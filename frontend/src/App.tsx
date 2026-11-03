@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Markdown from "react-markdown";
-import { api, connectSession, deleteSession, transcribe } from "./api";
+import { api, connectSession, deleteSession, logout, me, transcribe } from "./api";
 import type {
   Action,
   Health,
@@ -13,6 +13,7 @@ import type {
 } from "./types";
 import EndDialog from "./components/EndDialog";
 import LiveReport from "./components/LiveReport";
+import LoginView from "./components/LoginView";
 import ProfileView from "./components/ProfileView";
 import ReportView from "./components/ReportView";
 
@@ -89,6 +90,8 @@ export default function App() {
   const [background, setBackground] = useState("");
   const [pressure, setPressure] = useState<Pressure>("标准");
   const [mode, setMode] = useState<SessionMode>("text");
+  // null = 正在检查；enabled 且 user 为空 = 需要登录
+  const [auth, setAuth] = useState<{ user: string | null; enabled: boolean } | null>(null);
   const [creating, setCreating] = useState(false);
   const [pending, setPending] = useState(false);
   const [view, setView] = useState<"chat" | "report">("chat");
@@ -235,6 +238,10 @@ export default function App() {
         if (disposed) return;
         setConnected(false);
         setPending(false);
+        if (event.code === 1008 && event.reason === "unauthorized") {
+          setAuth({ user: null, enabled: true });
+          return;
+        }
         if (event.code === 1008) {
           setError("无法连接此场次，请返回并新建面试。");
           return;
@@ -261,7 +268,7 @@ export default function App() {
       speakingRef.current = false;
       setSpeaking(false);
     };
-  }, [selected, refresh, releaseMic]);
+  }, [selected, refresh, releaseMic, auth?.user]);
   useEffect(() => {
     // 切场次时清掉上一场的逐题预览，避免串到新场次
     setLiveQuestions([]);
@@ -276,6 +283,15 @@ export default function App() {
   useEffect(() => {
     sessionModeRef.current = session?.mode === "voice" ? "voice" : "text";
   }, [session?.mode]);
+  useEffect(() => {
+    me()
+      .then(setAuth)
+      .catch(() => setAuth({ user: null, enabled: true }));
+  }, []);
+  useEffect(() => {
+    // 登录前那次拉列表会 401，登录成功后要重新拉一遍
+    if (auth && (!auth.enabled || auth.user)) void refresh();
+  }, [auth, refresh]);
 
   const speak = useCallback((text: string) => {
     if (!("speechSynthesis" in window)) return;
@@ -474,6 +490,13 @@ export default function App() {
     (message) => message.role === "user" && message.status === "completed",
   );
 
+  if (auth === null) {
+    return <div className="loading">正在检查登录状态…</div>;
+  }
+  if (auth.enabled && !auth.user) {
+    return <LoginView onSuccess={(user) => setAuth({ user, enabled: true })} />;
+  }
+
   return (
     <div className="app">
       <aside className="sidebar">
@@ -539,6 +562,17 @@ export default function App() {
         </nav>
         <div className="sidebar-foot">
           <span className="small-dot" /> 本地练习空间<p>认真练习，从容表达。</p>
+          {auth?.user && (
+            <button
+              className="logout"
+              onClick={() => {
+                void logout();
+                setAuth({ user: null, enabled: true });
+              }}
+            >
+              退出登录（{auth.user}）
+            </button>
+          )}
         </div>
       </aside>
       <main>

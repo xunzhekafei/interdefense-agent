@@ -45,10 +45,11 @@
 | 10-31 | 评分校准脚本 + 默认切 flash | 从已完成报告导出评测包，真人盲评后算 AI-人 / 人-人 Spearman ρ 与 bootstrap 区间（不调用模型）；默认模型与自动化场景统一使用 flash，pro 需显式 `MODEL=claude-opus-5`；测试达 234 |
 | 10-31 | 立即结束 | 输入区新增：保留记录直接出报告，或删除这一场（无需先答完）；删除会先取消运行中的回合，worker 收尾时发现场次已删就安全返回；测试达 238 |
 | 10-31 | 纯语音会话 | 创建时选 `mode=voice`：不显示文字输入框，录音转写后自动提交；浏览器 TTS 朗读回复，朗读结束自动听下一轮，点麦克风可打断；ASR 沿用 faster-whisper，无新增模型；测试达 239 |
+| 11-03 | 评审账号登录 | 新增 `backend/auth.py`：PBKDF2 账号、HMAC 签名 cookie；所有 API 与 WebSocket 受保护，`/api/health` 和登录本身公开；没有 `auth.json` 时仍是无登录模式，本地开发不变；测试达 244 |
 
 ## 当前状态速览
 
-- **提交**：54 个；**测试**：239 离线 + 2 冒烟；**评测用例**：26 条
+- **提交**：55 个；**测试**：244 离线 + 2 冒烟；**评测用例**：26 条
 - **评测基线**（flash）：追问 17/17、行为 5/5、评分 4/4
 - **评分区分度**（v3 加权）：优秀 8.07 / 较好 6.87 / 空洞 2.58 / 事实错误 1.32（0–10）
 - **模型**：默认 `claude-haiku-4-5`（映射 flash）；评测脚本强制 flash，`EVAL_MODEL` 才能覆盖
@@ -133,6 +134,7 @@
 | 弱点怎么跨场次聚合 | **固定主题归类 + 生命周期 + 简化 SM-2** | 各场弱点是长句、措辞各异，纯相似度合并不了；先按 9 个主题归类，归不进去再走相似度。复习间隔用 1/3/7/14 天、低分重置——不直接上完整 SM-2，因为训练频次还不够 |
 | 评分口径怎么收拢 | **单一来源 `interview_spec.py` + 显式权重** | 维度名原来散在 agent.py / profile.py / 前端三处；权重显式化后总分不再四维等权。改口径必须升 `SCORING_VERSION`，旧报告按各自版本算，成长曲线才不会把「口径变了」画成「水平变了」 |
 | 纯语音怎么实现 | **会话级 mode + 浏览器 TTS** | 不另做页面：创建时定 `mode`，语音会话隐藏输入框、转写后自动提交。TTS 用浏览器 `speechSynthesis`，零依赖零成本；ASR 沿用 faster-whisper，不新增模型。后端只加一个 `mode` 字段 |
+| 评审怎么登录 | **auth.json + 签名 cookie，默认关闭** | 只为把作品交给评审：账号写 `.web-data/auth.json`，密码用 PBKDF2；登录发 HMAC 签名 cookie。没有账号文件时不启用鉴权，本地开发和测试行为不变。公网部署用 `WEB_ALLOWED_HOSTS` 放行域名，同源请求自动通过来源检查 |
 | 模型成本怎么控 | **默认与自动化场景统一 flash** | pro 太贵，评测一次要跑几十次调用。默认 `claude-haiku-4-5`（映射 flash），评测脚本强制 flash（只有 `EVAL_MODEL` 能覆盖），测试 conftest 也强制。实测 flash 下评测更快，通过率没有下降 |
 | 评分靠不靠谱怎么验证 | **真人盲评 + Spearman + bootstrap** | 自动评测只能测「行为对不对」，测不了「分数像不像人」。校准脚本导出问答包，两位以上评委盲评 1-5 分，算 AI-人 ρ 与人-人 ρ 的比值；不调用模型，AI 分数直接读报告。小样本一律报区间 |
 
@@ -168,7 +170,7 @@
 
 ```bash
 pip install -r requirements-web.txt -r requirements-dev.txt
-python -m pytest            # 离线测试（239 个，不需要 API key，约 3 秒）
+python -m pytest            # 离线测试（244 个，不需要 API key，约 3 秒）
 python -m pytest -m slow    # 真实 API 冒烟测试（会消耗 token）
 python agent.py             # 交互模式（需设置 ANTHROPIC_API_KEY）
 
@@ -204,13 +206,19 @@ frontend/             React 界面（Vite）
 evals/                面试官评测集（24 条用例 + 裁判 + 运行器）
 skills/               技能（code-review / deepseek-api / mock-interviewer）
 interview/            题库导入脚本与数据
-tests/                测试（239 离线 + 2 冒烟）
+tests/                测试（244 离线 + 2 冒烟）
 tools/                维护脚本（从验证过的环境生成依赖锁）
 documents/            文档（本文件）
 .web-data/ .sessions/ .memory/ .tasks/ .interviews/ .runtime/ .transcripts/   运行产物（已 gitignore）
 ```
 
 ## 下一步
+
+**近期目标：2026 全国人工智能应用创新大赛（校赛，命题领域「教育」）**
+提交 **PPT + ≤6 分钟答辩视频 + 智能体链接（网址 + 账号密码）**，截止 **2026-11-10**。
+提交内容**不得出现学校、学生姓名、指导教师**。为这次比赛，作品本身还缺：
+公网部署（HTTPS，麦克风/WS 要求）与清空测试记录/匿名化复查；账号密码登录已完成。
+PPT 与视频由其他队员负责。
 
 - **本地模型实测**：代码与文档已就绪（`MODEL` / `ANTHROPIC_BASE_URL` / `LOCAL_MODEL`），
   但还没装模型。装 Ollama 后用 `evals/` 量化 7B 与云端的差距——重点看追问通过率、

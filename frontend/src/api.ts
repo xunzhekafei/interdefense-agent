@@ -45,6 +45,35 @@ export async function transcribe(
   return (await response.json()).text as string;
 }
 
+export type AuthState = { user: string | null; enabled: boolean };
+
+/** 当前登录状态。401 表示「启用了鉴权但没登录」。 */
+export async function me(): Promise<AuthState> {
+  const response = await fetch("/api/me");
+  if (response.status === 401) return { user: null, enabled: true };
+  if (!response.ok) throw new Error("无法检查登录状态");
+  return response.json();
+}
+
+export async function login(username: string, password: string): Promise<AuthState> {
+  const response = await fetch("/api/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password }),
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(
+      typeof error.detail === "string" ? error.detail : "用户名或密码错误",
+    );
+  }
+  return response.json();
+}
+
+export async function logout(): Promise<void> {
+  await fetch("/api/logout", { method: "POST" }).catch(() => {});
+}
+
 /** 删除一场面试（快照 + 全部事件）。 */
 export async function deleteSession(sessionId: string): Promise<void> {
   const response = await fetch(`/api/sessions/${sessionId}`, { method: "DELETE" });

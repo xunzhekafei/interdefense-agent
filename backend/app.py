@@ -7,12 +7,13 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Literal
 
-from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, Request, Response, WebSocket, WebSocketDisconnect
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
+from .auth import COOKIE, TTL_SECONDS, AuthStore
 from .profile import build_profile
 from .service import InterviewService
 from .speech import CAPABILITIES
@@ -69,10 +70,18 @@ class Command(BaseModel):
     input_mode: Literal["text", "voice"] = "text"
 
 
+class LoginInput(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+    username: str = Field(min_length=1, max_length=80)
+    password: str = Field(min_length=1, max_length=200)
+
+
 def create_app(directory=None, adapter=None, recognizer=_AUTO):
+    data_dir = Path(directory) if directory else ROOT / ".web-data"
+
     @asynccontextmanager
     async def lifespan(app):
-        app.state.service = InterviewService(directory or ROOT / ".web-data", adapter)
+        app.state.service = InterviewService(data_dir, adapter)
         # 语音能力在启动时解析一次：_AUTO → 按环境试建；显式 None → 关闭语音。
         # 这里只构建识别器对象，**不加载模型**（首次转写或预热接口才加载）。
         app.state.recognizer = _build_recognizer() if recognizer is _AUTO else recognizer
@@ -82,15 +91,50 @@ def create_app(directory=None, adapter=None, recognizer=_AUTO):
             await asyncio.to_thread(app.state.service.close)
 
     app = FastAPI(title="Interview Studio", lifespan=lifespan)
-    app.add_middleware(TrustedHostMiddleware, allowed_hosts=["localhost", "127.0.0.1", "testserver"])
-    origins = set(os.environ.get("WEB_ALLOWED_ORIGINS", "http://127.0.0.1:8000,http://localhost:8000,http://127.0.0.1:5173,http://localhost:5173").split(","))
+    # 部署到公网时用 WEB_ALLOWED_HOSTS 放行域名/隧道地址；默认只允许本机。
+    allowed_hosts = [h.strip() for h in os.environ.get(
+        "WEB_ALLOWED_HOSTS", "localhost,127.0.0.1,testserver").split(",") if h.strip()]
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts)
+    origins = {o.strip() for o in os.environ.get(
+        "WEB_ALLOWED_ORIGINS",
+        "http://127.0.0.1:8000,http://localhost:8000,"
+        "http://127.0.0.1:5173,http://localhost:5173").split(",") if o.strip()}
+
+    # 登录状态：没有 auth.json 时 enabled=False，行为与之前完全一致。
+    app.state.auth = AuthStore(data_dir)
+
+    def _allowed_origins(request) -> set:
+        """同源请求永远放行；WEB_ALLOWED_ORIGINS 只用于额外的跨源来源。"""
+        allowed = set(origins)
+        host = request.headers.get("host")
+        if host:
+            allowed.update({f"http://{host}", f"https://{host}"})
+        return allowed
 
     @app.middleware("http")
     async def check_origin(request: Request, call_next):
         # Same-origin app / Vite proxy. Reject browser writes from unrelated sites.
-        if request.method not in ("GET", "HEAD", "OPTIONS") and request.headers.get("origin") not in origins | {None}:
+        if request.method not in ("GET", "HEAD", "OPTIONS"):
+            origin = request.headers.get("origin")
+            if origin and origin not in _allowed_origins(request):
+                from fastapi.responses import JSONResponse
+                return JSONResponse({"detail": "不允许的来源"}, status_code=403)
+        return await call_next(request)
+
+    @app.middleware("http")
+    async def check_auth(request: Request, call_next):
+        auth = app.state.auth
+        if not auth.enabled():
+            return await call_next(request)
+        path = request.url.path
+        # 登录本身和健康检查必须公开；静态页面也要能加载出登录页。
+        if not path.startswith("/api/") or path in ("/api/health", "/api/login", "/api/logout"):
+            return await call_next(request)
+        user = auth.check(request.cookies.get(COOKIE))
+        if user is None:
             from fastapi.responses import JSONResponse
-            return JSONResponse({"detail": "不允许的来源"}, status_code=403)
+            return JSONResponse({"detail": "请先登录"}, status_code=401)
+        request.state.user = user
         return await call_next(request)
 
     def get_session(session_id):
@@ -116,6 +160,36 @@ def create_app(directory=None, adapter=None, recognizer=_AUTO):
     @app.get("/api/health")
     def health():
         return {"configured": app.state.service.adapter.configured(), "speech": speech_capabilities()}
+
+    @app.post("/api/login")
+    def login(body: LoginInput, request: Request, response: Response):
+        auth = app.state.auth
+        if not auth.enabled():
+            return {"user": None, "enabled": False}
+        if not auth.verify(body.username, body.password):
+            raise HTTPException(401, "用户名或密码错误")
+        token = auth.issue(body.username)
+        # 走 HTTPS（或 Cloudflare Tunnel 转发）时加 Secure；本机 http 不加，否则 cookie 存不住。
+        secure = (request.url.scheme == "https"
+                  or request.headers.get("x-forwarded-proto") == "https")
+        response.set_cookie(COOKIE, token, max_age=TTL_SECONDS, httponly=True,
+                            samesite="lax", secure=secure, path="/")
+        return {"user": body.username, "enabled": True}
+
+    @app.get("/api/me")
+    def me(request: Request):
+        auth = app.state.auth
+        if not auth.enabled():
+            return {"user": None, "enabled": False}
+        user = auth.check(request.cookies.get(COOKIE))
+        if user is None:
+            raise HTTPException(401, "请先登录")
+        return {"user": user, "enabled": True}
+
+    @app.post("/api/logout")
+    def logout(response: Response):
+        response.delete_cookie(COOKIE, path="/")
+        return {"ok": True}
 
     @app.get("/api/sessions")
     def sessions():
@@ -212,7 +286,13 @@ def create_app(directory=None, adapter=None, recognizer=_AUTO):
 
     @app.websocket("/api/sessions/{session_id}/ws")
     async def socket(websocket: WebSocket, session_id: str):
-        if websocket.headers.get("origin") not in origins | {None}:
+        auth = app.state.auth
+        if auth.enabled() and auth.check(websocket.cookies.get(COOKIE)) is None:
+            # reason 让前端能区分「没登录」和「场次不存在」
+            await websocket.close(code=1008, reason="unauthorized")
+            return
+        origin = websocket.headers.get("origin")
+        if origin and origin not in _allowed_origins(websocket):
             await websocket.close(code=1008)
             return
         try:

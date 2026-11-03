@@ -347,6 +347,10 @@ npm run format
 | `ANTHROPIC_API_KEY` | DeepSeek 密钥，由后端或 CLI 进程环境读取 |
 | `AUX_MODEL` | CLI 辅助模型，默认 `claude-haiku-4-5` |
 | `WEB_ALLOWED_ORIGINS` | Web 允许的来源，逗号分隔；默认允许 localhost / 127.0.0.1 的 8000 和 5173 端口 |
+| `WEB_ALLOWED_HOSTS` | 允许的 Host，逗号分隔；**公网部署必须**加上域名或隧道地址 |
+| `AUTH_SECRET` | 登录 cookie 的签名密钥；不设时自动生成 `.web-data/auth_secret` |
+| `AUTH_TTL_DAYS` | 登录有效期，默认 7 天 |
+| 评审账号 | `.web-data/auth.json`，用 `python -m backend.auth add <用户名>` 创建。**没有这个文件时默认不启用登录** |
 | `WEB_LLM_TIMEOUT` | Web 端模型调用超时（秒），默认 300。**别调小**——报告生成是分钟级的，见下面的常见问题 |
 | `WEB_LLM_RETRIES` | Web 端 SDK 重试次数，默认 1 |
 | `WEB_SPEECH` | 设 `off` 关闭语音转文字（装了依赖但不想用时） |
@@ -493,6 +497,7 @@ $env:LOCAL_MODEL        = "on"          # 历史只带最近 1.2 万字符
 ## 文档与许可
 
 - [Agent 运行时详解](documents/AGENT_RUNTIME.md)：保留原 README 的 s01→s17 机制说明。
+- [部署说明](documents/DEPLOYMENT.md)：服务器安装、评审账号、HTTPS（Cloudflare Tunnel / nginx）与上线检查。
 - [Web 前端说明](documents/WEB_FRONTEND.md)：文件修改清单、实时协议、语音接口与验证记录。
 - [项目进度与设计记录](documents/PROGRESS.md)：阶段里程碑和历史问题记录，状态以文件标注日期为准。
 - [面试官技能](skills/mock-interviewer/SKILL.md)：面试行为与评分流程约束。

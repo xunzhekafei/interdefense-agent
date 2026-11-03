@@ -46,3 +46,7 @@ evals/results/
 
 # 校准数据（含面试问答，不要提交）
 evals/calibration-data/
+
+# 评审账号与登录签名密钥（部署时生成）
+auth.json
+auth_secret
