@@ -4,7 +4,7 @@
 支持浏览器中的文字面试，也保留终端交互模式。面试围绕候选人背景和项目经历展开，结束后生成四维评分、逐题证据与改进建议。
 
 核心运行时按 [learn-claude-code](https://github.com/shareAI-lab/learn-claude-code) s01→s17 逐章实现，包含工具调用、hooks、记忆、上下文压缩、任务系统、团队协作和工作流编排。
-模型通过 Anthropic Python SDK 连接 DeepSeek 的 Anthropic 兼容端点，使用 DeepSeek 密钥。
+模型通过 Anthropic Python SDK 调用，默认连接 Kimi 的 Anthropic 兼容端点（`PROVIDER=deepseek` 可切回 DeepSeek）。
 
 ## 导航
 
@@ -48,7 +48,7 @@ Web 对话仅开放 `search_questions` 和 `load_skill`，评分与存档由后�
 
 - Python 3.10+。
 - Web 前端构建使用 Node.js，建议使用 22.12+ 的 22.x 或 24.x；仅运行 CLI 不需要 Node.js。
-- 开始模型对话需要有效的 DeepSeek API Key。
+- 开始模型对话需要有效的 Kimi API Key（或设 `PROVIDER=deepseek` 后使用 DeepSeek Key）。
 
 ```powershell
 python -m venv .venv
@@ -76,7 +76,7 @@ cd ..
 在同一终端设置密钥并启动：
 
 ```powershell
-$env:ANTHROPIC_API_KEY = "你的 DeepSeek 密钥"
+$env:ANTHROPIC_API_KEY = "你的 Kimi 密钥"
 .\start-web.ps1
 ```
 
@@ -97,7 +97,7 @@ $env:ANTHROPIC_API_KEY = "你的 DeepSeek 密钥"
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
-$env:ANTHROPIC_API_KEY = "你的 DeepSeek 密钥"
+$env:ANTHROPIC_API_KEY = "你的 Kimi 密钥"
 .\.venv\Scripts\python.exe agent.py
 ```
 
@@ -325,7 +325,7 @@ npm run build
 npm run format
 ```
 
-最近一次验证（2026-09-19）：**合并主分支后 125 个离线测试通过，2 个真实 API 测试未运行；前端此前已通过 TypeScript 检查和生产构建**。
+最近一次验证（2026-11-04）：**258 个离线测试通过，2 个真实 API 测试未运行；前端此前已通过 TypeScript 检查和生产构建**。
 
 | 测试文件 | 覆盖 |
 | --- | --- |
@@ -336,6 +336,7 @@ npm run format
 | `test_session.py` | CLI 序列化、存档恢复、半截回合清理与输入合并 |
 | `test_interview.py` | 题库检索、评分流程与面试存档 |
 | `test_web.py` | 场次隔离、流式事件、取消重试、重连去重、重启恢复、完整评分与错误提示 |
+| `test_providers.py` | 提供商默认值、环境变量覆盖、Bearer / x-api-key 切换 |
 | `test_smoke_api.py` | 真实模型工具轮与目标判断器（`slow`） |
 
 测试使用临时目录和模拟模型；CLI 测试通过 `iso` fixture 重置运行时状态，Web 测试注入独立适配器和数据库。
@@ -344,8 +345,10 @@ npm run format
 
 | 配置 | 作用 |
 | --- | --- |
-| `ANTHROPIC_API_KEY` | DeepSeek 密钥，由后端或 CLI 进程环境读取 |
-| `AUX_MODEL` | CLI 辅助模型，默认 `claude-haiku-4-5` |
+| `PROVIDER` | 模型提供商，默认 `kimi`；可选 `deepseek`、`custom`（Ollama / 代理 / 国际站） |
+| `ANTHROPIC_API_KEY` | 模型密钥，Kimi 和 DeepSeek 都填这里 |
+| `ANTHROPIC_AUTH_TOKEN` | 显式 Bearer token（Kimi 官方推荐写法）；设置后优先于 `ANTHROPIC_API_KEY` |
+| `AUX_MODEL` | 辅助模型，默认跟随 `MODEL` |
 | `WEB_ALLOWED_ORIGINS` | Web 允许的来源，逗号分隔；默认允许 localhost / 127.0.0.1 的 8000 和 5173 端口 |
 | `WEB_ALLOWED_HOSTS` | 允许的 Host，逗号分隔；**公网部署必须**加上域名或隧道地址 |
 | `AUTH_SECRET` | 登录 cookie 的签名密钥；不设时自动生成 `.web-data/auth_secret` |
@@ -356,8 +359,10 @@ npm run format
 | `WEB_SPEECH` | 设 `off` 关闭语音转文字（装了依赖但不想用时） |
 | `INTERVIEW_MEMORY` | 设 `off` 关闭面试笔记（跨项目覆盖与对比）。关闭后每轮不再额外调用模型 |
 | `INTERVIEW_DECAY` | 面试笔记的指数衰减系数，默认 `0.5`。越小越只关注最近几轮（取值 0.1–0.95） |
-| `MODEL` | 主模型请求名，默认 `claude-haiku-4-5`（映射到 `deepseek-v4-flash`，成本低）。需要最强质量时设 `claude-opus-5`（映射到 pro，**明显更贵**）；接本地模型时设成 Ollama 的模型名。**自动化测试和评测脚本强制用 flash** |
-| `ANTHROPIC_BASE_URL` | 接口地址，默认 `https://api.deepseek.com/anthropic`；接 Ollama 时设 `http://localhost:11434` |
+| `MODEL` | 主模型请求名。Kimi 默认 `kimi-k3.1-pro`；DeepSeek 默认 `claude-haiku-4-5`（映射到 `deepseek-v4-flash`，成本低）。DeepSeek 下评测脚本强制用 flash |
+| `REASONING_EFFORT` | Kimi 推理深度：`low`（默认）/ `medium` / `high` / `xhigh` / `max`；设 `off` 不发送该字段 |
+| `WORKFLOW_MAX_PARALLEL` | 报告 workflow 的并发上限，默认 8。Kimi 未充值到 Tier1 时并发只有 1 路，设 `1` 可避免 429 |
+| `ANTHROPIC_BASE_URL` | 接口地址，**只在 `PROVIDER=custom` 时生效**；接 Ollama 时设 `http://localhost:11434` |
 | `LOCAL_MODEL` | 设 `on` 时每轮只带最近 1.2 万字符历史，避免本地模型的 KV cache 爆显存 |
 | `HISTORY_CHAR_LIMIT` | 显式指定每轮历史字符上限，优先于 `LOCAL_MODEL` |
 | `PROMPT_CACHE` | 设 `off` 关闭 prompt caching（Ollama 不支持该字段） |
@@ -366,7 +371,7 @@ npm run format
 模型请求名是兼容接口配置，实际路由由服务商决定。对话、背景与评分内容会随模型请求发送给该服务商。
 密钥不会写入前端或浏览器；默认启动命令直接读取进程环境，不会自动加载 `.env`。
 
-**页面提示未配置密钥或鉴权失败（401）**：检查启动后端的同一终端是否设置了有效的 DeepSeek 密钥，然后重启服务。`/api/health` 仅检查密钥是否存在，不验证有效性。
+**页面提示未配置密钥或鉴权失败（401）**：检查启动后端的同一终端是否设置了有效的模型密钥，然后重启服务。`/api/health` 仅检查密钥是否存在，不验证有效性。
 
 **提示前端未构建**：在 `frontend/` 运行 `npm ci`、`npm run build`，然后重启后端。
 如果 PowerShell 不允许执行 `npm.ps1`，可将命令中的 `npm` 改为 `npm.cmd`。
@@ -459,8 +464,9 @@ $env:WEB_SPEECH = "off"
 
 ## 本地模型（可选，默认关闭）
 
-默认调用云端 DeepSeek。也可以用 [Ollama](https://ollama.com) 在本机跑模型——
-Ollama 从 v0.13 起原生支持 Anthropic 的 `/v1/messages`，所以**不需要额外代理层**。
+默认调用云端 Kimi（`PROVIDER=deepseek` 可切回 DeepSeek）。也可以用
+[Ollama](https://ollama.com) 在本机跑模型——Ollama 从 v0.13 起原生支持
+Anthropic 的 `/v1/messages`，所以**不需要额外代理层**。
 
 **硬件参考**：8 GB 显存建议 7B/8B 的 Q4 量化（约 4.5–5.5 GB）；14B 会溢出到内存，32B 跑不动。
 本地模型的主要瓶颈不只是显存，还有上下文——项目每轮会带对话历史，`LOCAL_MODEL=on`
@@ -470,6 +476,7 @@ Ollama 从 v0.13 起原生支持 Anthropic 的 `/v1/messages`，所以**不需�
 winget install Ollama.Ollama
 ollama pull qwen2.5:7b
 
+$env:PROVIDER           = "custom"      # 自定义地址必须走 custom
 $env:ANTHROPIC_BASE_URL = "http://localhost:11434"
 $env:ANTHROPIC_API_KEY  = "ollama"      # Ollama 要求非空，值随意
 $env:MODEL              = "qwen2.5:7b"

@@ -19,7 +19,7 @@ def public_error(error):
     """Do not forward SDK response bodies (which may contain credentials) to browsers."""
     name = type(error).__name__
     if name == "AuthenticationError":
-        return "模型服务鉴权失败（401）。请检查后端 ANTHROPIC_API_KEY 是否为有效的 DeepSeek 密钥，然后重启服务。"
+        return "模型服务鉴权失败（401）。请检查后端 ANTHROPIC_API_KEY / ANTHROPIC_AUTH_TOKEN 是否为当前提供商的密钥，然后重启服务。"
     if name == "RateLimitError":
         return "模型服务请求过于频繁，请稍后重试。已保留问答记录。"
     if name in ("APIConnectionError", "APITimeoutError"):
@@ -90,7 +90,7 @@ class InterviewService:
             if session["status"] == "completed":
                 raise ValueError("这场面试已完成，请新建面试")
             if not self.adapter.configured():
-                raise ValueError("未配置 ANTHROPIC_API_KEY，请设置后重启后端")
+                raise ValueError("未配置模型密钥，请设置 ANTHROPIC_API_KEY 后重启后端")
             retry = action == "retry"
             if retry:
                 if not session["error"] or not session["last_action"]:

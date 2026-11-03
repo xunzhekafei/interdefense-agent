@@ -233,6 +233,23 @@ def test_voice_answers_are_marked_in_transcript():
     assert f"候选人（{agent.VOICE_MARK}）：这是手打的回答" not in transcript
 
 
+def test_answered_qa_puts_voice_mark_in_answer():
+    """结构化 qa 跳过模型解析，语音标注必须仍在 answer 里。"""
+    import agent
+    from backend.agent_adapter import answered_qa
+
+    qa = answered_qa([
+        _msg("assistant", "请自我介绍"),
+        _msg("user", "我用 LightGBM 做建模", input_mode="voice"),
+        _msg("assistant", "追问一下"),
+        _msg("user", "这是手打的回答"),
+    ])
+    assert qa == [
+        {"question": "请自我介绍", "answer": f"我用 LightGBM 做建模（{agent.VOICE_MARK}）"},
+        {"question": "追问一下", "answer": "这是手打的回答"},
+    ]
+
+
 def test_voice_fragment_marks_the_whole_answer():
     """一条回答分几次提交时，只要有一段来自语音，整条都该标上。"""
     import agent

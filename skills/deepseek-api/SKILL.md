@@ -1,6 +1,6 @@
 ---
 name: deepseek-api
-description: 本项目的接口背景——修改 agent 或添加工具代码前先读，避免踩 DeepSeek 兼容接口的坑
+description: 切回 DeepSeek（PROVIDER=deepseek）时读——DeepSeek 兼容接口的注意事项
 ---
 
 # DeepSeek 兼容接口注意事项

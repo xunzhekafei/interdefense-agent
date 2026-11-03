@@ -371,6 +371,27 @@ def test_interview_report_workflow(iso, monkeypatch):
     assert calls[0].startswith("parse") and "score:0" in calls and calls[-1] == "summary"
 
 
+def test_interview_report_accepts_structured_qa(iso, monkeypatch):
+    """Web 端直接传结构化 qa：不再调用模型解析，问题与回答不会串位。"""
+    import agent
+    calls: list = []
+    monkeypatch.setattr(agent, "_workflow_agent_call", _stub_interview_runner(calls))
+    out = json.loads(agent.run_workflow.call({
+        "name": "interview-report",
+        "args": {"qa": [{"question": "Q1", "answer": "A1"},
+                        {"question": "Q2", "answer": "A2"}]}}))
+    assert out["status"] == "completed"
+    assert not any(call.startswith("parse") for call in calls)
+    assert [item["question"] for item in out["result"]["per_question"]] == ["Q1", "Q2"]
+
+
+def test_interview_report_rejects_empty_qa(iso):
+    import agent
+    result = agent.run_workflow.call(
+        {"name": "interview-report", "args": {"qa": [{"question": "", "answer": ""}]}})
+    assert "qa" in result or "问答" in result
+
+
 def test_split_transcript_keeps_lines_intact(iso):
     import agent
     text = "\n".join(f"line-{i:04d}" for i in range(500))

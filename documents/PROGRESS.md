@@ -1,6 +1,6 @@
 # 项目进度
 
-> 最后更新：2026-10-31
+> 最后更新：2026-11-03
 
 ## 这是什么
 
@@ -10,14 +10,17 @@
 - 应用：技术岗模拟面试官（题库检索 → 追问式面试 → 评分报告 → 场次存档），覆盖 AI 与前端两个方向
 - 相关仓库：[myagent](https://github.com/xunzhekafei/myagent)（完整版，本仓库）· [myagent-prototype](https://github.com/xunzhekafei/myagent-prototype)（面试功能之前的原型快照）
 
-模型通过 **Anthropic 官方 SDK** 调用，默认接口指向 **DeepSeek 的 Anthropic 兼容端点**
-（`https://api.deepseek.com/anthropic`），所以只需要一个 DeepSeek 密钥。
-默认用 `claude-haiku-4-5`（映射到 `deepseek-v4-flash`，控制成本）；
-需要最强质量时显式设 `MODEL=claude-opus-5`（映射到 `deepseek-v4-pro`，明显更贵）。
-自动化测试和评测脚本强制使用 flash。
+模型通过 **Anthropic 官方 SDK** 调用，提供商在 `providers.py` 统一配置：
+默认 **Kimi**（`https://api.moonshot.cn/anthropic`，`kimi-k3.1-pro`），
+`PROVIDER=deepseek` 可切回 DeepSeek（`claude-haiku-4-5` 映射 flash）。
+两家的差异都在这一层吸收：Kimi 用 Bearer 鉴权、K3.1 Pro 没有思考开关（用
+`REASONING_EFFORT` 调深度）；DeepSeek 用 `x-api-key` 和自适应思考。
 
-模型地址和名称都可用环境变量覆盖；Ollama 从 v0.13 起原生支持 Anthropic `/v1/messages`，
-所以也可以完全本地运行（见「本地模型」一节），但 7B 模型的质量明显低于云端。
+选 Kimi 的主要原因是**项目级预算**：可以给一个项目设日/月消费上限，超了自动拒绝，
+DeepSeek 只能控制账户余额。评测仍保留 DeepSeek flash 的基线，换模型后要重跑。
+
+Ollama 从 v0.13 起原生支持 Anthropic `/v1/messages`，设 `PROVIDER=custom` 即可完全本地运行
+（见「本地模型」一节），但 7B 模型的质量明显低于云端。
 
 ## 里程碑
 
@@ -46,13 +49,15 @@
 | 10-31 | 立即结束 | 输入区新增：保留记录直接出报告，或删除这一场（无需先答完）；删除会先取消运行中的回合，worker 收尾时发现场次已删就安全返回；测试达 238 |
 | 10-31 | 纯语音会话 | 创建时选 `mode=voice`：不显示文字输入框，录音转写后自动提交；浏览器 TTS 朗读回复，朗读结束自动听下一轮，点麦克风可打断；ASR 沿用 faster-whisper，无新增模型；测试达 239 |
 | 11-03 | 评审账号登录 | 新增 `backend/auth.py`：PBKDF2 账号、HMAC 签名 cookie；所有 API 与 WebSocket 受保护，`/api/health` 和登录本身公开；没有 `auth.json` 时仍是无登录模式，本地开发不变；测试达 244 |
+| 11-03 | 公网部署 + 默认切 Kimi | 阿里云 2C2G + nginx + Let's Encrypt 上线，评审账号登录可用；新增 `providers.py` 收拢提供商差异（默认 Kimi，`PROVIDER=deepseek` 可切回），Kimi 用 Bearer、DeepSeek 用 x-api-key，Kimi 用 `output_config.effort` 控制推理深度；切提供商时残留的 `ANTHROPIC_BASE_URL` 不再串台；测试达 255 |
+| 11-04 | Kimi 联调 + 结构化问答 | 公网跑通完整面试（开场 → 4 轮追问 → 报告）：发现模型解析在低推理强度下会把四道题的回答全填成同一段，Web 端改为直接传结构化 `qa`、跳过解析；逐题评分与证据 4/4 通过，报告 v3 总分正常；测试达 258 |
 
 ## 当前状态速览
 
-- **提交**：55 个；**测试**：244 离线 + 2 冒烟；**评测用例**：26 条
-- **评测基线**（flash）：追问 17/17、行为 5/5、评分 4/4
+- **提交**：55 个；**测试**：258 离线 + 2 冒烟；**评测用例**：26 条
+- **评测基线**（DeepSeek flash）：追问 17/17、行为 5/5、评分 4/4。**Kimi 尚未重跑**，换模型后需重新建立基线
 - **评分区分度**（v3 加权）：优秀 8.07 / 较好 6.87 / 空洞 2.58 / 事实错误 1.32（0–10）
-- **模型**：默认 `claude-haiku-4-5`（映射 flash）；评测脚本强制 flash，`EVAL_MODEL` 才能覆盖
+- **模型**：默认 `kimi-k3.1-pro`（`PROVIDER=kimi`）；`PROVIDER=deepseek` 切回 flash；DeepSeek 下评测脚本强制 flash，`EVAL_MODEL` 才能覆盖
 - **评分口径版本**：v1 旧报告仍按均分；v3 新报告按 30/30/25/15 加权，画像会提示跨版本不可比
 - **CI**：ubuntu + windows，Python 3.14，按 `requirements-lock.txt` 安装
 
@@ -108,7 +113,7 @@
 | 决策 | 选择 | 理由 |
 | ---- | ---- | ---- |
 | 面试官建在哪 | **自建运行时**，不是 Coze / LangChain | 评分标准、追问策略、记录留存需要精细控制；本运行时已具备 skill / workflow / 结构化输出 / 存档等组件（实测 LangChain 的 `create_agent` 可用，但仅适合作为零件库做 RAG） |
-| 接口 | Anthropic SDK + DeepSeek 兼容端点 | SDK 生态成熟（流式、工具调用、**prompt caching**）；DeepSeek 便宜且国内可直连 |
+| 接口 | Anthropic SDK + 兼容端点（默认 Kimi，可切 DeepSeek） | SDK 生态成熟（流式、工具调用、**prompt caching**）；两家都国内可直连，切换只改 `PROVIDER`。选 Kimi 是为了**项目级预算**（见下） |
 | 并行模型 | 线程（非 asyncio） | 本项目是同步代码库；子 agent 调用是网络等待，线程足够 |
 | worktree | 普通隔离目录（教学简化） | 项目非 git 仓库；真实实现应使用 git worktree，且注意它只是目录隔离、不是沙箱 |
 | 上下文压缩阈值 | 150K 字符（教程默认 50K） | 实测一次 60KB 的文件读取就会让会话进入"读什么都变指针"的压缩态 |
@@ -117,7 +122,7 @@
 | 行为题怎么标 | 导入时按信号词写进 `stage` 字段 | 前端的「软技能」分类是个杂物筐（1188 条混着技术题和闲聊）；`stage` 字段本来就在 schema 里且英文题库用了同一语义，标 71 道行为题让「至少一道行为面」的规则对两个岗位都能用 |
 | 题库抽取器怎么写 | 一个**参数化**函数 + `SOURCES` 里的键 | 后加入的 5 个仓库结构各异，但共同点是「某级标题行就是题目」。差异（glob 白名单、作题正则、分类来源、跳过目录、分类归一）全部用数据描述，不必一个仓库写一个抽取器；BAT 一个仓库两种标题格式也只多一条正则 |
 | ASu-skills 怎么用 | **只借鉴方法论，不装它的技能** | 它的 `interview` 技能与 `mock-interviewer` 职责重叠，且 `references/` 子目录不会被本项目 SkillLoader 自动加载、技能间还有交叉引用（`/great-resume` → `/make-resume`），装了要么失效要么让模型选错技能。只取四条：**提问前锁定评分契约**（定了就不因答得好坏而改）、**Claim 分类追问**（归属/指标/技术/架构/结果）、**按证据停止**（连着两次没新证据就推进）、**风险信号清单**。明确**不取**两条：卡住时给提示（与「面试中不给反馈」冲突）、不给精确总分（与现有总分制冲突） |
-| 语音识别的模型跑在哪 | **本地 faster-whisper，不接云端** | 与项目"只用一个 DeepSeek 密钥、国内可直连"的约束一致：本地推理不额外要密钥、不按量计费、音频不出本机。代价是装一个可选的重依赖（`requirements-speech.txt`，不装不影响 Web 面试） |
+| 语音识别的模型跑在哪 | **本地 faster-whisper，不接云端** | 与项目"只用一个云端密钥、国内可直连"的约束一致：本地推理不额外要密钥、不按量计费、音频不出本机。代价是装一个可选的重依赖（`requirements-speech.txt`，不装不影响 Web 面试） |
 | 音频怎么送到后端 | **独立 HTTP 端点，不改 WebSocket 协议** | 交互是「录完再转 → 填进输入框 → 用户确认 → 走现有 answer 提交」，音频根本不需要进入会话。一次绕开三个障碍：WS 循环只收 `receive_text()`、单条消息 64000 字符上限、`Command` 的 `action: Literal[...]` 校验。原计划的「扩展 WebSocket 音频事件 + 输入模式校验 + 音频存储策略」因此不再需要——不是砍掉，是被绕过了 |
 | 语音能力怎么声明 | 由**注入的 recognizer** 决定，不由「能否 import faster_whisper」决定 | 后者有个只在本机发作的坑：装上语音依赖后 `asr` 变 True，断言 `asr is False` 的测试就挂，而 CI（不装该依赖）照样绿——故障只在功能开始可用之后出现。现在测试显式传 `recognizer=None`，两个方向都确定 |
 | 压力档位的规则放哪 | **规则在技能里，运行时只传「当前是哪一档」** | 三档各自怎么追问属于面试方法论，和 Claim 分类、风险信号是一类东西，都该跟技能走；`agent.py` 只维护一个会话级变量 + 一句给模型的提示（照搬 `/user` 的既有模式）。好处是调语气不用改代码，代价是模型得自己翻技能找对应档——所以系统提示里明确写了「按技能里对应档位的规则提问」 |
@@ -127,7 +132,7 @@
 | 成长画像怎么算 | **纯聚合，不调模型** | 报告字段已经结构化，聚合确定、可测、零成本。总分统一按维度均分重算，兼容修复前的 100 分制旧数据 |
 | 报告怎么边算边看 | 给 workflow 的 `_gather` 加 `on_done` 回调 | 某个 item 一完成就推 `report.question`；回调抛错被吞掉（只是展示层，不能影响评分） |
 | 评分怎么校准 | **分档标尺 + 口径版本号** | 没有锚点时同一回答在 7.4–8.1 漂（std 0.31）；加 9-10 / 7-8 / 5-6 / 3-4 / 0-2 五档描述后 std 0.15。当前 SDK 不支持 temperature，所以只靠标尺。改口径必须升版本，否则成长曲线会把「口径变了」画成「水平变了」 |
-| 本地模型怎么接 | **只做配置覆盖，不改架构** | Ollama 原生支持 Anthropic `/v1/messages`；只需 `MODEL` / `ANTHROPIC_BASE_URL` 可覆盖，并关掉它不支持的 `cache_control` / `thinking`。本地模式单独收窄上下文（1.2 万字符） |
+| 本地模型怎么接 | **只做配置覆盖，不改架构** | Ollama 原生支持 Anthropic `/v1/messages`；设 `PROVIDER=custom` + `ANTHROPIC_BASE_URL` + `MODEL`，并关掉它不支持的 `cache_control` / `thinking`。本地模式单独收窄上下文（1.2 万字符） |
 | 静默失败怎么治 | **窄修 + 测试兜底**，不是一刀切 | 39 处宽泛捕获里多数在边界上（可选依赖、工具调用），宽 catch 是对的；只把 5 处纯 `pass` 改成记日志，并加测试禁止新增 `except Exception: pass` |
 | 评分证据怎么保证是真原话 | **机器校验 + 重试 / 标记** | 只写在 prompt 里拦不住改写和概括。归一化后要求 evidence 是候选人回答的连续子串；非法就带修正提示重试，耗尽后保留分数但标记 `evidence_verified=false`。评测与生产共用同一个校验器 |
 | 追问深度怎么控 | **动作由代码算，提示同时写「要做 / 不要做」** | 模型只判断回答质量（0-1），深入 / 换角度 / 换主题由确定性规则决定；层数上限跟着压力档位。目标越自由，越容易在「还能问」和「该收手」之间选错 |
@@ -135,7 +140,7 @@
 | 评分口径怎么收拢 | **单一来源 `interview_spec.py` + 显式权重** | 维度名原来散在 agent.py / profile.py / 前端三处；权重显式化后总分不再四维等权。改口径必须升 `SCORING_VERSION`，旧报告按各自版本算，成长曲线才不会把「口径变了」画成「水平变了」 |
 | 纯语音怎么实现 | **会话级 mode + 浏览器 TTS** | 不另做页面：创建时定 `mode`，语音会话隐藏输入框、转写后自动提交。TTS 用浏览器 `speechSynthesis`，零依赖零成本；ASR 沿用 faster-whisper，不新增模型。后端只加一个 `mode` 字段 |
 | 评审怎么登录 | **auth.json + 签名 cookie，默认关闭** | 只为把作品交给评审：账号写 `.web-data/auth.json`，密码用 PBKDF2；登录发 HMAC 签名 cookie。没有账号文件时不启用鉴权，本地开发和测试行为不变。公网部署用 `WEB_ALLOWED_HOSTS` 放行域名，同源请求自动通过来源检查 |
-| 模型成本怎么控 | **默认与自动化场景统一 flash** | pro 太贵，评测一次要跑几十次调用。默认 `claude-haiku-4-5`（映射 flash），评测脚本强制 flash（只有 `EVAL_MODEL` 能覆盖），测试 conftest 也强制。实测 flash 下评测更快，通过率没有下降 |
+| 模型成本怎么控 | **DeepSeek 下默认与自动化场景统一 flash；公网用 Kimi 项目预算** | pro 太贵，评测一次要跑几十次调用。DeepSeek 的默认模型和评测脚本都强制 flash（只有 `EVAL_MODEL` 能覆盖）。公网部署切 Kimi，是因为只有它能给项目设日/月硬预算，链接被刷时损失有上限；代价是 K3.1 Pro 单价比 flash 高，用 `REASONING_EFFORT=low` 压推理开销 |
 | 评分靠不靠谱怎么验证 | **真人盲评 + Spearman + bootstrap** | 自动评测只能测「行为对不对」，测不了「分数像不像人」。校准脚本导出问答包，两位以上评委盲评 1-5 分，算 AI-人 ρ 与人-人 ρ 的比值；不调用模型，AI 分数直接读报告。小样本一律报区间 |
 
 ## 踩坑与修复日志
@@ -170,7 +175,7 @@
 
 ```bash
 pip install -r requirements-web.txt -r requirements-dev.txt
-python -m pytest            # 离线测试（244 个，不需要 API key，约 3 秒）
+python -m pytest            # 离线测试（258 个，不需要 API key，约 3 秒）
 python -m pytest -m slow    # 真实 API 冒烟测试（会消耗 token）
 python agent.py             # 交互模式（需设置 ANTHROPIC_API_KEY）
 
@@ -204,9 +209,9 @@ interview_spec.py     评分口径单一来源（维度、权重、版本）
 backend/              FastAPI 服务、会话存储、面试适配、语音、跨场次画像
 frontend/             React 界面（Vite）
 evals/                面试官评测集（24 条用例 + 裁判 + 运行器）
-skills/               技能（code-review / deepseek-api / mock-interviewer）
+skills/               技能（code-review / kimi-api / deepseek-api / mock-interviewer）
 interview/            题库导入脚本与数据
-tests/                测试（244 离线 + 2 冒烟）
+tests/                测试（258 离线 + 2 冒烟）
 tools/                维护脚本（从验证过的环境生成依赖锁）
 documents/            文档（本文件）
 .web-data/ .sessions/ .memory/ .tasks/ .interviews/ .runtime/ .transcripts/   运行产物（已 gitignore）

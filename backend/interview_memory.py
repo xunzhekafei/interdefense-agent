@@ -138,6 +138,7 @@ def _call(prompt: str):
         max_tokens=1600,
         system=SYSTEM,
         messages=[{"role": "user", "content": prompt}],
+        **agent._effort_kwargs(),
     )
     text = "".join(block.text for block in response.content if block.type == "text")
     return agent._extract_json_object(text)

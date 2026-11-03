@@ -69,7 +69,7 @@ Web 架构及实时协议见 [Web 前端说明](WEB_FRONTEND.md)。
 
 加技能 = 新建 `skills/<名称>/SKILL.md`，开头写 `--- name: ... / description: ... ---` frontmatter 即可。
 `load_skill` 的 `name` 只在启动时建立的注册表里查询，绝不当作文件路径（安全）。
-内置技能：`code-review`（代码审查清单）、`deepseek-api`（接口注意事项）、`mock-interviewer`（面试流程）。
+内置技能：`code-review`（代码审查清单）、`kimi-api`（默认接口注意事项）、`deepseek-api`（切回 DeepSeek 时用）、`mock-interviewer`（面试流程）。
 
 ## 上下文压缩（Context Compact）
 

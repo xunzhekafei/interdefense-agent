@@ -11,15 +11,9 @@ from .interview_memory import update as update_memory
 logger = logging.getLogger(__name__)
 
 
-def answered_transcript(messages):
-    """Only pair submitted answers; ending a session is not a blank answer.
-
-    语音提交的回答会带上 VOICE_MARK 标注。本地语音识别会把技术名词听错
-    （实测「风控反欺诈」→「分控反击诈」），标注是给评分模型的信号：这类拼写问题
-    大概率是识别造成的，别当成候选人说错。
-    """
-    import agent                                  # 与运行时共用同一个标注常量，避免两处各写一份
-    pairs = []                                    # [问题, 回答, 是否语音提交]
+def _answered_entries(messages):
+    """把消息序列配成 [问题, 回答, 是否语音提交]；只配对已提交的回答。"""
+    pairs = []
     question = None
     for message in messages:
         if message["status"] != "completed":
@@ -34,10 +28,35 @@ def answered_transcript(messages):
             # A second submitted fragment after a failed/interrupted reply.
             pairs[-1][1] += "\n" + message["text"]
             pairs[-1][2] = pairs[-1][2] or voice
+    return pairs
+
+
+def answered_transcript(messages):
+    """Only pair submitted answers; ending a session is not a blank answer.
+
+    语音提交的回答会带上 VOICE_MARK 标注。本地语音识别会把技术名词听错
+    （实测「风控反欺诈」→「分控反击诈」），标注是给评分模型的信号：这类拼写问题
+    大概率是识别造成的，别当成候选人说错。
+    """
+    import agent                                  # 与运行时共用同一个标注常量，避免两处各写一份
     return "\n\n".join(
         f"面试官：{question}\n"
         f"候选人{'（' + agent.VOICE_MARK + '）' if voice else ''}：{answer}"
-        for question, answer, voice in pairs)
+        for question, answer, voice in _answered_entries(messages))
+
+
+def answered_qa(messages):
+    """结构化问答对，直接交给评分 workflow，跳过模型解析这一步。
+
+    语音标注放进 answer 里（评分提示按「answer 中是否含 VOICE_MARK」判断），
+    而不是像文本 transcript 那样放在说话人后面。
+    """
+    import agent
+    return [
+        {"question": question,
+         "answer": f"{answer}（{agent.VOICE_MARK}）" if voice else answer}
+        for question, answer, voice in _answered_entries(messages)
+    ]
 
 
 def history_limit() -> int:
@@ -83,11 +102,12 @@ def _web_client(agent):
 
 class InterviewAgent:
     def configured(self):
-        return bool(os.environ.get("ANTHROPIC_API_KEY"))
+        return bool(os.environ.get("ANTHROPIC_API_KEY")
+                    or os.environ.get("ANTHROPIC_AUTH_TOKEN"))
 
     def _runtime(self):
         if not self.configured():
-            raise RuntimeError("请设置 ANTHROPIC_API_KEY 后重启后端")
+            raise RuntimeError("请设置 ANTHROPIC_API_KEY（或 ANTHROPIC_AUTH_TOKEN）后重启后端")
         import agent
         return agent
 
@@ -134,8 +154,8 @@ class InterviewAgent:
 
     def report(self, session, emit, cancel, directory: Path):
         agent = self._runtime()
-        transcript = answered_transcript(session["messages"])
-        if not transcript:
+        qa = answered_qa(session["messages"])
+        if not qa:
             raise ValueError("没有已回答的问题，无法评分")
 
         # 内部 label（parse:0 / score:3 / summary）不能直接给用户看
@@ -177,7 +197,6 @@ class InterviewAgent:
         journal = LockedJournal(directory / "report.journal.jsonl")
         try:
             context = agent.WorkflowContext(journal, ProgressTask(session["id"], "interview-report"), call)
-            return agent._interview_report(context, {"role": session["role"], "transcript": transcript,
-                                                     "include_all": True})
+            return agent._interview_report(context, {"role": session["role"], "qa": qa})
         finally:
             journal.close()

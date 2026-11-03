@@ -8,7 +8,7 @@
 - Linux 服务器（Ubuntu 22.04 / Debian 12 均可），1 核 2G 起步
 - Python 3.10+
 - Node.js 22+（只在构建前端时需要）
-- 一个 DeepSeek API 密钥（建议单独开户、设额度上限）
+- 一个 Kimi API 密钥（**单独建项目并设日/月消费预算**，见下面的「额度控制」）
 
 ## 二、安装
 
@@ -36,7 +36,8 @@ cd frontend && npm ci && npm run build && cd ..
 ## 四、启动
 
 ```bash
-export ANTHROPIC_API_KEY="你的密钥"
+export PROVIDER="kimi"                 # 默认值，写出来只是让配置一目了然
+export ANTHROPIC_API_KEY="你的密钥"    # Kimi 会自动按 Bearer 发送
 export WEB_ALLOWED_HOSTS="你的域名或隧道地址"
 .venv/bin/uvicorn backend.app:app --host 127.0.0.1 --port 8000
 ```
@@ -45,6 +46,10 @@ export WEB_ALLOWED_HOSTS="你的域名或隧道地址"
 
 | 变量 | 作用 |
 | --- | --- |
+| `PROVIDER` | `kimi`（默认）/ `deepseek` / `custom` |
+| `MODEL` | 默认 `kimi-k3.1-pro`；一般不用改 |
+| `REASONING_EFFORT` | Kimi 推理深度，默认 `low`；报告质量不够时设 `high`。若接口报 400 且提到 `output_config`，设 `off` 关闭该字段 |
+| `WORKFLOW_MAX_PARALLEL` | 报告并发，默认 8。Kimi 未到 Tier1 时并发只有 1，设 `1` 避免 429 | |
 | `AUTH_SECRET` | 签名登录 cookie 的密钥；不设会自动生成 `.web-data/auth_secret` |
 | `AUTH_TTL_DAYS` | 登录有效期，默认 7 天 |
 | `WEB_ALLOWED_HOSTS` | 允许的 Host，逗号分隔；公网部署**必须**加上域名/隧道地址 |
@@ -59,6 +64,7 @@ After=network.target
 
 [Service]
 WorkingDirectory=/opt/myagent
+Environment=PROVIDER=kimi
 Environment=ANTHROPIC_API_KEY=你的密钥
 Environment=WEB_ALLOWED_HOSTS=你的域名
 ExecStart=/opt/myagent/.venv/bin/uvicorn backend.app:app --host 127.0.0.1 --port 8000
@@ -116,9 +122,27 @@ location / {
 - [ ] HTTPS 下点麦克风能弹出授权
 - [ ] `git status` 干净，密钥和账号文件都没进仓库
 
-## 七、安全
+## 七、额度控制（Kimi）
+
+DeepSeek 只能给**账户**充值、不能给单个 key 设上限；Kimi 可以给**项目**设日/月预算，
+所以公网部署优先用 Kimi：
+
+1. 先完成个人实名认证（未认证只能有 1 个项目、10 个 key，分不出评审项目）
+2. 控制台顶部切到新项目（例如 `myagent-reviewer`）
+3. 项目设置 → 项目预算/限速设置 → 日预算、月预算（例如 ¥10/天、¥50/月）
+4. 在**这个项目下**创建 API Key，填到服务器环境变量
+
+并发也按**累计充值**分档：Tier0（¥0）只有 1 路并发、3 RPM，报告 workflow 的
+8 路并行会直接 429。**至少充值 ¥50 到 Tier1**（15 路并发）；不想充值就把
+`WORKFLOW_MAX_PARALLEL` 设成 `1`，代价是报告变慢。项目预算只限制花多少，
+不影响余额和并发档位。
+
+达到预算后该项目下所有请求都会被拒绝，其他项目不受影响。
+注意计费有约 10 分钟延迟，预算别设得刚好够用，留 20–30% 余量。
+
+## 八、安全
 
 - `AUTH_SECRET` 泄露等于任何人都能伪造登录 cookie；用长随机串，不要提交
 - API 密钥只放在服务器环境变量里，不要写进代码或前端
-- 给 DeepSeek 密钥设额度上限，防止被刷
+- 给 Kimi 项目设日/月预算，防止链接被刷
 - 评审结束后可以删除 `.web-data/auth.json` 或直接停服务

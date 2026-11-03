@@ -143,6 +143,7 @@ def judge(case: dict, reply: str, *, model: str | None = None) -> dict:
             max_tokens=800,
             system=JUDGE_SYSTEM,
             messages=[{"role": "user", "content": _judge_prompt(case, reply)}],
+            **agent._effort_kwargs(),
         )
         text = "".join(b.text for b in response.content if b.type == "text")
         value = _extract_json(text)

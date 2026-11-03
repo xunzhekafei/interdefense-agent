@@ -34,10 +34,10 @@ npm run build
 cd ..
 ```
 
-设置模型密钥后启动（沿用原项目的 DeepSeek 兼容接口）：
+设置模型密钥后启动（默认 Kimi，`PROVIDER=deepseek` 可切回）：
 
 ```powershell
-$env:ANTHROPIC_API_KEY = "你的 DeepSeek 密钥"
+$env:ANTHROPIC_API_KEY = "你的 Kimi 密钥"
 .\start-web.ps1
 ```
 
