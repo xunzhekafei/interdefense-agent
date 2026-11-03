@@ -24,3 +24,25 @@ def test_agent_uses_the_shared_dimensions():
 
 def test_profile_uses_the_shared_dimensions():
     assert profile.DIMENSION_NAMES == spec.DIMENSION_NAMES
+
+
+def test_round_plan_sums_to_target():
+    for rounds in spec.ROUND_OPTIONS:
+        plan = spec.round_plan(rounds)
+        total = (plan["intro"] + plan["reverse"] + plan["project"]
+                 + plan["technical"] + plan["design"] + plan["behavior"])
+        assert total == rounds
+        assert plan["project"] >= plan["technical"] >= plan["design"] >= plan["behavior"] >= 0
+
+
+def test_classify_answer_filters_accidents():
+    assert spec.classify_answer("请做自我介绍", "请做自我介绍") == "copy"
+    assert spec.classify_answer("请做自我介绍", "你好？") == "greeting"
+    assert spec.classify_answer("请做自我介绍", "   ") == "empty"
+    assert spec.classify_answer("请做自我介绍", "跳过") == "skip"
+    assert spec.classify_answer("你有什么想问我的吗？", "你好") == "reverse"
+    assert spec.classify_answer("什么是闭包？", "闭包是函数和其词法环境的组合") == "score"
+
+
+def test_scoring_version_marks_invalid_answer_change():
+    assert spec.SCORING_VERSION == 4

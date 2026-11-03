@@ -385,6 +385,35 @@ def test_interview_report_accepts_structured_qa(iso, monkeypatch):
     assert [item["question"] for item in out["result"]["per_question"]] == ["Q1", "Q2"]
 
 
+def test_interview_report_skips_invalid_answers(iso, monkeypatch):
+    """误触/问候/反问不计分，只评有效回答，但报告里要列出来。"""
+    import agent
+    calls: list = []
+    monkeypatch.setattr(agent, "_workflow_agent_call", _stub_interview_runner(calls))
+    out = json.loads(agent.run_workflow.call({
+        "name": "interview-report",
+        "args": {"qa": [
+            {"question": "请做自我介绍", "answer": "请做自我介绍"},
+            {"question": "你有什么想问我的吗？", "answer": "你好？"},
+            {"question": "什么是闭包？", "answer": "闭包是函数和其词法环境的组合"},
+        ], "rounds": 10}}))
+    assert out["status"] == "completed"
+    result = out["result"]
+    assert len(result["per_question"]) == 1
+    assert len(result["skipped_questions"]) == 2
+    assert {item["reason"] for item in result["skipped_questions"]} == {"copy", "reverse"}
+    assert result["target_rounds"] == 10
+    assert result["scoring_version"] == 4
+
+
+def test_interview_report_rejects_all_invalid(iso):
+    import agent
+    result = agent.run_workflow.call({
+        "name": "interview-report",
+        "args": {"qa": [{"question": "请做自我介绍", "answer": "你好"}]}})
+    assert "有效回答" in result
+
+
 def test_interview_report_rejects_empty_qa(iso):
     import agent
     result = agent.run_workflow.call(

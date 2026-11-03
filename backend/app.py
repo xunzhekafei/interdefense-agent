@@ -13,6 +13,8 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
+from interview_spec import DEFAULT_ROUNDS
+
 from .auth import COOKIE, TTL_SECONDS, AuthStore
 from .profile import build_profile
 from .service import InterviewService
@@ -57,6 +59,8 @@ class SessionInput(BaseModel):
     pressure: Literal["温和", "标准", "压力"] = "标准"
     # 交互方式：文字 / 纯语音。纯语音会话不显示文字输入框，回答自动转写提交。
     mode: Literal["text", "voice"] = "text"
+    # 目标总题数（含开场和反问），只允许几个固定档位
+    rounds: Literal[10, 15, 20, 30, 50] = DEFAULT_ROUNDS
 
 
 class Command(BaseModel):
@@ -198,6 +202,7 @@ def create_app(directory=None, adapter=None, recognizer=_AUTO):
             "id": s["id"], "candidate": s["candidate"], "role": s["role"],
             "created_at": s["created_at"], "status": s["status"],
             "mode": s.get("mode") or "text",
+            "rounds": s.get("rounds") or DEFAULT_ROUNDS,
         } for s in app.state.service.store.list()]
 
     @app.get("/api/profile")

@@ -64,6 +64,27 @@ export default function ReportView({ report }: { report: Report }) {
           <p>{item.suggestion}</p>
         </details>
       ))}
+      {report.skipped_questions?.length ? (
+        <>
+          <h3>未计分的轮次</h3>
+          <p className="report-note">
+            这些轮次没有有效作答（误触、问候、跳过或反问），已从均分中剔除，
+            不影响综合评分。
+          </p>
+          {report.skipped_questions.map((item, i) => (
+            <details key={i} className="skipped-question">
+              <summary>
+                <span>{String(i + 1).padStart(2, "0")}</span>
+                {item.question}
+              </summary>
+              <blockquote>{item.answer || "（空）"}</blockquote>
+              <small className="evidence-warning">
+                {item.reason_text || item.reason}
+              </small>
+            </details>
+          ))}
+        </>
+      ) : null}
       <button
         className="secondary"
         onClick={() => {

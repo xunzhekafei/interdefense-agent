@@ -90,6 +90,7 @@ export default function App() {
   const [background, setBackground] = useState("");
   const [pressure, setPressure] = useState<Pressure>("标准");
   const [mode, setMode] = useState<SessionMode>("text");
+  const [rounds, setRounds] = useState(15);
   // null = 正在检查；enabled 且 user 为空 = 需要登录
   const [auth, setAuth] = useState<{ user: string | null; enabled: boolean } | null>(null);
   const [creating, setCreating] = useState(false);
@@ -475,6 +476,7 @@ export default function App() {
         background,
         pressure,
         mode,
+        rounds,
       });
       await refresh();
       setSelected(s.id);
@@ -485,6 +487,11 @@ export default function App() {
     }
   };
   const busy = !!session?.active_turn;
+  const askedCount = session
+    ? session.messages.filter(
+        (m) => m.role === "assistant" && m.status === "completed",
+      ).length
+    : 0;
   const available = connected && !pending && !!health?.configured;
   const answered = !!session?.messages.some(
     (message) => message.role === "user" && message.status === "completed",
@@ -685,6 +692,19 @@ export default function App() {
                 </select>
               </label>
               <label>
+                面试轮数
+                <select
+                  value={rounds}
+                  onChange={(e) => setRounds(Number(e.target.value))}
+                >
+                  <option value={10}>10 轮 — 快速练习</option>
+                  <option value={15}>15 轮 — 标准（默认）</option>
+                  <option value={20}>20 轮 — 深入</option>
+                  <option value={30}>30 轮 — 完整面试</option>
+                  <option value={50}>50 轮 — 长程压力测试</option>
+                </select>
+              </label>
+              <label>
                 经历与练习重点 <span className="optional">选填</span>
                 <textarea
                   maxLength={8000}
@@ -749,6 +769,11 @@ export default function App() {
                 <p>
                   {session.candidate} <span>·</span> {date(session.created_at)}{" "}
                   <span>·</span> {labels[session.status]}
+                  {session.rounds && (
+                    <>
+                      <span>·</span> 目标 {session.rounds} 题
+                    </>
+                  )}
                   {session.mode === "voice" && (
                     <span className="voice-tag">纯语音</span>
                   )}
@@ -793,7 +818,10 @@ export default function App() {
                   <span>
                     <span className="small-dot" /> 模拟面试官
                   </span>
-                  <small>一次一题，留出思考的空间</small>
+                  <small>
+                    第 {Math.min(askedCount, session.rounds ?? 15)} /{" "}
+                    {session.rounds ?? 15} 题 · 一次一题
+                  </small>
                 </div>
                 <div
                   className="messages"

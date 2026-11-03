@@ -20,7 +20,7 @@ from datetime import date, timedelta
 from difflib import SequenceMatcher
 from statistics import mean
 
-from interview_spec import DIMENSION_NAMES, SCORING_VERSION, weighted_overall
+from interview_spec import DIMENSION_NAMES, weighted_overall
 
 RECENT_SESSIONS = 5
 
@@ -88,8 +88,9 @@ def _overall(session):
     """
     scores = _dimensions(session)
     if scores:
-        # v3 起总分是加权和；旧报告保持当时的均分口径，跨版本才能各算各的
-        if _version(session) >= SCORING_VERSION:
+        # v3 起总分是加权和；这里写死 3，不能跟着 SCORING_VERSION 走——
+        # 否则升到 v4 时，v3 的历史报告会被误判成旧口径。
+        if _version(session) >= 3:
             return weighted_overall(scores)
         return round(mean(scores.values()), 2)
     value = _number((session.get("report") or {}).get("overall"))

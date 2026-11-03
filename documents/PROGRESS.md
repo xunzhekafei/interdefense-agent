@@ -51,14 +51,15 @@ Ollama 从 v0.13 起原生支持 Anthropic `/v1/messages`，设 `PROVIDER=custom
 | 11-03 | 评审账号登录 | 新增 `backend/auth.py`：PBKDF2 账号、HMAC 签名 cookie；所有 API 与 WebSocket 受保护，`/api/health` 和登录本身公开；没有 `auth.json` 时仍是无登录模式，本地开发不变；测试达 244 |
 | 11-03 | 公网部署 + 默认切 Kimi | 阿里云 2C2G + nginx + Let's Encrypt 上线，评审账号登录可用；新增 `providers.py` 收拢提供商差异（默认 Kimi，`PROVIDER=deepseek` 可切回），Kimi 用 Bearer、DeepSeek 用 x-api-key，Kimi 用 `output_config.effort` 控制推理深度；切提供商时残留的 `ANTHROPIC_BASE_URL` 不再串台；测试达 255 |
 | 11-04 | Kimi 联调 + 结构化问答 | 公网跑通完整面试（开场 → 4 轮追问 → 报告）：发现模型解析在低推理强度下会把四道题的回答全填成同一段，Web 端改为直接传结构化 `qa`、跳过解析；逐题评分与证据 4/4 通过，报告 v3 总分正常；测试达 258 |
+| 11-04 | 轮数计划 + 误触兜底 + 延迟修复 | 创建时可选 10/15/20/30/50 轮，按 40/30/20/10 分配项目/技术/设计/行为；重复题目、问候、主动跳过和反问环节不计分（v4），提交前也会拦截误触；笔记更新移到后台线程，实测回合完成从 23.7 秒降到 5–8 秒；测试达 268 |
 
 ## 当前状态速览
 
-- **提交**：55 个；**测试**：258 离线 + 2 冒烟；**评测用例**：26 条
+- **提交**：55 个；**测试**：268 离线 + 2 冒烟；**评测用例**：26 条
 - **评测基线**（DeepSeek flash）：追问 17/17、行为 5/5、评分 4/4。**Kimi 尚未重跑**，换模型后需重新建立基线
 - **评分区分度**（v3 加权）：优秀 8.07 / 较好 6.87 / 空洞 2.58 / 事实错误 1.32（0–10）
 - **模型**：默认 `kimi-k3.1-pro`（`PROVIDER=kimi`）；`PROVIDER=deepseek` 切回 flash；DeepSeek 下评测脚本强制 flash，`EVAL_MODEL` 才能覆盖
-- **评分口径版本**：v1 旧报告仍按均分；v3 新报告按 30/30/25/15 加权，画像会提示跨版本不可比
+- **评分口径版本**：v1 旧报告仍按均分；v3 起按 30/30/25/15 加权；v4 起误触/问候/跳过/反问不计分，画像会提示跨版本不可比
 - **CI**：ubuntu + windows，Python 3.14，按 `requirements-lock.txt` 安装
 
 ## 当前能力
@@ -175,7 +176,7 @@ Ollama 从 v0.13 起原生支持 Anthropic `/v1/messages`，设 `PROVIDER=custom
 
 ```bash
 pip install -r requirements-web.txt -r requirements-dev.txt
-python -m pytest            # 离线测试（258 个，不需要 API key，约 3 秒）
+python -m pytest            # 离线测试（268 个，不需要 API key，约 3 秒）
 python -m pytest -m slow    # 真实 API 冒烟测试（会消耗 token）
 python agent.py             # 交互模式（需设置 ANTHROPIC_API_KEY）
 
@@ -211,7 +212,7 @@ frontend/             React 界面（Vite）
 evals/                面试官评测集（24 条用例 + 裁判 + 运行器）
 skills/               技能（code-review / kimi-api / deepseek-api / mock-interviewer）
 interview/            题库导入脚本与数据
-tests/                测试（258 离线 + 2 冒烟）
+tests/                测试（268 离线 + 2 冒烟）
 tools/                维护脚本（从验证过的环境生成依赖锁）
 documents/            文档（本文件）
 .web-data/ .sessions/ .memory/ .tasks/ .interviews/ .runtime/ .transcripts/   运行产物（已 gitignore）

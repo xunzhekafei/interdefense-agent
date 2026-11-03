@@ -33,8 +33,9 @@ from anthropic import beta_tool
 
 import providers
 
-from interview_spec import (DIMENSION_NAMES, DIMENSION_WEIGHTS,
-                            SCORING_VERSION, weighted_overall)
+from interview_spec import (DEFAULT_ROUNDS, DIMENSION_NAMES, DIMENSION_WEIGHTS,
+                            SCORING_VERSION, SKIP_REASONS, classify_answer,
+                            weighted_overall)
 
 logger = logging.getLogger(__name__)
 
@@ -2862,6 +2863,27 @@ def _interview_report(ctx: WorkflowContext, args: dict) -> dict:
                 "没能从记录里解析出任何问答对——记录可能为空或不是面试对话；"
                 "如果对话被压缩过，改用 transcript_file 指向 .transcripts/ 里最新的存档重试")
 
+    # 误触、重复题目、问候、主动跳过和反问环节不计分。15 轮里出现 1-2 次
+    # 这种输入，原来的做法是给 0 分并直接拉低均分，候选人的真实水平被淹没。
+    target_rounds = int(args.get("rounds") or DEFAULT_ROUNDS)
+    scored_qa = []
+    skipped_questions = []
+    for item in qa:
+        kind = classify_answer(item["question"], item["answer"])
+        if kind == "score":
+            scored_qa.append(item)
+        else:
+            skipped_questions.append({
+                "question": item["question"],
+                "answer": item["answer"],
+                "reason": kind,
+                "reason_text": SKIP_REASONS.get(kind, "未计分"),
+            })
+    if not scored_qa:
+        raise WorkflowInputError(
+            "没有有效回答可以评分——所有轮次都是空白、问候、重复题目或主动跳过")
+    qa = scored_qa
+
     def score_answer(_value, item, index):
         prompt = (
             f"你是{role}方向的资深面试官，给下面这道题的候选人回答打分"
@@ -2924,12 +2946,18 @@ def _interview_report(ctx: WorkflowContext, args: dict) -> dict:
             on_done=lambda i, v, offset=start: emit_scored(i, v, offset)))
 
     ctx.phase("汇总")
+    skipped_note = ""
+    if skipped_questions:
+        reasons = "、".join(sorted({item["reason_text"] for item in skipped_questions}))
+        skipped_note = (f"\n\n另有 {len(skipped_questions)} 轮没有有效作答（{reasons}），"
+                        "已从均分中剔除；可以在报告里提醒候选人，但不要按 0 分计入。")
     report = ctx.agent(
         f"根据下面的逐题评分，汇总一份{role}模拟面试报告：给出总分、各维度均分、"
         f"优势、短板和改进建议（建议要可执行、按优先级排序）。"
         "**所有分数一律用 0-10 分制**：各维度分是逐题分数的平均，"
         "总分是四个维度分的加权和（技术正确性 30%、深度与原理 30%、"
-        "工程与场景思考 25%、表达与结构 15%）；不要用 100 分制或 5 分制：\n\n"
+        "工程与场景思考 25%、表达与结构 15%）；不要用 100 分制或 5 分制："
+        + skipped_note + "\n\n"
         + json.dumps(scored_questions, ensure_ascii=False),
         schema=INTERVIEW_REPORT_SCHEMA, label="summary")
     # 总分由代码算，不用模型返回的那个：同一个 prompt 下模型会在 0-10、0-100、
@@ -2941,7 +2969,10 @@ def _interview_report(ctx: WorkflowContext, args: dict) -> dict:
     weighted = weighted_overall(dimensions)
     if weighted is not None:
         report["overall"] = weighted
-    return {**report, "per_question": scored_questions, "scoring_version": SCORING_VERSION}
+    return {**report, "per_question": scored_questions,
+            "skipped_questions": skipped_questions,
+            "target_rounds": target_rounds,
+            "scoring_version": SCORING_VERSION}
 
 
 register_workflow(

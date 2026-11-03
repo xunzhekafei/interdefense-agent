@@ -792,6 +792,14 @@ meter::-webkit-meter-optimum-value {
   font-weight: 550;
   color: #61754e;
 }
+.report-note {
+  margin: 6px 0 12px;
+  color: #9aa88a;
+  font-size: 12px;
+}
+.report details.skipped-question {
+  color: #a2ad95;
+}
 .review-grid ul {
   padding-left: 17px;
   color: #8a987a;

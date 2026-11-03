@@ -4,9 +4,11 @@ import os
 import threading
 from pathlib import Path
 
+from interview_spec import DEFAULT_ROUNDS, round_plan
+
 from .interview_memory import enabled as memory_enabled
 from .interview_memory import render as render_memory
-from .interview_memory import update as update_memory
+from .interview_memory import update as update_memory_state
 
 logger = logging.getLogger(__name__)
 
@@ -117,8 +119,28 @@ class InterviewAgent:
         history = [m for m in session["messages"] if m["status"] == "completed"]
         messages = select_history(history)
         messages.insert(0, {"role": "user", "content": "开始模拟面试，请先让我做自我介绍。"})
-        # 老场次（这次改动之前建的）没有 pressure 字段，按默认档处理
+        # 老场次（这次改动之前建的）没有 pressure / rounds 字段，按默认值处理
         pressure = session.get("pressure") or "标准"
+        rounds = int(session.get("rounds") or DEFAULT_ROUNDS)
+        plan = round_plan(rounds)
+        asked = sum(1 for message in session["messages"]
+                    if message.get("role") == "assistant"
+                    and message.get("status") == "completed")
+        if asked >= rounds:
+            round_note = ("本场已经达到目标题数，简短告知候选人：点击「结束面试」"
+                          "可以生成评分报告，不要再出技术题。")
+        elif asked >= rounds - 1:
+            round_note = ("只剩最后一道反问，本轮**只能**问："
+                          "「你有什么想问我的吗？」不要再出技术题。")
+        else:
+            round_note = (f"当前已问 {asked} 题，本轮是第 {asked + 1} 题。"
+                          "按下面的配额分配题目，不要把所有题都堆在同一个项目上；"
+                          "达到总题数后进入反问环节。")
+        plan_block = ("\n\n【本场轮数计划（必须遵守）】\n"
+                      f"目标总题数：{rounds} 题（含开场自我介绍和最后的反问环节）。\n"
+                      f"开场自我介绍 1 题；项目深挖 {plan['project']} 题；"
+                      f"技术基础 {plan['technical']} 题；系统设计 {plan['design']} 题；"
+                      f"行为协作 {plan['behavior']} 题；反问 1 题。\n" + round_note)
         # 结构化笔记：让面试官看得到「问过几个项目、各自问到哪、下一步该干什么」，
         # 而不是每轮只盯着最新那句回答。没有笔记时返回空串，行为与之前完全一致。
         memory_block = (render_memory(session.get("memory"), session["messages"])
@@ -129,7 +151,8 @@ class InterviewAgent:
                   str({"姓名": session["candidate"], "岗位": session["role"],
                        "背景": session["background"],
                        "压力档位": pressure}) +
-                  f"\n本次面试的压力档位是「{pressure}」——按技能里对应档位的规则提问。"
+                  f"\n本次面试的压力档位是「{pressure}」——按技能里对应档位的规则提问。" +
+                  plan_block +
                   "\n当前是对话阶段。**每轮只输出一个问句**——发出前数一遍问号，"
                   "超过一个就删掉后面的，留到下一轮。结束和评分由页面的结束面试按钮触发；"
                   "不调用评分、存档或文件工具。流程结束时请提示候选人点击结束面试。")
@@ -142,15 +165,20 @@ class InterviewAgent:
                                 # 压缩归档写进场次自己的目录，不混进 CLI 的 .transcripts/
                                 archive_dir=(Path(directory) / "transcripts") if directory else None)
 
-        # 回话已经流式发完了，这里再更新笔记——首字延迟不受影响。
-        # session 是 service 传进来的快照，返回后由 service 合并回库。
-        # 更新失败沿用旧笔记，绝不让笔记影响面试本身。
-        if memory_enabled():
-            try:
-                session["memory"] = update_memory(session, text)
-            except Exception:
-                logger.exception("面试笔记更新失败，本轮沿用旧笔记")
+        # 笔记更新放到 service 的后台线程里（见 InterviewService._refresh_memory）。
+        # 以前在这里同步更新：问题已经流式显示完了，用户却还要等 10-15 秒
+        # 笔记调用结束才能提交下一轮——这是「面试官还在思考」的主要来源。
         return text
+
+    def update_memory(self, session):
+        """后台更新面试笔记；失败返回 None，不影响面试本身。"""
+        if not memory_enabled():
+            return None
+        try:
+            return update_memory_state(session)
+        except Exception:
+            logger.exception("面试笔记更新失败，本轮沿用旧笔记")
+            return None
 
     def report(self, session, emit, cancel, directory: Path):
         agent = self._runtime()
@@ -197,6 +225,8 @@ class InterviewAgent:
         journal = LockedJournal(directory / "report.journal.jsonl")
         try:
             context = agent.WorkflowContext(journal, ProgressTask(session["id"], "interview-report"), call)
-            return agent._interview_report(context, {"role": session["role"], "qa": qa})
+            return agent._interview_report(context, {
+                "role": session["role"], "qa": qa,
+                "rounds": session.get("rounds") or DEFAULT_ROUNDS})
         finally:
             journal.close()

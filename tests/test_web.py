@@ -399,6 +399,117 @@ def test_delete_cancels_running_turn(tmp_path):
         service.close()
 
 
+def test_reply_injects_round_plan(monkeypatch):
+    """轮数计划必须真的进 system prompt，模型才知道什么时候收尾。"""
+    import agent
+    from backend.agent_adapter import InterviewAgent
+
+    captured = {}
+
+    def fake_loop(messages, system, **kwargs):
+        captured["system"] = system
+        return "下一个问题"
+
+    monkeypatch.setattr(agent, "agent_loop", fake_loop)
+    session = {
+        "id": "s1", "candidate": "甲", "role": "AI", "background": "",
+        "pressure": "标准", "rounds": 10,
+        "messages": [
+            {"role": "assistant", "text": "Q1", "status": "completed"},
+            {"role": "user", "text": "A1", "status": "completed"},
+            {"role": "assistant", "text": "", "status": "streaming"},
+        ],
+    }
+    InterviewAgent().reply(session, lambda *args: None, threading.Event())
+    assert "目标总题数：10" in captured["system"]
+    assert "本轮是第 2 题" in captured["system"]
+    assert "项目深挖 3 题" in captured["system"]
+
+
+def test_reply_forces_reverse_on_last_round(monkeypatch):
+    import agent
+    from backend.agent_adapter import InterviewAgent
+
+    captured = {}
+
+    def fake_loop(messages, system, **kwargs):
+        captured["system"] = system
+        return "反问"
+
+    monkeypatch.setattr(agent, "agent_loop", fake_loop)
+    messages = []
+    for index in range(9):
+        messages.append({"role": "assistant", "text": f"Q{index}", "status": "completed"})
+        messages.append({"role": "user", "text": f"A{index}", "status": "completed"})
+    messages.append({"role": "assistant", "text": "", "status": "streaming"})
+    session = {"id": "s1", "candidate": "甲", "role": "AI", "background": "",
+               "pressure": "标准", "rounds": 10, "messages": messages}
+    InterviewAgent().reply(session, lambda *args: None, threading.Event())
+    assert "只能" in captured["system"] and "反问" in captured["system"]
+
+
+def test_session_rounds_default_and_validation(tmp_path):
+    with TestClient(create_app(tmp_path, FakeAgent(), recognizer=None)) as client:
+        default = client.post("/api/sessions",
+                              json={"candidate": "甲", "role": "AI"}).json()
+        custom = client.post("/api/sessions",
+                             json={"candidate": "乙", "role": "AI", "rounds": 30}).json()
+        assert default["rounds"] == 15
+        assert custom["rounds"] == 30
+        assert client.post("/api/sessions",
+                           json={"candidate": "丙", "role": "AI",
+                                 "rounds": 12}).status_code == 422
+
+
+def test_submit_rejects_accidental_answers(tmp_path):
+    service = InterviewService(tmp_path, FakeAgent())
+    try:
+        sid = service.create("甲", "AI", "")["id"]
+        service.submit(sid, action="start", request_id="r" * 8)
+        wait_done(service, sid)
+        question = service.store.get(sid)["messages"][-1]["text"]
+
+        with pytest.raises(ValueError, match="几乎一样"):
+            service.submit(sid, action="answer", text=question, request_id="c" * 8)
+        with pytest.raises(ValueError, match="问候"):
+            service.submit(sid, action="answer", text="你好？", request_id="g" * 8)
+
+        service.submit(sid, action="answer", text="我做过一个检索项目。", request_id="a" * 8)
+        wait_done(service, sid)
+    finally:
+        service.close()
+
+
+class MemoryAgent(FakeAgent):
+    def __init__(self):
+        self.called = threading.Event()
+
+    def update_memory(self, session):
+        self.called.set()
+        return {"projects": [], "phase": "technical", "timeline": []}
+
+
+def test_memory_update_runs_after_turn(tmp_path):
+    """笔记在后台线程更新：回合先结束，用户不用等那 10-15 秒。"""
+    adapter = MemoryAgent()
+    service = InterviewService(tmp_path, adapter)
+    try:
+        sid = service.create("甲", "AI", "")["id"]
+        service.submit(sid, action="start", request_id="r" * 8)
+        wait_done(service, sid)
+        assert adapter.called.wait(2)
+        deadline = time.monotonic() + 2
+        while time.monotonic() < deadline:
+            if service.store.get(sid).get("memory"):
+                break
+            time.sleep(0.01)
+        session = service.store.get(sid)
+        assert session["memory"]["phase"] == "technical"
+        assert session["memory_version"] >= 1
+    finally:
+        service.close()
+
+
 def test_session_mode_defaults_to_text_and_can_be_voice(tmp_path):
     with TestClient(create_app(tmp_path, FakeAgent(), recognizer=None)) as client:
         default = client.post("/api/sessions",

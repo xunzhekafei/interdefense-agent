@@ -22,6 +22,15 @@ export type Report = {
     /** 证据是否通过了「必须是候选人逐字原话」的机器校验 */
     evidence_verified?: boolean;
   } & Record<string, unknown>)[];
+  /** 误触/问候/跳过/反问等没有有效作答的轮次，已从均分中剔除 */
+  skipped_questions?: {
+    question: string;
+    answer: string;
+    reason: string;
+    reason_text?: string;
+  }[];
+  /** 本场目标总题数 */
+  target_rounds?: number;
 };
 export type SessionSummary = {
   id: string;
@@ -31,6 +40,8 @@ export type SessionSummary = {
   status: string;
   /** 老场次没有这个字段，按文字处理 */
   mode?: SessionMode;
+  /** 目标总题数（含开场和反问）；老场次按 15 处理 */
+  rounds?: number;
 };
 export type Pressure = "温和" | "标准" | "压力";
 export type SessionMode = "text" | "voice";

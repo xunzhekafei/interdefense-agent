@@ -147,32 +147,48 @@ def test_timeline_is_trimmed(monkeypatch):
 # ---------- 取最近一轮问答 ----------
 
 def test_service_persists_memory_from_adapter(tmp_path):
-    """adapter 在快照上写笔记，service 必须合并回权威会话——否则下一轮就丢了。"""
+    """adapter 的 update_memory 在回合结束后由后台线程落库，不阻塞回话。"""
+    import threading
     import time
     from backend.service import InterviewService
 
     class MemoryAgent:
+        def __init__(self):
+            self.called = threading.Event()
+
         def configured(self):
             return True
 
         def reply(self, session, emit, cancel, directory=None):
-            session["memory"] = {**empty(), "phase": "deep_dive"}
             return "好的"
 
         def report(self, session, emit, cancel, directory):
             return {}
 
-    service = InterviewService(tmp_path, MemoryAgent())
-    session = service.create("甲", "AI", "")
-    service.submit(session["id"], action="start", request_id="a" * 8)
-    deadline = time.monotonic() + 5
-    while time.monotonic() < deadline:
-        if not service.store.get(session["id"])["active_turn"]:
-            break
-        time.sleep(0.01)
+        def update_memory(self, session):
+            self.called.set()
+            return {**empty(), "phase": "deep_dive"}
 
-    assert service.store.get(session["id"])["memory"]["phase"] == "deep_dive"
-    service.close()
+    adapter = MemoryAgent()
+    service = InterviewService(tmp_path, adapter)
+    try:
+        session = service.create("甲", "AI", "")
+        service.submit(session["id"], action="start", request_id="a" * 8)
+        deadline = time.monotonic() + 5
+        while time.monotonic() < deadline:
+            if not service.store.get(session["id"])["active_turn"]:
+                break
+            time.sleep(0.01)
+
+        assert adapter.called.wait(2)
+        deadline = time.monotonic() + 2
+        while time.monotonic() < deadline:
+            if service.store.get(session["id"]).get("memory"):
+                break
+            time.sleep(0.01)
+        assert service.store.get(session["id"])["memory"]["phase"] == "deep_dive"
+    finally:
+        service.close()
 
 
 def test_last_qa_skips_trailing_streaming_assistant():

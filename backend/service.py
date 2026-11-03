@@ -7,6 +7,8 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 
+from interview_spec import DEFAULT_ROUNDS, classify_answer
+
 from .agent_adapter import InterviewAgent
 from .sessions import SessionStore
 
@@ -34,17 +36,20 @@ class InterviewService:
         self.adapter = adapter or InterviewAgent()
         self.lock = threading.RLock()
         self.executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="interview")
+        # 笔记更新单独一个线程：不能挡住下一轮，也不该让用户等它跑完
+        self.memory_executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="memory")
         self.cancels = {}
         # No process-local job survives a restart; retain partial output for review.
         for session in self.store.list():
             if session["active_turn"]:
                 self._interrupt(session, "服务已重启，本轮未完成。可重试。")
 
-    def create(self, candidate, role, background, pressure="标准", mode="text"):
+    def create(self, candidate, role, background, pressure="标准", mode="text",
+               rounds=DEFAULT_ROUNDS):
         session = dict(id=uuid.uuid4().hex, candidate=candidate, role=role, background=background,
-                       pressure=pressure, mode=mode, created_at=now(), status="ready",
-                       active_turn=None, messages=[], report=None, seq=0, error=None,
-                       last_action=None, requests=[])
+                       pressure=pressure, mode=mode, rounds=rounds, created_at=now(),
+                       status="ready", active_turn=None, messages=[], report=None, seq=0,
+                       error=None, last_action=None, requests=[])
         self.store.save(session)
         return session
 
@@ -107,6 +112,19 @@ class InterviewService:
                 # Finishing is a host action, not a model-selected file workflow.
                 if text.strip() in ("结束面试", "不面了"):
                     action = "finish"
+                # 误触/复制题目/只发问候：挡在提交前，别让它变成一轮 0 分。
+                # 反问环节不挡——候选人反问什么都可以，报告里会跳过。
+                if action == "answer" and not retry:
+                    question = next((m["text"] for m in reversed(session["messages"])
+                                     if m["role"] == "assistant"
+                                     and m["status"] == "completed"), "")
+                    kind = classify_answer(question, text)
+                    if kind in ("copy", "empty", "greeting"):
+                        raise ValueError({
+                            "copy": "这段回答和面试官的问题几乎一样，可能是误触。请直接回答上面的问题。",
+                            "empty": "回答不能为空。",
+                            "greeting": "这只是问候，请直接回答上面的问题。",
+                        }[kind])
             elif action != "finish":
                 raise ValueError("不支持的操作")
             if action == "finish" and not any(m["role"] == "user" for m in session["messages"]):
@@ -160,9 +178,6 @@ class InterviewService:
                     return                    # 场次已被删除，别再写回去
                 if cancel.is_set() or session["active_turn"] != turn_id:
                     return
-                # 笔记是在快照上更新的（见 agent_adapter.reply），这里合并回权威会话
-                if action != "finish" and snapshot.get("memory") is not None:
-                    session["memory"] = snapshot["memory"]
                 if action == "finish":
                     session["report"] = result
                     session["status"] = "completed"
@@ -177,6 +192,10 @@ class InterviewService:
                     self.store.save(session, "reply.completed", {"text": message["text"]}, turn_id)
                 session["active_turn"] = None
                 self.store.save(session, "turn.completed", {}, turn_id)
+                # 本轮已经对用户结束了。笔记在后台更新，下一轮开始前基本能赶上；
+                # 赶不上就晚一轮，不影响面试本身。
+                if action != "finish":
+                    self.memory_executor.submit(self._refresh_memory, session_id)
         except InterruptedError:
             with self.lock:
                 try:
@@ -198,9 +217,46 @@ class InterviewService:
             with self.lock:
                 self.cancels.pop(turn_id, None)
 
+    def _refresh_memory(self, session_id):
+        """后台更新结构化笔记；失败或场次已删就静默跳过。"""
+        updater = getattr(self.adapter, "update_memory", None)
+        if updater is None:
+            return
+        try:
+            snapshot = self.store.get(session_id)
+        except KeyError:
+            return
+        except Exception:
+            # 服务正在关闭、数据库已关：后台任务是尽力而为，不往外抛
+            logging.getLogger(__name__).debug("笔记任务读库失败", exc_info=True)
+            return
+        version = len(snapshot.get("messages") or [])
+        try:
+            memory = updater(snapshot)
+        except Exception:
+            logging.getLogger(__name__).exception("面试笔记更新失败：%s", session_id)
+            return
+        if not memory:
+            return
+        with self.lock:
+            try:
+                session = self.store.get(session_id)
+            except KeyError:
+                return
+            except Exception:
+                logging.getLogger(__name__).debug("笔记任务回写失败", exc_info=True)
+                return
+            # 后来的回合已经写过更新的笔记，这次就作废
+            if version < int(session.get("memory_version") or 0):
+                return
+            session["memory"] = memory
+            session["memory_version"] = version
+            self.store.save(session)
+
     def close(self):
         with self.lock:
             for cancel in self.cancels.values():
                 cancel.set()
+        self.memory_executor.shutdown(wait=False, cancel_futures=True)
         self.executor.shutdown(wait=True, cancel_futures=True)
         self.store.close()
