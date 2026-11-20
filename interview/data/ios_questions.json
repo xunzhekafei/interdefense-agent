@@ -1,0 +1,1569 @@
+[
+  {
+    "question": "Live Rendering in Storyboards",
+    "keywords": [
+      "Live",
+      "Rendering",
+      "in",
+      "Storyboards",
+      "UIKit"
+    ],
+    "role": "iOS 工程师",
+    "category": "UIKit",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Ways of specifing the layout of elements",
+    "keywords": [
+      "Ways",
+      "of",
+      "specifing",
+      "the",
+      "layout",
+      "elements",
+      "UIKit"
+    ],
+    "role": "iOS 工程师",
+    "category": "UIKit",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Autolayout formula",
+    "keywords": [
+      "Autolayout",
+      "formula",
+      "UIKit"
+    ],
+    "role": "iOS 工程师",
+    "category": "UIKit",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Size Classes",
+    "keywords": [
+      "Size",
+      "Classes",
+      "UIKit"
+    ],
+    "role": "iOS 工程师",
+    "category": "UIKit",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Intrinsic Content Size",
+    "keywords": [
+      "Intrinsic",
+      "Content",
+      "Size",
+      "UIKit"
+    ],
+    "role": "iOS 工程师",
+    "category": "UIKit",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Frame and bounds",
+    "keywords": [
+      "Frame",
+      "and",
+      "bounds",
+      "UIKit"
+    ],
+    "role": "iOS 工程师",
+    "category": "UIKit",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "When bounds origin will be different from 0,0?",
+    "keywords": [
+      "When",
+      "bounds",
+      "origin",
+      "will",
+      "be",
+      "different",
+      "from",
+      "UIKit"
+    ],
+    "role": "iOS 工程师",
+    "category": "UIKit",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "What do layer objects represent?",
+    "keywords": [
+      "What",
+      "do",
+      "layer",
+      "objects",
+      "represent",
+      "UIKit"
+    ],
+    "role": "iOS 工程师",
+    "category": "UIKit",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "File owner meaning",
+    "keywords": [
+      "File",
+      "owner",
+      "meaning",
+      "UIKit"
+    ],
+    "role": "iOS 工程师",
+    "category": "UIKit",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Life Cycle of App",
+    "keywords": [
+      "Life",
+      "Cycle",
+      "of",
+      "App",
+      "UIKit"
+    ],
+    "role": "iOS 工程师",
+    "category": "UIKit",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Test types",
+    "keywords": [
+      "Test",
+      "types",
+      "Testing"
+    ],
+    "role": "iOS 工程师",
+    "category": "Testing",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Unit Tests",
+    "keywords": [
+      "Unit",
+      "Tests",
+      "Testing"
+    ],
+    "role": "iOS 工程师",
+    "category": "Testing",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Integration Tests",
+    "keywords": [
+      "Integration",
+      "Tests",
+      "Testing"
+    ],
+    "role": "iOS 工程师",
+    "category": "Testing",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Functional Tests",
+    "keywords": [
+      "Functional",
+      "Tests",
+      "Testing"
+    ],
+    "role": "iOS 工程师",
+    "category": "Testing",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Acceptance Tests",
+    "keywords": [
+      "Acceptance",
+      "Tests",
+      "Testing"
+    ],
+    "role": "iOS 工程师",
+    "category": "Testing",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Writing tests for iOS apps",
+    "keywords": [
+      "Writing",
+      "tests",
+      "for",
+      "iOS",
+      "apps",
+      "Testing"
+    ],
+    "role": "iOS 工程师",
+    "category": "Testing",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "“Arrange-Act-Assert”",
+    "keywords": [
+      "Arrange-Act-Assert",
+      "Testing"
+    ],
+    "role": "iOS 工程师",
+    "category": "Testing",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Test Driven Development",
+    "keywords": [
+      "Test",
+      "Driven",
+      "Development",
+      "Testing"
+    ],
+    "role": "iOS 工程师",
+    "category": "Testing",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Your new app is prone to crashing. What do you do?",
+    "keywords": [
+      "Your",
+      "new",
+      "app",
+      "is",
+      "prone",
+      "to",
+      "crashing.",
+      "What",
+      "do",
+      "you"
+    ],
+    "role": "iOS 工程师",
+    "category": "Testing",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Explain why a compile time error occurs",
+    "keywords": [
+      "Explain",
+      "why",
+      "a",
+      "compile",
+      "time",
+      "error",
+      "occurs",
+      "Tasks"
+    ],
+    "role": "iOS 工程师",
+    "category": "Tasks",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Spot the bug that occurs in the code",
+    "keywords": [
+      "Spot",
+      "the",
+      "bug",
+      "that",
+      "occurs",
+      "in",
+      "code",
+      "Tasks"
+    ],
+    "role": "iOS 工程师",
+    "category": "Tasks",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Consider the following code",
+    "keywords": [
+      "Consider",
+      "the",
+      "following",
+      "code",
+      "Tasks"
+    ],
+    "role": "iOS 工程师",
+    "category": "Tasks",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Determine the value of “x” in the Swift code",
+    "keywords": [
+      "Determine",
+      "the",
+      "value",
+      "of",
+      "x",
+      "in",
+      "Swift",
+      "code",
+      "Tasks"
+    ],
+    "role": "iOS 工程师",
+    "category": "Tasks",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Given two sorted arrays, the task is to merge them in a sorted manner",
+    "keywords": [
+      "Given",
+      "two",
+      "sorted",
+      "arrays",
+      "the",
+      "task",
+      "is",
+      "to",
+      "merge",
+      "them"
+    ],
+    "role": "iOS 工程师",
+    "category": "Tasks",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Write down the custom method which works similar to reduce() api?",
+    "keywords": [
+      "Write",
+      "down",
+      "the",
+      "custom",
+      "method",
+      "which",
+      "works",
+      "similar",
+      "to",
+      "reduce"
+    ],
+    "role": "iOS 工程师",
+    "category": "Tasks",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Application States",
+    "keywords": [
+      "Application",
+      "States",
+      "SDK"
+    ],
+    "role": "iOS 工程师",
+    "category": "SDK",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Adapter Pattern",
+    "keywords": [
+      "Adapter",
+      "Pattern",
+      "Patterns"
+    ],
+    "role": "iOS 工程师",
+    "category": "Patterns",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Memento Pattern",
+    "keywords": [
+      "Memento",
+      "Pattern",
+      "Patterns"
+    ],
+    "role": "iOS 工程师",
+    "category": "Patterns",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Factory Method Pattern",
+    "keywords": [
+      "Factory",
+      "Method",
+      "Pattern",
+      "Patterns"
+    ],
+    "role": "iOS 工程师",
+    "category": "Patterns",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Responder Chain",
+    "keywords": [
+      "Responder",
+      "Chain",
+      "Patterns"
+    ],
+    "role": "iOS 工程师",
+    "category": "Patterns",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Observer Pattern",
+    "keywords": [
+      "Observer",
+      "Pattern",
+      "Patterns"
+    ],
+    "role": "iOS 工程师",
+    "category": "Patterns",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Singleton Pattern",
+    "keywords": [
+      "Singleton",
+      "Pattern",
+      "Patterns"
+    ],
+    "role": "iOS 工程师",
+    "category": "Patterns",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Decorator Pattern",
+    "keywords": [
+      "Decorator",
+      "Pattern",
+      "Patterns"
+    ],
+    "role": "iOS 工程师",
+    "category": "Patterns",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Facade Pattern",
+    "keywords": [
+      "Facade",
+      "Pattern",
+      "Patterns"
+    ],
+    "role": "iOS 工程师",
+    "category": "Patterns",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Inheritance",
+    "keywords": [
+      "Inheritance",
+      "OOP"
+    ],
+    "role": "iOS 工程师",
+    "category": "OOP",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Polymorphism",
+    "keywords": [
+      "Polymorphism",
+      "OOP"
+    ],
+    "role": "iOS 工程师",
+    "category": "OOP",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Encapsulation",
+    "keywords": [
+      "Encapsulation",
+      "OOP"
+    ],
+    "role": "iOS 工程师",
+    "category": "OOP",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Difference between Delegate and KVO",
+    "keywords": [
+      "Difference",
+      "between",
+      "Delegate",
+      "and",
+      "KVO",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "What happens when you call autorelease on an object?",
+    "keywords": [
+      "What",
+      "happens",
+      "when",
+      "you",
+      "call",
+      "autorelease",
+      "on",
+      "an",
+      "object",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "By calling performSelector:withObject:afterDelay: is the object retained?",
+    "keywords": [
+      "By",
+      "calling",
+      "performSelector",
+      "withObject",
+      "afterDelay",
+      "is",
+      "the",
+      "object",
+      "retained",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Selectors",
+    "keywords": [
+      "Selectors",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Major differences between Objective-C and Swift",
+    "keywords": [
+      "Major",
+      "differences",
+      "between",
+      "Objective-C",
+      "and",
+      "Swift",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Access Levels",
+    "keywords": [
+      "Access",
+      "Levels",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "What is an in-out parameter?",
+    "keywords": [
+      "What",
+      "is",
+      "an",
+      "in-out",
+      "parameter",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Lazy Stored Property vs Stored Property",
+    "keywords": [
+      "Lazy",
+      "Stored",
+      "Property",
+      "vs",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Open class",
+    "keywords": [
+      "Open",
+      "class",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Final class",
+    "keywords": [
+      "Final",
+      "class",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Struct vs Class",
+    "keywords": [
+      "Struct",
+      "vs",
+      "Class",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Swift Standard Library Protocol",
+    "keywords": [
+      "Swift",
+      "Standard",
+      "Library",
+      "Protocol",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Downcasting",
+    "keywords": [
+      "Downcasting",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Lazy in Swift",
+    "keywords": [
+      "Lazy",
+      "in",
+      "Swift",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "What are failable and throwing initializers?",
+    "keywords": [
+      "What",
+      "are",
+      "failable",
+      "and",
+      "throwing",
+      "initializers",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "What are type aliases?",
+    "keywords": [
+      "What",
+      "are",
+      "type",
+      "aliases",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Raw values and associated values",
+    "keywords": [
+      "Raw",
+      "values",
+      "and",
+      "associated",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Non-Escaping and Escaping Closures",
+    "keywords": [
+      "Non-Escaping",
+      "and",
+      "Escaping",
+      "Closures",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Error handling in Swift",
+    "keywords": [
+      "Error",
+      "handling",
+      "in",
+      "Swift",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Guard benefits",
+    "keywords": [
+      "Guard",
+      "benefits",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "What’s the complexity of the countElements function of a string and why?",
+    "keywords": [
+      "What",
+      "s",
+      "the",
+      "complexity",
+      "of",
+      "countElements",
+      "function",
+      "a",
+      "string",
+      "and"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "What are designated and convenience initializers?",
+    "keywords": [
+      "What",
+      "are",
+      "designated",
+      "and",
+      "convenience",
+      "initializers",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Swift Transforming Array functions",
+    "keywords": [
+      "Swift",
+      "Transforming",
+      "Array",
+      "functions",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Extensions",
+    "keywords": [
+      "Extensions",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "What is defer?",
+    "keywords": [
+      "What",
+      "is",
+      "defer",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "What is the difference Any and AnyObject?",
+    "keywords": [
+      "What",
+      "is",
+      "the",
+      "difference",
+      "Any",
+      "and",
+      "AnyObject",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "How will you make property’s getter available, but the property is settable only from within code in swift?",
+    "keywords": [
+      "How",
+      "will",
+      "you",
+      "make",
+      "property",
+      "s",
+      "getter",
+      "available",
+      "but",
+      "the"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Property Wrappers",
+    "keywords": [
+      "Property",
+      "Wrappers",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Objective-C",
+    "keywords": [
+      "Objective-C",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "What is the difference between vs self. in Objective-C?",
+    "keywords": [
+      "What",
+      "is",
+      "the",
+      "difference",
+      "between",
+      "vs",
+      "self.",
+      "in",
+      "Objective-C",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "What are blocks in Objective-C?",
+    "keywords": [
+      "What",
+      "are",
+      "blocks",
+      "in",
+      "Objective-C",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "“Strong” and “Weak” references",
+    "keywords": [
+      "Strong",
+      "and",
+      "Weak",
+      "references",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Strong, Weak, Readonly and Copy",
+    "keywords": [
+      "Strong",
+      "Weak",
+      "Readonly",
+      "and",
+      "Copy",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "@dynamic in Objective-C",
+    "keywords": [
+      "dynamic",
+      "in",
+      "Objective-C",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "NSError object",
+    "keywords": [
+      "NSError",
+      "object",
+      "Language"
+    ],
+    "role": "iOS 工程师",
+    "category": "Language",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "What is the difference in functional programming and OOPS?",
+    "keywords": [
+      "What",
+      "is",
+      "the",
+      "difference",
+      "in",
+      "functional",
+      "programming",
+      "and",
+      "OOPS",
+      "General"
+    ],
+    "role": "iOS 工程师",
+    "category": "General",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "HTTP request types",
+    "keywords": [
+      "HTTP",
+      "request",
+      "types",
+      "General"
+    ],
+    "role": "iOS 工程师",
+    "category": "General",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Communication protocols",
+    "keywords": [
+      "Communication",
+      "protocols",
+      "General"
+    ],
+    "role": "iOS 工程师",
+    "category": "General",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Network socket",
+    "keywords": [
+      "Network",
+      "socket",
+      "General"
+    ],
+    "role": "iOS 工程师",
+    "category": "General",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "WebSocket",
+    "keywords": [
+      "WebSocket",
+      "General"
+    ],
+    "role": "iOS 工程师",
+    "category": "General",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "TCP Stream Socket",
+    "keywords": [
+      "TCP",
+      "Stream",
+      "Socket",
+      "General"
+    ],
+    "role": "iOS 工程师",
+    "category": "General",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "UDP Datagram Socket",
+    "keywords": [
+      "UDP",
+      "Datagram",
+      "Socket",
+      "General"
+    ],
+    "role": "iOS 工程师",
+    "category": "General",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "CFStream",
+    "keywords": [
+      "CFStream",
+      "General"
+    ],
+    "role": "iOS 工程师",
+    "category": "General",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "NSStream",
+    "keywords": [
+      "NSStream",
+      "General"
+    ],
+    "role": "iOS 工程师",
+    "category": "General",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Deep and shallow copy",
+    "keywords": [
+      "Deep",
+      "and",
+      "shallow",
+      "copy",
+      "General"
+    ],
+    "role": "iOS 工程师",
+    "category": "General",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Difference between functions and methods in Swift?",
+    "keywords": [
+      "Difference",
+      "between",
+      "functions",
+      "and",
+      "methods",
+      "in",
+      "Swift",
+      "General"
+    ],
+    "role": "iOS 工程师",
+    "category": "General",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Protocol Oriented Programming",
+    "keywords": [
+      "Protocol",
+      "Oriented",
+      "Programming",
+      "General"
+    ],
+    "role": "iOS 工程师",
+    "category": "General",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "How does NSManagedObjectContext work?",
+    "keywords": [
+      "How",
+      "does",
+      "NSManagedObjectContext",
+      "work",
+      "Data"
+    ],
+    "role": "iOS 工程师",
+    "category": "Data",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "NSFetchedResultsController",
+    "keywords": [
+      "NSFetchedResultsController",
+      "Data"
+    ],
+    "role": "iOS 工程师",
+    "category": "Data",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "NSPersistentContainer",
+    "keywords": [
+      "NSPersistentContainer",
+      "Data"
+    ],
+    "role": "iOS 工程师",
+    "category": "Data",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Managed object context and the functionality that it provides",
+    "keywords": [
+      "Managed",
+      "object",
+      "context",
+      "and",
+      "the",
+      "functionality",
+      "that",
+      "it",
+      "provides",
+      "Data"
+    ],
+    "role": "iOS 工程师",
+    "category": "Data",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "What is NSFetchRequest?",
+    "keywords": [
+      "What",
+      "is",
+      "NSFetchRequest",
+      "Data"
+    ],
+    "role": "iOS 工程师",
+    "category": "Data",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Concurrency in Mac OS and iOS",
+    "keywords": [
+      "Concurrency",
+      "in",
+      "Mac",
+      "OS",
+      "and",
+      "iOS"
+    ],
+    "role": "iOS 工程师",
+    "category": "Concurrency",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "POSIX Threads",
+    "keywords": [
+      "POSIX",
+      "Threads",
+      "Concurrency"
+    ],
+    "role": "iOS 工程师",
+    "category": "Concurrency",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "NSThread",
+    "keywords": [
+      "NSThread",
+      "Concurrency"
+    ],
+    "role": "iOS 工程师",
+    "category": "Concurrency",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Quality of Service (QoS)",
+    "keywords": [
+      "Quality",
+      "of",
+      "Service",
+      "QoS",
+      "Concurrency"
+    ],
+    "role": "iOS 工程师",
+    "category": "Concurrency",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "NSOperationQueue",
+    "keywords": [
+      "NSOperationQueue",
+      "Concurrency"
+    ],
+    "role": "iOS 工程师",
+    "category": "Concurrency",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Cancel NSOperation problem",
+    "keywords": [
+      "Cancel",
+      "NSOperation",
+      "problem",
+      "Concurrency"
+    ],
+    "role": "iOS 工程师",
+    "category": "Concurrency",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "DispatchGroup",
+    "keywords": [
+      "DispatchGroup",
+      "Concurrency"
+    ],
+    "role": "iOS 工程师",
+    "category": "Concurrency",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "@synchronized",
+    "keywords": [
+      "synchronized",
+      "Concurrency"
+    ],
+    "role": "iOS 工程师",
+    "category": "Concurrency",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Synchronous &amp; asynchronous tasks",
+    "keywords": [
+      "Synchronous",
+      "amp",
+      "asynchronous",
+      "tasks",
+      "Concurrency"
+    ],
+    "role": "iOS 工程师",
+    "category": "Concurrency",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Semaphore",
+    "keywords": [
+      "Semaphore",
+      "Concurrency"
+    ],
+    "role": "iOS 工程师",
+    "category": "Concurrency",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  },
+  {
+    "question": "Semaphore vs Mutex vs Lock",
+    "keywords": [
+      "Semaphore",
+      "vs",
+      "Mutex",
+      "Lock",
+      "Concurrency"
+    ],
+    "role": "iOS 工程师",
+    "category": "Concurrency",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "dashvlas/awesome-ios-interview (MIT)"
+  }
+]

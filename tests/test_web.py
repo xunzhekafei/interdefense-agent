@@ -44,10 +44,20 @@ def wait_done(service, session_id):
     pytest.fail("Turn did not complete")
 
 
+_WS_LAST_SEQ = {}
+
+
 def ws_done(ws):
+    last = _WS_LAST_SEQ.get(id(ws), -1)
     for _ in range(150):
         event = ws.receive_json()
-        if event["type"] == "session.snapshot" and not event["data"]["active_turn"]:
+        if event["type"] != "session.snapshot":
+            continue
+        seq = event.get("seq", 0)
+        if seq <= last:
+            continue
+        _WS_LAST_SEQ[id(ws)] = seq
+        if not event["data"]["active_turn"]:
             return event["data"]
     pytest.fail("No terminal snapshot")
 

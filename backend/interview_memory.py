@@ -25,7 +25,8 @@
 """
 import json
 import logging
-import os
+
+from settings import env_float, env_flag
 
 logger = logging.getLogger(__name__)
 
@@ -93,15 +94,11 @@ def empty() -> dict:
 
 def enabled() -> bool:
     """INTERVIEW_MEMORY=off 时完全退回旧行为（不注入、不更新、不额外调用模型）。"""
-    return os.environ.get("INTERVIEW_MEMORY", "on").strip().lower() not in (
-        "off", "0", "false", "no")
+    return env_flag("INTERVIEW_MEMORY", True)
 
 
 def decay() -> float:
-    try:
-        value = float(os.environ.get("INTERVIEW_DECAY", DEFAULT_DECAY))
-    except ValueError:
-        return DEFAULT_DECAY
+    value = env_float("INTERVIEW_DECAY", DEFAULT_DECAY)
     return value if 0.1 <= value <= 0.95 else DEFAULT_DECAY
 
 
@@ -139,6 +136,7 @@ def _call(prompt: str):
         system=SYSTEM,
         messages=[{"role": "user", "content": prompt}],
         **agent._effort_kwargs(),
+        **agent._cache_kwargs(),
     )
     text = "".join(block.text for block in response.content if block.type == "text")
     return agent._extract_json_object(text)

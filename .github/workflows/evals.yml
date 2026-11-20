@@ -1,0 +1,36 @@
+name: Evals
+
+on:
+  workflow_dispatch:
+    inputs:
+      group:
+        description: all, followup, behavior or scoring
+        default: all
+      repeat:
+        description: repeats (1 or 3)
+        default: "1"
+
+jobs:
+  evals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: requirements-lock.txt
+      - run: pip install -r requirements-lock.txt
+      - name: Run evals
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PROVIDER: deepseek
+        run: python evals/run_eval.py --group "${{ inputs.group }}" --repeat "${{ inputs.repeat }}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-results-${{ github.run_id }}
+          path: evals/results/
+          if-no-files-found: warn
+          retention-days: 14

@@ -3,8 +3,8 @@
 
 切换提供商只改环境变量，不动代码：
 
-    PROVIDER=kimi          # 默认；kimi / deepseek / custom
-    PROVIDER=deepseek      # 回到 DeepSeek
+    PROVIDER=deepseek      # 默认；deepseek / kimi / custom
+    PROVIDER=kimi          # 切到 Kimi
 
 各字段都可以单独覆盖：`ANTHROPIC_BASE_URL`、`MODEL`、`AUX_MODEL`。
 
@@ -17,6 +17,8 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
+
+from settings import env_flag
 
 EFFORTS = ("low", "medium", "high", "xhigh", "max")
 
@@ -82,7 +84,7 @@ def resolve() -> Provider:
     时还残留着指向 DeepSeek 的旧变量。要换地址就设 `PROVIDER=custom` 并给出
     `ANTHROPIC_BASE_URL`（本地模型、代理、国际站都走这条路）。
     """
-    name = (os.environ.get("PROVIDER") or "kimi").strip().lower()
+    name = (os.environ.get("PROVIDER") or "deepseek").strip().lower()
     base = PROVIDERS.get(name, PROVIDERS["custom"])
     if name == "custom":
         base_url = (os.environ.get("ANTHROPIC_BASE_URL") or "").strip()
@@ -129,7 +131,4 @@ def thinking_enabled() -> bool:
 
 
 def _flag(name: str, default: bool) -> bool:
-    raw = os.environ.get(name)
-    if raw is None:
-        return default
-    return raw.strip().lower() not in ("off", "0", "false", "no")
+    return env_flag(name, default)

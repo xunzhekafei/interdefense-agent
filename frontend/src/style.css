@@ -1752,3 +1752,39 @@ meter::-webkit-meter-optimum-value {
 .logout:hover {
   color: #dce7d5;
 }
+.load-earlier {
+  align-self: center;
+  margin: 4px auto 8px;
+  font-size: 12px;
+}
+.crash {
+  max-width: 520px;
+  margin: 12vh auto;
+  padding: 28px;
+  text-align: center;
+  border: 1px solid #d8dfd6;
+  border-radius: 14px;
+  background: #fff;
+}
+.crash h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+.crash p {
+  margin: 0 0 18px;
+  color: #6d7b71;
+  font-size: 13px;
+  white-space: pre-wrap;
+}
+.message.streaming .bubble::after {
+  content: "▍";
+  display: inline-block;
+  margin-left: 2px;
+  color: #ca7349;
+  animation: cursor-blink 1s steps(2, start) infinite;
+}
+@keyframes cursor-blink {
+  to {
+    visibility: hidden;
+  }
+}

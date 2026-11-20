@@ -268,3 +268,30 @@ def test_render_shows_action_with_do_and_avoid():
     assert "深入一层" in text
     assert "要做：" in text and "不要做：" in text
     assert "缓存一致性" in text
+
+def test_memory_call_enables_prompt_cache(monkeypatch):
+    """笔记调用的 system 是固定的，必须和主对话一样带上缓存标记。"""
+    from types import SimpleNamespace
+
+    import agent
+
+    captured = {}
+
+    class FakeMessages:
+        def create(self, **kwargs):
+            captured.update(kwargs)
+            return SimpleNamespace(content=[SimpleNamespace(type="text", text="{}")])
+
+    class FakeClient:
+        def __init__(self):
+            self.messages = FakeMessages()
+
+        def with_options(self, **kwargs):
+            return self
+
+    monkeypatch.setattr(agent, "client", FakeClient())
+    memory_module._call("测试")
+
+    expected = agent._cache_kwargs()
+    assert captured.get("cache_control") == expected.get("cache_control")
+    assert captured["system"] == memory_module.SYSTEM

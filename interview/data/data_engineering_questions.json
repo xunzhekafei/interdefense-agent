@@ -1,0 +1,718 @@
+[
+  {
+    "question": "What is the difference between MLOps, ModelOps, and AIOps?",
+    "keywords": [
+      "What",
+      "is",
+      "the",
+      "difference",
+      "between",
+      "MLOps",
+      "ModelOps",
+      "and",
+      "AIOps",
+      "General MLOps"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "What is the difference between MLOps and DevOps?",
+    "keywords": [
+      "What",
+      "is",
+      "the",
+      "difference",
+      "between",
+      "MLOps",
+      "and",
+      "DevOps",
+      "General MLOps"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "How do you create Infrastructure in MLOps?",
+    "keywords": [
+      "How",
+      "do",
+      "you",
+      "create",
+      "Infrastructure",
+      "in",
+      "MLOps",
+      "General MLOps"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "How can you create CI/CD pipelines for Machine Learning?",
+    "keywords": [
+      "How",
+      "can",
+      "you",
+      "create",
+      "CI",
+      "CD",
+      "pipelines",
+      "for",
+      "Machine",
+      "Learning"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "What is model or concept drift?",
+    "keywords": [
+      "What",
+      "is",
+      "model",
+      "or",
+      "concept",
+      "drift",
+      "General MLOps"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "How does monitoring differ from logging?",
+    "keywords": [
+      "How",
+      "does",
+      "monitoring",
+      "differ",
+      "from",
+      "logging",
+      "General MLOps"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "What testing should be done before deploying an ML model into production?",
+    "keywords": [
+      "What",
+      "testing",
+      "should",
+      "be",
+      "done",
+      "before",
+      "deploying",
+      "an",
+      "ML",
+      "model"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "What is the A/B split approach of model evaluation?",
+    "keywords": [
+      "What",
+      "is",
+      "the",
+      "A",
+      "B",
+      "split",
+      "approach",
+      "of",
+      "model",
+      "evaluation"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "What is the importance of using version control for MLOps?",
+    "keywords": [
+      "What",
+      "is",
+      "the",
+      "importance",
+      "of",
+      "using",
+      "version",
+      "control",
+      "for",
+      "MLOps"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "What is the difference between A/B testing model deployment and Multi-Arm Bandit?",
+    "keywords": [
+      "What",
+      "is",
+      "the",
+      "difference",
+      "between",
+      "A",
+      "B",
+      "testing",
+      "model",
+      "deployment"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "What is the difference between Canary and Blue-Green strategies of deployment?",
+    "keywords": [
+      "What",
+      "is",
+      "the",
+      "difference",
+      "between",
+      "Canary",
+      "and",
+      "Blue-Green",
+      "strategies",
+      "of"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "Why would you monitor feature attribution rather than feature distribution?",
+    "keywords": [
+      "Why",
+      "would",
+      "you",
+      "monitor",
+      "feature",
+      "attribution",
+      "rather",
+      "than",
+      "distribution",
+      "General MLOps"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "What are the ways of packaging ML Models?",
+    "keywords": [
+      "What",
+      "are",
+      "the",
+      "ways",
+      "of",
+      "packaging",
+      "ML",
+      "Models",
+      "General MLOps"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "What is the concept of “Immutable Infrastructure”?",
+    "keywords": [
+      "What",
+      "is",
+      "the",
+      "concept",
+      "of",
+      "Immutable",
+      "Infrastructure",
+      "General MLOps"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "Mention some common issues involved in ML model deployment.",
+    "keywords": [
+      "Mention",
+      "some",
+      "common",
+      "issues",
+      "involved",
+      "in",
+      "ML",
+      "model",
+      "deployment.",
+      "General MLOps"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "What Do You Mean By MLOps?",
+    "keywords": [
+      "What",
+      "Do",
+      "You",
+      "Mean",
+      "By",
+      "MLOps",
+      "General MLOps"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "How Do Data Scientists, Data Engineers, And ML Engineers Vary From One Another?",
+    "keywords": [
+      "How",
+      "Do",
+      "Data",
+      "Scientists",
+      "Engineers",
+      "And",
+      "ML",
+      "Vary",
+      "From",
+      "One"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "What Distinguishes MLOps From ModelOps And AIOps?",
+    "keywords": [
+      "What",
+      "Distinguishes",
+      "MLOps",
+      "From",
+      "ModelOps",
+      "And",
+      "AIOps",
+      "General MLOps"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "Can You Tell Me Some Of The Benefits Of MLOps?",
+    "keywords": [
+      "Can",
+      "You",
+      "Tell",
+      "Me",
+      "Some",
+      "Of",
+      "The",
+      "Benefits",
+      "MLOps",
+      "General MLOps"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "Can You Tell Me The Components Of MLOps?",
+    "keywords": [
+      "Can",
+      "You",
+      "Tell",
+      "Me",
+      "The",
+      "Components",
+      "Of",
+      "MLOps",
+      "General MLOps"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "What Risks Come With Using Data Science?",
+    "keywords": [
+      "What",
+      "Risks",
+      "Come",
+      "With",
+      "Using",
+      "Data",
+      "Science",
+      "General MLOps"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "Can You Explain, What Is Model Drift?",
+    "keywords": [
+      "Can",
+      "You",
+      "Explain",
+      "What",
+      "Is",
+      "Model",
+      "Drift",
+      "General MLOps"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "How Many Different Ways May MLOps Be Applied, In Your Opinion?",
+    "keywords": [
+      "How",
+      "Many",
+      "Different",
+      "Ways",
+      "May",
+      "MLOps",
+      "Be",
+      "Applied",
+      "In",
+      "Your"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "What Separates Static Deployment From Dynamic Deployment?",
+    "keywords": [
+      "What",
+      "Separates",
+      "Static",
+      "Deployment",
+      "From",
+      "Dynamic",
+      "General MLOps"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "What Production Testing Techniques Are You Aware Of?",
+    "keywords": [
+      "What",
+      "Production",
+      "Testing",
+      "Techniques",
+      "Are",
+      "You",
+      "Aware",
+      "Of",
+      "General MLOps"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "What Distinguishes Stream Processing From Batch Processing?",
+    "keywords": [
+      "What",
+      "Distinguishes",
+      "Stream",
+      "Processing",
+      "From",
+      "Batch",
+      "General MLOps"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "What Do You Mean By Training Serving Skew?",
+    "keywords": [
+      "What",
+      "Do",
+      "You",
+      "Mean",
+      "By",
+      "Training",
+      "Serving",
+      "Skew",
+      "General MLOps"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "What Do You Mean By Model Registry?",
+    "keywords": [
+      "What",
+      "Do",
+      "You",
+      "Mean",
+      "By",
+      "Model",
+      "Registry",
+      "General MLOps"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "Can You Elaborate On The Benefits Of Model Registry?",
+    "keywords": [
+      "Can",
+      "You",
+      "Elaborate",
+      "On",
+      "The",
+      "Benefits",
+      "Of",
+      "Model",
+      "Registry",
+      "General MLOps"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "Can You Explain The Champion-Challenger Technique Works?",
+    "keywords": [
+      "Can",
+      "You",
+      "Explain",
+      "The",
+      "Champion-Challenger",
+      "Technique",
+      "Works",
+      "General MLOps"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "Describe The Enterprise-Level Applications Of The MLOps Lifecycle?",
+    "keywords": [
+      "Describe",
+      "The",
+      "Enterprise-Level",
+      "Applications",
+      "Of",
+      "MLOps",
+      "Lifecycle",
+      "General MLOps"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "Can you explain how to monitor the performance of an ML model over time?",
+    "keywords": [
+      "Can",
+      "you",
+      "explain",
+      "how",
+      "to",
+      "monitor",
+      "the",
+      "performance",
+      "of",
+      "an"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "Can you discuss an example with data drift and how can addressed it?",
+    "keywords": [
+      "Can",
+      "you",
+      "discuss",
+      "an",
+      "example",
+      "with",
+      "data",
+      "drift",
+      "and",
+      "how"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "Why you should package ML models?",
+    "keywords": [
+      "Why",
+      "you",
+      "should",
+      "package",
+      "ML",
+      "models",
+      "General MLOps"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "What are the pros and cons of using Microservices?",
+    "keywords": [
+      "What",
+      "are",
+      "the",
+      "pros",
+      "and",
+      "cons",
+      "of",
+      "using",
+      "Microservices",
+      "General MLOps"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  },
+  {
+    "question": "What is a structure of a typical ML Artifact?",
+    "keywords": [
+      "What",
+      "is",
+      "a",
+      "structure",
+      "of",
+      "typical",
+      "ML",
+      "Artifact",
+      "General MLOps"
+    ],
+    "role": "数据工程师",
+    "category": "General MLOps",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "SepidehHosseinian/MLOPs-Interview-Questions (CC0-1.0)"
+  }
+]

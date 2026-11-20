@@ -35,6 +35,35 @@ def test_round_plan_sums_to_target():
         assert plan["project"] >= plan["technical"] >= plan["design"] >= plan["behavior"] >= 0
 
 
+def test_round_plan_default_unchanged():
+    """未识别岗位时必须保持旧比例，避免升级后悄悄改变题库分配。"""
+    assert spec.round_plan(10) == {
+        "rounds": 10, "intro": 1, "reverse": 1,
+        "project": 3, "technical": 2, "design": 2, "behavior": 1}
+
+
+def test_round_plan_varies_by_role():
+    """岗位不同，配比不同；但总数始终等于目标轮数，且项目仍占最大头。"""
+    default = spec.round_plan(15)
+    frontend = spec.round_plan(15, "前端开发工程师")
+    ai = spec.round_plan(15, "AI / ML 工程师")
+    data = spec.round_plan(15, "数据分析师")
+
+    assert frontend["project"] > default["project"]
+    assert ai["technical"] > default["technical"]
+    assert data["behavior"] >= default["behavior"]
+    assert ai["technical"] >= ai["design"]
+
+    for role in ("前端开发工程师", "AI / ML 工程师", "数据分析师",
+                 "后端开发工程师", "未知岗位"):
+        for rounds in spec.ROUND_OPTIONS:
+            plan = spec.round_plan(rounds, role)
+            total = (plan["intro"] + plan["reverse"] + plan["project"]
+                     + plan["technical"] + plan["design"] + plan["behavior"])
+            assert total == rounds
+            assert plan["project"] >= plan["technical"] >= plan["design"] >= plan["behavior"] >= 0
+
+
 def test_classify_answer_filters_accidents():
     assert spec.classify_answer("请做自我介绍", "请做自我介绍") == "copy"
     assert spec.classify_answer("请做自我介绍", "你好？") == "greeting"

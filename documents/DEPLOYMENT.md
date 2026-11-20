@@ -16,7 +16,7 @@
 git clone https://github.com/xunzhekafei/myagent.git
 cd myagent
 python3 -m venv .venv
-.venv/bin/pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements-web.txt
+.venv/bin/pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements-lock.txt
 cd frontend && npm ci && npm run build && cd ..
 ```
 
@@ -36,8 +36,8 @@ cd frontend && npm ci && npm run build && cd ..
 ## 四、启动
 
 ```bash
-export PROVIDER="kimi"                 # 默认值，写出来只是让配置一目了然
-export ANTHROPIC_API_KEY="你的密钥"    # Kimi 会自动按 Bearer 发送
+export PROVIDER="deepseek"             # 默认值，写出来只是让配置一目了然
+export ANTHROPIC_API_KEY="你的密钥"    # DeepSeek 使用 x-api-key；切到 Kimi 时自动改用 Bearer
 export WEB_ALLOWED_HOSTS="你的域名或隧道地址"
 .venv/bin/uvicorn backend.app:app --host 127.0.0.1 --port 8000
 ```
@@ -46,14 +46,25 @@ export WEB_ALLOWED_HOSTS="你的域名或隧道地址"
 
 | 变量 | 作用 |
 | --- | --- |
-| `PROVIDER` | `kimi`（默认）/ `deepseek` / `custom` |
-| `MODEL` | 默认 `kimi-k3.1-pro`；一般不用改 |
-| `REASONING_EFFORT` | Kimi 推理深度，默认 `low`；报告质量不够时设 `high`。若接口报 400 且提到 `output_config`，设 `off` 关闭该字段 |
-| `WORKFLOW_MAX_PARALLEL` | 报告并发，默认 8。Kimi 未到 Tier1 时并发只有 1，设 `1` 避免 429 | |
+| `PROVIDER` | `deepseek`（默认）/ `kimi` / `custom` |
+| `MODEL` | 默认 `claude-haiku-4-5`；一般不用改 |
+| `REASONING_EFFORT` | Kimi 推理深度（仅 `PROVIDER=kimi` 时生效），默认 `low`；报告质量不够时设 `high`。若接口报 400 且提到 `output_config`，设 `off` 关闭该字段 |
+| `WORKFLOW_MAX_PARALLEL` | 报告并发，默认 8。Kimi 未到 Tier1 时并发只有 1，设 `1` 避免 429 |
 | `AUTH_SECRET` | 签名登录 cookie 的密钥；不设会自动生成 `.web-data/auth_secret` |
 | `AUTH_TTL_DAYS` | 登录有效期，默认 7 天 |
 | `WEB_ALLOWED_HOSTS` | 允许的 Host，逗号分隔；公网部署**必须**加上域名/隧道地址 |
 | `WEB_ALLOWED_ORIGINS` | 额外的跨源来源；同源请求自动放行，一般不用设 |
+
+### 登录与会话安全
+
+- 登出会把账号的 token 版本号 +1，已签发但未过期的 cookie 立即作废（同账号其它设备也会下线）；
+  只删除浏览器 cookie 已不足以保证安全。
+- 连续登录失败按「客户端 IP」与「IP + 用户名」各计一次：第 5 次起锁 60 秒，之后逐次翻倍，
+  上限 15 分钟。重启服务会清零计数。经 nginx / Tunnel 反代后 `client.host` 通常是
+  127.0.0.1，限流会退化为全局计数——单用户评审场景可接受。
+- 所有 HTTP 响应带 `X-Content-Type-Options`、`X-Frame-Options`、`Referrer-Policy`
+  与 CSP；HTTPS 请求（或 `X-Forwarded-Proto: https`）额外带 HSTS。
+  `/docs` 豁免 CSP，因为 Swagger UI 从 CDN 加载。nginx 自己加同名头时后端不覆盖。
 
 用 systemd 托管（示例）：
 
@@ -64,7 +75,7 @@ After=network.target
 
 [Service]
 WorkingDirectory=/opt/myagent
-Environment=PROVIDER=kimi
+Environment=PROVIDER=deepseek
 Environment=ANTHROPIC_API_KEY=你的密钥
 Environment=WEB_ALLOWED_HOSTS=你的域名
 ExecStart=/opt/myagent/.venv/bin/uvicorn backend.app:app --host 127.0.0.1 --port 8000
@@ -146,3 +157,28 @@ DeepSeek 只能给**账户**充值、不能给单个 key 设上限；Kimi 可以
 - API 密钥只放在服务器环境变量里，不要写进代码或前端
 - 给 Kimi 项目设日/月预算，防止链接被刷
 - 评审结束后可以删除 `.web-data/auth.json` 或直接停服务
+## 九、备份与恢复
+
+数据库在 `.web-data/interviews.sqlite3`（WAL 模式），账号文件在同目录。
+**不要直接 `cp` 正在写入的数据库**——可能拿到半写状态。用脚本的一致快照：
+
+```bash
+python tools/backup.py                    # 生成 .web-data/backups/<时间戳>/
+python tools/backup.py --keep 14          # 只保留最近 14 份
+```
+
+每份备份包含 `interviews.sqlite3`、`auth.json`、`auth_secret`（存在时）。
+POSIX 上备份目录自动设为 0700、文件 0600；`.web-data` 已被 gitignore，
+不要把备份上传到仓库或网盘。
+
+恢复前**必须先停服务**，否则运行中的进程会继续写旧库：
+
+```bash
+sudo systemctl stop myagent
+python tools/backup.py --restore .web-data/backups/20261110-120000
+sudo systemctl start myagent
+```
+
+脚本会先做 `PRAGMA integrity_check`，校验失败拒绝恢复；并把当前库另存为
+`interviews.sqlite3.pre-restore-<时间戳>`，恢复错了还能回退。
+旧的 `-wal/-shm` 会被移除，因为它们属于恢复前的库。

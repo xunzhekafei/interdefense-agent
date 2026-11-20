@@ -1,0 +1,2169 @@
+[
+  {
+    "question": "0/1 背包的状态转移方程如何建立？滚动数组如何优化空间？",
+    "keywords": [
+      "背包的状态转移方程建立",
+      "滚动数组优化空间",
+      "algorithm"
+    ],
+    "role": "PHP 工程师",
+    "category": "algorithm",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "如何用一次遍历删除链表倒数第 N 个节点？",
+    "keywords": [
+      "N",
+      "用一次遍历删除链表倒数第",
+      "个节点",
+      "algorithm"
+    ],
+    "role": "PHP 工程师",
+    "category": "algorithm",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "原地移除数组中的指定元素（快慢指针）",
+    "keywords": [
+      "原地移除数组中的指定元素",
+      "快慢指针",
+      "algorithm"
+    ],
+    "role": "PHP 工程师",
+    "category": "algorithm",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "双指针判断回文字符串",
+    "keywords": [
+      "双指针判断回文字符串",
+      "algorithm"
+    ],
+    "role": "PHP 工程师",
+    "category": "algorithm",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "双指针的两种形式：对撞指针与快慢指针",
+    "keywords": [
+      "双指针的两种形式",
+      "对撞指针与快慢指针",
+      "algorithm"
+    ],
+    "role": "PHP 工程师",
+    "category": "algorithm",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "如何合并两条有序链表？",
+    "keywords": [
+      "合并两条有序链表",
+      "algorithm"
+    ],
+    "role": "PHP 工程师",
+    "category": "algorithm",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "哈希冲突的解决策略有哪些？如何用哈希表实现 LRU 缓存？",
+    "keywords": [
+      "LRU",
+      "哈希冲突的解决策略",
+      "用哈希表",
+      "缓存",
+      "algorithm"
+    ],
+    "role": "PHP 工程师",
+    "category": "algorithm",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "固定大小滑动窗口求子数组最大和",
+    "keywords": [
+      "algorithm"
+    ],
+    "role": "PHP 工程师",
+    "category": "algorithm",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "常见数据结构基础操作的时间复杂度是多少？",
+    "keywords": [
+      "algorithm"
+    ],
+    "role": "PHP 工程师",
+    "category": "algorithm",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "快速排序与归并排序的原理、稳定性和复杂度如何比较？",
+    "keywords": [
+      "快速排序与归并排序的",
+      "稳定性和复杂度比较",
+      "algorithm"
+    ],
+    "role": "PHP 工程师",
+    "category": "algorithm",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "如何用动态规划求最长公共子序列并还原具体路径？",
+    "keywords": [
+      "algorithm"
+    ],
+    "role": "PHP 工程师",
+    "category": "algorithm",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "最长递增子序列（LIS）的 O(n²) 与 O(n log n) 算法有何区别？",
+    "keywords": [
+      "LIS",
+      "O",
+      "n",
+      "log",
+      "最长递增子序列",
+      "算法有何",
+      "algorithm"
+    ],
+    "role": "PHP 工程师",
+    "category": "algorithm",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "算法复杂度分析与 Big-O 表示法",
+    "keywords": [
+      "Big-O",
+      "算法复杂度分析与",
+      "表示法",
+      "algorithm"
+    ],
+    "role": "PHP 工程师",
+    "category": "algorithm",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "记忆化搜索（自顶向下）与自底向上 DP 在实现和性能上有何区别？",
+    "keywords": [
+      "DP",
+      "记忆化搜索",
+      "自顶向下",
+      "与自底向上",
+      "在和性能上有何",
+      "algorithm"
+    ],
+    "role": "PHP 工程师",
+    "category": "algorithm",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "递归三要素是什么？如何分析递归的时间复杂度？",
+    "keywords": [
+      "递归三要素是",
+      "分析递归的时间复杂度",
+      "algorithm"
+    ],
+    "role": "PHP 工程师",
+    "category": "algorithm",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "链表翻转与 Floyd 环检测",
+    "keywords": [
+      "Floyd",
+      "链表翻转与",
+      "环检测",
+      "algorithm"
+    ],
+    "role": "PHP 工程师",
+    "category": "algorithm",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "API网关的核心职责与设计原则",
+    "keywords": [
+      "API",
+      "architecture"
+    ],
+    "role": "PHP 工程师",
+    "category": "architecture",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "AP vs CP：Eureka与ZooKeeper的注册中心选型对比",
+    "keywords": [
+      "AP",
+      "vs",
+      "CP",
+      "Eureka",
+      "ZooKeeper",
+      "architecture"
+    ],
+    "role": "PHP 工程师",
+    "category": "architecture",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "BASE理论：最终一致性的三要素与实现方式",
+    "keywords": [
+      "BASE",
+      "BASE理论",
+      "最终一致性的三要素与方式",
+      "architecture"
+    ],
+    "role": "PHP 工程师",
+    "category": "architecture",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "CAP定理：一致性、可用性与分区容忍的三角权衡",
+    "keywords": [
+      "CAP",
+      "CAP定理",
+      "一致性",
+      "architecture"
+    ],
+    "role": "PHP 工程师",
+    "category": "architecture",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PACELC模型：延迟维度对CAP的补充",
+    "keywords": [
+      "PACELC",
+      "CAP",
+      "PACELC模型",
+      "延迟维度对CAP的补充",
+      "architecture"
+    ],
+    "role": "PHP 工程师",
+    "category": "architecture",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "TCC 方案落地：空回滚、悬挂与幂等三类问题的量化代价与防范",
+    "keywords": [
+      "TCC",
+      "方案落地",
+      "空回滚",
+      "architecture"
+    ],
+    "role": "PHP 工程师",
+    "category": "architecture",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "一致性哈希：虚拟节点原理与数据迁移最小化",
+    "keywords": [
+      "一致性哈希",
+      "虚拟节点与数据迁移最小化",
+      "architecture"
+    ],
+    "role": "PHP 工程师",
+    "category": "architecture",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "单体拆分微服务后的分布式事务选型",
+    "keywords": [
+      "architecture"
+    ],
+    "role": "PHP 工程师",
+    "category": "architecture",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "微服务拆分反模式：过度拆分、分布式单体与循环依赖",
+    "keywords": [
+      "微服务拆分反模式",
+      "过度拆分",
+      "分布式单体与循环依赖",
+      "architecture"
+    ],
+    "role": "PHP 工程师",
+    "category": "architecture",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "微服务服务边界划分：业务能力与DDD限界上下文",
+    "keywords": [
+      "DDD",
+      "微服务服务边界划分",
+      "architecture"
+    ],
+    "role": "PHP 工程师",
+    "category": "architecture",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "服务间通信选型：同步HTTP与gRPC对比异步MQ",
+    "keywords": [
+      "HTTP",
+      "gRPC",
+      "MQ",
+      "服务间通信选型",
+      "architecture"
+    ],
+    "role": "PHP 工程师",
+    "category": "architecture",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "注册中心原理与选型：Consul、Nacos与Eureka对比",
+    "keywords": [
+      "Consul",
+      "Nacos",
+      "Eureka",
+      "注册中心与选型",
+      "architecture"
+    ],
+    "role": "PHP 工程师",
+    "category": "architecture",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "短链系统设计：唯一短码生成方案的架构权衡",
+    "keywords": [
+      "短链系统设计",
+      "architecture"
+    ],
+    "role": "PHP 工程师",
+    "category": "architecture",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "Laravel Facade 命名陷阱——它是\"静态代理\"还是\"门面模式\"？",
+    "keywords": [
+      "Laravel",
+      "Facade",
+      "design-pattern"
+    ],
+    "role": "PHP 工程师",
+    "category": "design-pattern",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "Laravel 框架特性与 GoF 设计模式的对应关系",
+    "keywords": [
+      "Laravel",
+      "GoF",
+      "框架特性与",
+      "设计模式的对应关系",
+      "design-pattern"
+    ],
+    "role": "PHP 工程师",
+    "category": "design-pattern",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "OCP 的设计哲学：隔离变化点而非冻结代码",
+    "keywords": [
+      "OCP",
+      "的设计哲学",
+      "隔离变化点而非冻结代码",
+      "design-pattern"
+    ],
+    "role": "PHP 工程师",
+    "category": "design-pattern",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP clone 与原型模式：浅拷贝与深拷贝的实现差异",
+    "keywords": [
+      "PHP",
+      "clone",
+      "与原型模式",
+      "浅拷贝与深拷贝的差异",
+      "design-pattern"
+    ],
+    "role": "PHP 工程师",
+    "category": "design-pattern",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP 单例模式为什么不需要处理线程安全？",
+    "keywords": [
+      "PHP",
+      "design-pattern"
+    ],
+    "role": "PHP 工程师",
+    "category": "design-pattern",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "SRP 的「变化理由」原则：如何量化职责边界",
+    "keywords": [
+      "SRP",
+      "的「变化理由」原则",
+      "量化职责边界",
+      "design-pattern"
+    ],
+    "role": "PHP 工程师",
+    "category": "design-pattern",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "工厂方法与抽象工厂的区别及选型",
+    "keywords": [
+      "工厂方法与抽象工厂及选型",
+      "design-pattern"
+    ],
+    "role": "PHP 工程师",
+    "category": "design-pattern",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "建造者模式如何解决复杂对象的构造问题？",
+    "keywords": [
+      "design-pattern"
+    ],
+    "role": "PHP 工程师",
+    "category": "design-pattern",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "抽象类与接口的设计意图差异：PHP 中的选型原则",
+    "keywords": [
+      "PHP",
+      "中的选型原则",
+      "design-pattern"
+    ],
+    "role": "PHP 工程师",
+    "category": "design-pattern",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "设计模式的三大分类与意图",
+    "keywords": [
+      "设计模式的三大分类与意图",
+      "design-pattern"
+    ],
+    "role": "PHP 工程师",
+    "category": "design-pattern",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "里氏替换原则的行为契约与继承陷阱",
+    "keywords": [
+      "design-pattern"
+    ],
+    "role": "PHP 工程师",
+    "category": "design-pattern",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "AI 时代的 PHP 开发者：从工具选择到学习方法论",
+    "keywords": [
+      "AI",
+      "PHP",
+      "时代的",
+      "开发者",
+      "从工具选择到学习方法论",
+      "misc"
+    ],
+    "role": "PHP 工程师",
+    "category": "misc",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "生产环境如何排查 Bug，以及如何在本地复现并调试",
+    "keywords": [
+      "Bug",
+      "生产环境排查",
+      "在本地复现并调试",
+      "misc"
+    ],
+    "role": "PHP 工程师",
+    "category": "misc",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "epoll 为什么比 select/poll 性能好？IO 多路复用机制对比",
+    "keywords": [
+      "epoll",
+      "select",
+      "poll",
+      "IO",
+      "性能好",
+      "多路复用对比",
+      "network"
+    ],
+    "role": "PHP 工程师",
+    "category": "network",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "epoll 的水平触发（LT）与边缘触发（ET）有什么区别？",
+    "keywords": [
+      "epoll",
+      "LT",
+      "ET",
+      "的水平触发",
+      "与边缘触发",
+      "network"
+    ],
+    "role": "PHP 工程师",
+    "category": "network",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "GET 和 POST 请求的区别",
+    "keywords": [
+      "GET",
+      "POST",
+      "请求",
+      "network"
+    ],
+    "role": "PHP 工程师",
+    "category": "network",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "HTTP/2 与 HTTP/3 的核心改进与底层原理",
+    "keywords": [
+      "HTTP",
+      "的核心改进与底层",
+      "network"
+    ],
+    "role": "PHP 工程师",
+    "category": "network",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "HTTPS 的 TLS 握手流程与加密分工",
+    "keywords": [
+      "HTTPS",
+      "TLS",
+      "握手流程与加密分工",
+      "network"
+    ],
+    "role": "PHP 工程师",
+    "category": "network",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "HTTP 的无状态特性与会话保持方案",
+    "keywords": [
+      "HTTP",
+      "network"
+    ],
+    "role": "PHP 工程师",
+    "category": "network",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "HTTP 缓存机制：强缓存与协商缓存的区别",
+    "keywords": [
+      "HTTP",
+      "缓存",
+      "强缓存与协商缓存",
+      "network"
+    ],
+    "role": "PHP 工程师",
+    "category": "network",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "IO 模型：同步/异步与阻塞/非阻塞的区别",
+    "keywords": [
+      "IO",
+      "模型",
+      "同步",
+      "异步与阻塞",
+      "非阻塞",
+      "network"
+    ],
+    "role": "PHP 工程师",
+    "category": "network",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP 网络并发与连接复用策略",
+    "keywords": [
+      "PHP",
+      "网络并发与连接复用策略",
+      "network"
+    ],
+    "role": "PHP 工程师",
+    "category": "network",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "Reactor 模式是如何工作的？与多线程模型相比优势在哪？",
+    "keywords": [
+      "Reactor",
+      "模式是工作的",
+      "与多线程模型相比优势在哪",
+      "network"
+    ],
+    "role": "PHP 工程师",
+    "category": "network",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "TCP 粘包的成因与应用层拆包方案",
+    "keywords": [
+      "TCP",
+      "network"
+    ],
+    "role": "PHP 工程师",
+    "category": "network",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "Composer 自动加载机制与 PSR-4 规范",
+    "keywords": [
+      "Composer",
+      "PSR-4",
+      "自动加载与",
+      "规范",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "declare(stricttypes=1) 的作用是什么？严格模式与强制模式有何区别？",
+    "keywords": [
+      "declare",
+      "stricttypes",
+      "的作用是",
+      "严格模式与强制模式有何",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP 中 Error 与 Exception 的区别及异常处理最佳实践",
+    "keywords": [
+      "PHP",
+      "Error",
+      "Exception",
+      "及异常处理最佳实践",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "Fiber 与 Generator 有栈协程与无栈协程的本质区别",
+    "keywords": [
+      "Fiber",
+      "Generator",
+      "有栈协程与无栈协程的本质",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "Fiber 与 Swoole 协程的能力边界对比",
+    "keywords": [
+      "Fiber",
+      "Swoole",
+      "协程的能力边界对比",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "isset() 与 empty() 有什么区别",
+    "keywords": [
+      "isset",
+      "empty",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "Late Static Binding 是什么及 static:: 与 self:: 的区别",
+    "keywords": [
+      "Late",
+      "Static",
+      "Binding",
+      "static",
+      "self",
+      "是及",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP 的 never 返回类型表示什么？与 void 有何区别？",
+    "keywords": [
+      "PHP",
+      "never",
+      "void",
+      "返回类型表示",
+      "有何",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "OPcache 编译缓存的工作原理是什么？",
+    "keywords": [
+      "OPcache",
+      "编译缓存的工作是",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP 8.0 的 match 表达式与 switch 有什么区别？",
+    "keywords": [
+      "PHP",
+      "match",
+      "switch",
+      "表达式与",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP 8.0 的 nullsafe 运算符（?-）是什么？与 ?? 有何区别？",
+    "keywords": [
+      "PHP",
+      "nullsafe",
+      "运算符",
+      "有何",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP 8.0 的命名参数（Named Arguments）是什么？有哪些使用场景？",
+    "keywords": [
+      "PHP",
+      "Named",
+      "Arguments",
+      "的命名参数",
+      "使用场景",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP JIT 是什么？Tracing 与 Function 两种模式有何区别？",
+    "keywords": [
+      "PHP",
+      "JIT",
+      "Tracing",
+      "Function",
+      "两种模式有何",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP 中 == 和 === 的区别是什么",
+    "keywords": [
+      "PHP",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP 中引用传递与值传递的区别",
+    "keywords": [
+      "PHP",
+      "中引用传递与值传递",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP 动态语言特性与静态语言的区别",
+    "keywords": [
+      "PHP",
+      "动态语言特性与静态语言",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP 单引号与双引号字符串的区别",
+    "keywords": [
+      "PHP",
+      "单引号与双引号字符串",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP 的垃圾回收机制是如何工作的",
+    "keywords": [
+      "PHP",
+      "的垃圾回收是工作的",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP 多范式编程与场景选型",
+    "keywords": [
+      "PHP",
+      "多范式编程与场景选型",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP 索引数组与关联数组的区别及常见操作",
+    "keywords": [
+      "PHP",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP 浮点数精度问题是什么？如何用 bcmath 解决？",
+    "keywords": [
+      "PHP",
+      "bcmath",
+      "浮点数精度问题是",
+      "解决",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP 类型强转有哪些方式？各种类型互转的规则是什么？",
+    "keywords": [
+      "PHP",
+      "类型强转方式",
+      "各种类型互转的规则是",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP 请求生命周期的四个阶段",
+    "keywords": [
+      "PHP",
+      "请求生命周期的四个阶段",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "SOLID 设计原则是什么？各原则的核心意图是什么？",
+    "keywords": [
+      "SOLID",
+      "设计原则是",
+      "各原则的核心意图是",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP 中 Trait 的作用与冲突解决机制",
+    "keywords": [
+      "PHP",
+      "Trait",
+      "的作用与冲突解决",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP 的 union types（PHP 8.0）与交集类型（PHP 8.1）有何区别？各自有哪些使用约束？",
+    "keywords": [
+      "PHP",
+      "union",
+      "types",
+      "与交集类型",
+      "有何",
+      "各自使用约束",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "WeakReference 与 WeakMap 如何避免引用计数陷阱？",
+    "keywords": [
+      "WeakReference",
+      "WeakMap",
+      "避免引用计数陷阱",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP zval 内部结构是什么？写时复制（COW）机制如何工作？",
+    "keywords": [
+      "PHP",
+      "zval",
+      "COW",
+      "内部结构是",
+      "写时复制",
+      "工作",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "什么是依赖注入？它解决了什么问题？",
+    "keywords": [
+      "是依赖注入",
+      "它解决了问题",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "抽象类与接口的区别及使用场景",
+    "keywords": [
+      "抽象类与接口及使用场景",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP 魔术方法是什么？get/set/call 各适用于哪些场景？",
+    "keywords": [
+      "PHP",
+      "get",
+      "set",
+      "call",
+      "魔术方法是",
+      "各适用于场景",
+      "php"
+    ],
+    "role": "PHP 工程师",
+    "category": "php",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "CC 攻击与应用层限流防护方案",
+    "keywords": [
+      "CC",
+      "攻击与应用层限流防护方案",
+      "security"
+    ],
+    "role": "PHP 工程师",
+    "category": "security",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "CSRF 攻防基础",
+    "keywords": [
+      "CSRF",
+      "攻防基础",
+      "security"
+    ],
+    "role": "PHP 工程师",
+    "category": "security",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "JWT alg:none 与算法混淆攻击",
+    "keywords": [
+      "JWT",
+      "alg",
+      "none",
+      "与算法混淆攻击",
+      "security"
+    ],
+    "role": "PHP 工程师",
+    "category": "security",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "JWT Token 撤销机制选型",
+    "keywords": [
+      "JWT",
+      "Token",
+      "撤销选型",
+      "security"
+    ],
+    "role": "PHP 工程师",
+    "category": "security",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "JWT 存储位置安全权衡",
+    "keywords": [
+      "JWT",
+      "存储位置安全权衡",
+      "security"
+    ],
+    "role": "PHP 工程师",
+    "category": "security",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP 文件上传安全与输入过滤实践",
+    "keywords": [
+      "PHP",
+      "security"
+    ],
+    "role": "PHP 工程师",
+    "category": "security",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "Session 劫持攻击向量与防护",
+    "keywords": [
+      "Session",
+      "劫持攻击向量与防护",
+      "security"
+    ],
+    "role": "PHP 工程师",
+    "category": "security",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "Session 固定攻击与防御",
+    "keywords": [
+      "Session",
+      "固定攻击与防御",
+      "security"
+    ],
+    "role": "PHP 工程师",
+    "category": "security",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "SQL 注入防御基础",
+    "keywords": [
+      "SQL",
+      "注入防御基础",
+      "security"
+    ],
+    "role": "PHP 工程师",
+    "category": "security",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "XSS 攻击类型与防御方案",
+    "keywords": [
+      "XSS",
+      "攻击类型与防御方案",
+      "security"
+    ],
+    "role": "PHP 工程师",
+    "category": "security",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "密码学基础概念辨析",
+    "keywords": [
+      "密码学基础概念辨析",
+      "security"
+    ],
+    "role": "PHP 工程师",
+    "category": "security",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "crontab 计划任务——表达式语法、环境变量陷阱、日志与调试",
+    "keywords": [
+      "crontab",
+      "计划任务——表达式语法",
+      "环境变量陷阱",
+      "日志与调试",
+      "server"
+    ],
+    "role": "PHP 工程师",
+    "category": "server",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "Linux 文件系统基础——inode、硬链接与软链接、权限位",
+    "keywords": [
+      "Linux",
+      "inode",
+      "硬链接与软链接",
+      "权限位",
+      "server"
+    ],
+    "role": "PHP 工程师",
+    "category": "server",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "LVS 与 Nginx 负载均衡的层级差异与选型依据",
+    "keywords": [
+      "LVS",
+      "Nginx",
+      "server"
+    ],
+    "role": "PHP 工程师",
+    "category": "server",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "Nginx 的 event-driven 模型与 epoll 多路复用原理",
+    "keywords": [
+      "Nginx",
+      "event-driven",
+      "epoll",
+      "模型与",
+      "多路复用",
+      "server"
+    ],
+    "role": "PHP 工程师",
+    "category": "server",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "Nginx master/worker 进程架构与信号处理机制",
+    "keywords": [
+      "Nginx",
+      "master",
+      "worker",
+      "进程架构与信号处理",
+      "server"
+    ],
+    "role": "PHP 工程师",
+    "category": "server",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "Nginx proxycache 缓存配置与失效策略",
+    "keywords": [
+      "Nginx",
+      "proxycache",
+      "缓存配置与失效策略",
+      "server"
+    ],
+    "role": "PHP 工程师",
+    "category": "server",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "Nginx rewrite 规则四种 flag 的行为差异",
+    "keywords": [
+      "Nginx",
+      "rewrite",
+      "flag",
+      "规则四种",
+      "的行为差异",
+      "server"
+    ],
+    "role": "PHP 工程师",
+    "category": "server",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "Nginx SSL 终止与 HTTPS 安全配置",
+    "keywords": [
+      "Nginx",
+      "SSL",
+      "HTTPS",
+      "终止与",
+      "安全配置",
+      "server"
+    ],
+    "role": "PHP 工程师",
+    "category": "server",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "Nginx 与 PHP-FPM 的 FastCGI 通信原理与 Unix Socket vs TCP 选型",
+    "keywords": [
+      "Nginx",
+      "PHP-FPM",
+      "FastCGI",
+      "Unix",
+      "Socket",
+      "vs",
+      "TCP",
+      "通信与",
+      "选型",
+      "server"
+    ],
+    "role": "PHP 工程师",
+    "category": "server",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "Nginx 反向代理与 upstream 负载均衡配置",
+    "keywords": [
+      "Nginx",
+      "upstream",
+      "反向代理与",
+      "负载均衡配置",
+      "server"
+    ],
+    "role": "PHP 工程师",
+    "category": "server",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "Nginx 限流指令 limitreq 与 limitconn 的区别",
+    "keywords": [
+      "Nginx",
+      "limitreq",
+      "limitconn",
+      "限流指令",
+      "server"
+    ],
+    "role": "PHP 工程师",
+    "category": "server",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "Nginx 零拷贝与 sendfile 系统调用原理",
+    "keywords": [
+      "Nginx",
+      "sendfile",
+      "零拷贝与",
+      "系统调用",
+      "server"
+    ],
+    "role": "PHP 工程师",
+    "category": "server",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "nice 与 renice 进程优先级——nice 值范围、对 PHP-FPM/Nginx 的影响",
+    "keywords": [
+      "nice",
+      "renice",
+      "PHP-FPM",
+      "Nginx",
+      "进程优先级——nice",
+      "值范围",
+      "的影响",
+      "server"
+    ],
+    "role": "PHP 工程师",
+    "category": "server",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP-FPM 进程模型与 FastCGI 协议",
+    "keywords": [
+      "PHP-FPM",
+      "FastCGI",
+      "进程模型与",
+      "协议",
+      "server"
+    ],
+    "role": "PHP 工程师",
+    "category": "server",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP 开发常用 Linux 命令：文件查找、进程与网络诊断",
+    "keywords": [
+      "PHP",
+      "Linux",
+      "开发常用",
+      "命令",
+      "文件查找",
+      "进程与网络诊断",
+      "server"
+    ],
+    "role": "PHP 工程师",
+    "category": "server",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "sed 流编辑器常用操作——行定址、s 替换、与 awk 的职责分工",
+    "keywords": [
+      "sed",
+      "s",
+      "awk",
+      "替换",
+      "的职责分工",
+      "server"
+    ],
+    "role": "PHP 工程师",
+    "category": "server",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "Swoole 协程与 PHP-FPM 的选型决策",
+    "keywords": [
+      "Swoole",
+      "PHP-FPM",
+      "协程与",
+      "的选型决策",
+      "server"
+    ],
+    "role": "PHP 工程师",
+    "category": "server",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "Vim 常用操作——模式切换、搜索替换、保存退出",
+    "keywords": [
+      "Vim",
+      "常用操作——模式切换",
+      "搜索替换",
+      "保存退出",
+      "server"
+    ],
+    "role": "PHP 工程师",
+    "category": "server",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "InnoDB 脏页刷新与 Checkpoint 机制",
+    "keywords": [
+      "InnoDB",
+      "Checkpoint",
+      "脏页刷新与",
+      "storage"
+    ],
+    "role": "PHP 工程师",
+    "category": "storage",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "MySQL count() 的差异与大表计数优化",
+    "keywords": [
+      "MySQL",
+      "count",
+      "的差异与大表计数优化",
+      "storage"
+    ],
+    "role": "PHP 工程师",
+    "category": "storage",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "MySQL 主从复制延迟的原因与解决",
+    "keywords": [
+      "MySQL",
+      "主从复制延迟的原因与解决",
+      "storage"
+    ],
+    "role": "PHP 工程师",
+    "category": "storage",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "MySQL 中各种 JOIN 的区别是什么？",
+    "keywords": [
+      "MySQL",
+      "JOIN",
+      "中各种",
+      "storage"
+    ],
+    "role": "PHP 工程师",
+    "category": "storage",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "MySQL 四种事务隔离级别与并发问题",
+    "keywords": [
+      "MySQL",
+      "storage"
+    ],
+    "role": "PHP 工程师",
+    "category": "storage",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "MySQL 一条查询语句的完整执行流程",
+    "keywords": [
+      "MySQL",
+      "storage"
+    ],
+    "role": "PHP 工程师",
+    "category": "storage",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "MySQL 索引为什么用 B+ 树？聚簇索引与非聚簇索引有什么区别？",
+    "keywords": [
+      "MySQL",
+      "B+",
+      "索引用",
+      "聚簇索引与非聚簇索引有",
+      "storage"
+    ],
+    "role": "PHP 工程师",
+    "category": "storage",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "MySQL 隐式类型转换导致索引失效",
+    "keywords": [
+      "MySQL",
+      "隐式类型转换导致索引失效",
+      "storage"
+    ],
+    "role": "PHP 工程师",
+    "category": "storage",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "ORDER BY 的执行原理与性能优化",
+    "keywords": [
+      "ORDER",
+      "BY",
+      "的执行与性能优化",
+      "storage"
+    ],
+    "role": "PHP 工程师",
+    "category": "storage",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "Redis 有哪五种基本数据类型？各自适用什么场景？",
+    "keywords": [
+      "Redis",
+      "有哪五种基本数据类型",
+      "各自适用场景",
+      "storage"
+    ],
+    "role": "PHP 工程师",
+    "category": "storage",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "什么是数据库三范式？各范式分别解决了什么问题？",
+    "keywords": [
+      "是数据库三范式",
+      "各范式分别解决了问题",
+      "storage"
+    ],
+    "role": "PHP 工程师",
+    "category": "storage",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "缓存与数据库双写一致性方案如何选型？",
+    "keywords": [
+      "storage"
+    ],
+    "role": "PHP 工程师",
+    "category": "storage",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "缓存穿透、缓存击穿与缓存雪崩的区别及防护方案",
+    "keywords": [
+      "缓存穿透",
+      "storage"
+    ],
+    "role": "PHP 工程师",
+    "category": "storage",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "什么是覆盖索引？联合索引的最左前缀原则是什么？",
+    "keywords": [
+      "是覆盖索引",
+      "联合索引的最左前缀原则是",
+      "storage"
+    ],
+    "role": "PHP 工程师",
+    "category": "storage",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "读写分离下的一致性陷阱",
+    "keywords": [
+      "读写分离下的一致性陷阱",
+      "storage"
+    ],
+    "role": "PHP 工程师",
+    "category": "storage",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "高并发下缓存击穿防护方案如何量化选型？",
+    "keywords": [
+      "storage"
+    ],
+    "role": "PHP 工程师",
+    "category": "storage",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "$SERVER 超全局变量中有哪些常用字段？分别有什么用途？",
+    "keywords": [
+      "SERVER",
+      "超全局变量中常用字段",
+      "分别有用途",
+      "web"
+    ],
+    "role": "PHP 工程师",
+    "category": "web",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "header() 函数的作用是什么？为什么调用前不能有任何输出？",
+    "keywords": [
+      "header",
+      "函数的作用是",
+      "调用前不能有任何输出",
+      "web"
+    ],
+    "role": "PHP 工程师",
+    "category": "web",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "HTTP 301、302、307 重定向状态码有什么语义差异？如何选择？",
+    "keywords": [
+      "HTTP",
+      "重定向状态码有语义差异",
+      "选择",
+      "web"
+    ],
+    "role": "PHP 工程师",
+    "category": "web",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "HTTP 常见状态码含义与 301 和 302 的区别",
+    "keywords": [
+      "HTTP",
+      "常见状态码含义与",
+      "web"
+    ],
+    "role": "PHP 工程师",
+    "category": "web",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "Laravel 中间件 Pipeline 如何通过 arrayreduce 构造洋葱式闭包链？",
+    "keywords": [
+      "Laravel",
+      "Pipeline",
+      "arrayreduce",
+      "中间件",
+      "通过",
+      "构造洋葱式闭包链",
+      "web"
+    ],
+    "role": "PHP 工程师",
+    "category": "web",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "Laravel 服务容器（IoC）的实现原理",
+    "keywords": [
+      "Laravel",
+      "IoC",
+      "服务容器",
+      "web"
+    ],
+    "role": "PHP 工程师",
+    "category": "web",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "obstart() 如何解决 headers already sent 问题？输出缓冲机制是怎样工作的？",
+    "keywords": [
+      "obstart",
+      "headers",
+      "already",
+      "sent",
+      "解决",
+      "问题",
+      "输出缓冲是怎样工作的",
+      "web"
+    ],
+    "role": "PHP 工程师",
+    "category": "web",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "ORM 链式查询如何逐步拼装 SQL？Active Record 与 Data Mapper 有何本质区别？Eager Loading 如何消除 N+1？",
+    "keywords": [
+      "ORM",
+      "SQL",
+      "Active",
+      "Record",
+      "Data",
+      "Mapper",
+      "Eager",
+      "Loading",
+      "N+1",
+      "链式查询逐步拼装"
+    ],
+    "role": "PHP 工程师",
+    "category": "web",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP 主流框架对比与选型概览",
+    "keywords": [
+      "PHP",
+      "主流框架对比与选型概览",
+      "web"
+    ],
+    "role": "PHP 工程师",
+    "category": "web",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP 框架中间件机制与洋葱模型",
+    "keywords": [
+      "PHP",
+      "框架中间件与洋葱模型",
+      "web"
+    ],
+    "role": "PHP 工程师",
+    "category": "web",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP 框架请求生命周期与各阶段职责",
+    "keywords": [
+      "PHP",
+      "web"
+    ],
+    "role": "PHP 工程师",
+    "category": "web",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "PHP 框架路由注册、匹配与参数提取机制",
+    "keywords": [
+      "PHP",
+      "框架路由注册",
+      "匹配与参数提取",
+      "web"
+    ],
+    "role": "PHP 工程师",
+    "category": "web",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "X-Forwarded-For 与 REMOTEADDR 有什么区别？如何在代理场景下获取真实客户端 IP？",
+    "keywords": [
+      "X-Forwarded-For",
+      "REMOTEADDR",
+      "IP",
+      "web"
+    ],
+    "role": "PHP 工程师",
+    "category": "web",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "服务容器 bind/singleton/instance 的用法与选型",
+    "keywords": [
+      "bind",
+      "singleton",
+      "instance",
+      "服务容器",
+      "的用法与选型",
+      "web"
+    ],
+    "role": "PHP 工程师",
+    "category": "web",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "框架事件系统如何注册监听器、分发事件？同步事件与队列事件的内部路径有何差异？",
+    "keywords": [
+      "框架事件系统注册监听器",
+      "分发事件",
+      "web"
+    ],
+    "role": "PHP 工程师",
+    "category": "web",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  },
+  {
+    "question": "路由匹配如何通过前缀树结构与正则预编译实现高性能查找？",
+    "keywords": [
+      "web"
+    ],
+    "role": "PHP 工程师",
+    "category": "web",
+    "level": "",
+    "stage": "",
+    "lang": "zh",
+    "source": "colinlet/PHP-Interview-QA (Apache-2.0)"
+  }
+]

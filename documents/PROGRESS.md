@@ -1,23 +1,23 @@
 # 项目进度
 
-> 最后更新：2026-11-03
+> 最后更新：2026-11-20
 
 ## 这是什么
 
 从零手写的一个 Claude Agent 运行时，外加一个跑在它上面的真实应用——**模拟面试官**。
 
 - 运行时：[agent.py](../agent.py) 单文件，按 [learn-claude-code](https://github.com/shareAI-lab/learn-claude-code) 教程 s01→s17 的路径逐章构建、集成
-- 应用：技术岗模拟面试官（题库检索 → 追问式面试 → 评分报告 → 场次存档），覆盖 AI 与前端两个方向
+- 应用：技术/产品岗模拟面试官（题库检索 → 追问式面试 → 评分报告 → 场次存档），覆盖 AI、前端、后端、移动端、DevOps、数据工程、PHP、Node、算法与产品
 - 相关仓库：[myagent](https://github.com/xunzhekafei/myagent)（完整版，本仓库）· [myagent-prototype](https://github.com/xunzhekafei/myagent-prototype)（面试功能之前的原型快照）
 
 模型通过 **Anthropic 官方 SDK** 调用，提供商在 `providers.py` 统一配置：
-默认 **Kimi**（`https://api.moonshot.cn/anthropic`，`kimi-k3.1-pro`），
-`PROVIDER=deepseek` 可切回 DeepSeek（`claude-haiku-4-5` 映射 flash）。
+默认 **DeepSeek**（`https://api.deepseek.com/anthropic`，`claude-haiku-4-5` 映射 flash），
+`PROVIDER=kimi` 可切到 Kimi（`kimi-k3.1-pro`）。
 两家的差异都在这一层吸收：Kimi 用 Bearer 鉴权、K3.1 Pro 没有思考开关（用
 `REASONING_EFFORT` 调深度）；DeepSeek 用 `x-api-key` 和自适应思考。
 
-选 Kimi 的主要原因是**项目级预算**：可以给一个项目设日/月消费上限，超了自动拒绝，
-DeepSeek 只能控制账户余额。评测仍保留 DeepSeek flash 的基线，换模型后要重跑。
+需要**项目级预算**时可以切到 Kimi（`PROVIDER=kimi`）：可以给项目设日/月消费上限，
+超了自动拒绝；DeepSeek 只能控制账户余额。评测基线仍保留 DeepSeek flash，换模型后要重跑。
 
 Ollama 从 v0.13 起原生支持 Anthropic `/v1/messages`，设 `PROVIDER=custom` 即可完全本地运行
 （见「本地模型」一节），但 7B 模型的质量明显低于云端。
@@ -52,13 +52,18 @@ Ollama 从 v0.13 起原生支持 Anthropic `/v1/messages`，设 `PROVIDER=custom
 | 11-03 | 公网部署 + 默认切 Kimi | 阿里云 2C2G + nginx + Let's Encrypt 上线，评审账号登录可用；新增 `providers.py` 收拢提供商差异（默认 Kimi，`PROVIDER=deepseek` 可切回），Kimi 用 Bearer、DeepSeek 用 x-api-key，Kimi 用 `output_config.effort` 控制推理深度；切提供商时残留的 `ANTHROPIC_BASE_URL` 不再串台；测试达 255 |
 | 11-04 | Kimi 联调 + 结构化问答 | 公网跑通完整面试（开场 → 4 轮追问 → 报告）：发现模型解析在低推理强度下会把四道题的回答全填成同一段，Web 端改为直接传结构化 `qa`、跳过解析；逐题评分与证据 4/4 通过，报告 v3 总分正常；测试达 258 |
 | 11-04 | 轮数计划 + 误触兜底 + 延迟修复 | 创建时可选 10/15/20/30/50 轮，按 40/30/20/10 分配项目/技术/设计/行为；重复题目、问候、主动跳过和反问环节不计分（v4），提交前也会拦截误触；笔记更新移到后台线程，实测回合完成从 23.7 秒降到 5–8 秒；测试达 268 |
+| 11-10 | 性能（P0） | 回合内存态 + 合并增量 + 事件驱动 WS + 摘要列；2000 增量落库 2000→3 次，WS 推送 2000→17 条 |
+| 11-17 | 安全与工程化（P1/P2/P3 + A/B/C） | 登出 token 失效、登录限流、CSP/HSTS、候选人注入防护、备份/恢复；settings.py、cron_utils.py、ruff、CI、前端 vitest/eslint、start.ps1 |
+| 11-18~11-20 | 岗位与公司题库 | 题库 11073 道 / 18 来源 / 20 仓库；新增 Android、iOS、DevOps、产品、数据工程、PHP、Node、算法 8 类岗位；Just-Code 字节题 133 |
+| 11-19~11-20 | 长面试评测 | 10/15/20/30 轮 × 3 岗位 × 2 场；四类口径（开场/项目、技术、行为协作、判断/案例）；DevOps 最稳，数据后段补词表后 60% |
 
 ## 当前状态速览
 
-- **提交**：55 个；**测试**：268 离线 + 2 冒烟；**评测用例**：26 条
-- **评测基线**（DeepSeek flash）：追问 17/17、行为 5/5、评分 4/4。**Kimi 尚未重跑**，换模型后需重新建立基线
+- **提交**：55 个（当前 72 个文件改动未提交）；**测试**：307 collected / 2 slow skipped；WebSocket 用例待本机全量复验；**评测用例**：26 条
+- **未完成**：P0-1/P0-2 本机连跑 3 次、分块提交、公网重新部署、区域赛材料
+- **评测基线**（DeepSeek flash，旧用例规模）：追问 17/17、行为 5/5、评分 4/4。**Kimi 尚未重跑**；当前用例已扩到 26 条，换模型后需重新建立基线
 - **评分区分度**（v3 加权）：优秀 8.07 / 较好 6.87 / 空洞 2.58 / 事实错误 1.32（0–10）
-- **模型**：默认 `kimi-k3.1-pro`（`PROVIDER=kimi`）；`PROVIDER=deepseek` 切回 flash；DeepSeek 下评测脚本强制 flash，`EVAL_MODEL` 才能覆盖
+- **模型**：默认 `claude-haiku-4-5`（`PROVIDER=deepseek`）；`PROVIDER=kimi` 切到 `kimi-k3.1-pro`；DeepSeek 下评测脚本强制 flash，`EVAL_MODEL` 才能覆盖
 - **评分口径版本**：v1 旧报告仍按均分；v3 起按 30/30/25/15 加权；v4 起误触/问候/跳过/反问不计分，画像会提示跨版本不可比
 - **CI**：ubuntu + windows，Python 3.14，按 `requirements-lock.txt` 安装
 
@@ -81,12 +86,16 @@ Ollama 从 v0.13 起原生支持 Anthropic `/v1/messages`，设 `PROVIDER=custom
 
 **AI 模拟面试官**：
 
-- **题库**：`interview/data/` 共 **8990 道题、九个来源**（详见 README 的表）——
+- **题库**：`interview/data/` 共 **11073 道题、十八个来源（20 个仓库/数据集）**（详见 README 的表）——
   前端 6160 道（`fe_questions.json`）、AI 岗中文 1183 道（`zh_questions.json`）、
-  AI 岗英文 1647 道（`ai_questions.json`）。
+  AI 岗英文 1647 道（`ai_questions.json`）、后端 492 道（`backend_questions.json`）；
+  新增 Android 812、iOS 100、DevOps 159、产品 87、数据工程 36、PHP 145、Node 119、算法 133。
   导入器会**排除简历/招聘/个人面经/常用工具清单等非技术目录**，并按信号词标注行为面题目
 - **岗位**：AI 方向（AI 应用开发、AI/ML 工程师、数据科学家、数据分析师、AI Agent 开发、
-  大模型算法工程师）+ 前端方向（前端工程师）；`search_questions` 支持中英文关键词 +
+  大模型算法工程师）+ 前端方向（前端工程师）+ 后端方向（后端开发工程师）+
+  移动端（Android 工程师、iOS 工程师）+ DevOps（DevOps 工程师）+ 数据工程（数据工程师）+
+  PHP（PHP 工程师）+ Node（Node.js 工程师）+ 算法（算法工程师）+ 产品（产品经理）；
+  `search_questions` 支持中英文关键词 +
   类别/岗位/阶段过滤
 - **面试官技能**：一次一题、追问上限、碎片输入处理、面试中不给反馈、结束触发评分
 - **评分**：`interview-report` workflow——记录分段并行解析 → 逐题并行评分（技术正确性/深度与原理/工程与场景思考/表达与结构）→ 汇总报告，**每个维度必须引用候选人原话作为证据**
@@ -176,7 +185,7 @@ Ollama 从 v0.13 起原生支持 Anthropic `/v1/messages`，设 `PROVIDER=custom
 
 ```bash
 pip install -r requirements-web.txt -r requirements-dev.txt
-python -m pytest            # 离线测试（268 个，不需要 API key，约 3 秒）
+python -m pytest            # 离线测试（不需要 API key，数量以实际收集为准）
 python -m pytest -m slow    # 真实 API 冒烟测试（会消耗 token）
 python agent.py             # 交互模式（需设置 ANTHROPIC_API_KEY）
 
@@ -209,10 +218,10 @@ agent.py              运行时本体（单文件）
 interview_spec.py     评分口径单一来源（维度、权重、版本）
 backend/              FastAPI 服务、会话存储、面试适配、语音、跨场次画像
 frontend/             React 界面（Vite）
-evals/                面试官评测集（24 条用例 + 裁判 + 运行器）
+evals/                面试官评测集（26 条用例 + 裁判 + 运行器）
 skills/               技能（code-review / kimi-api / deepseek-api / mock-interviewer）
 interview/            题库导入脚本与数据
-tests/                测试（268 离线 + 2 冒烟）
+tests/                离线测试 + 2 冒烟
 tools/                维护脚本（从验证过的环境生成依赖锁）
 documents/            文档（本文件）
 .web-data/ .sessions/ .memory/ .tasks/ .interviews/ .runtime/ .transcripts/   运行产物（已 gitignore）

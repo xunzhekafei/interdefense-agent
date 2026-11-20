@@ -14,7 +14,7 @@
 | `requirements-speech.txt` | 语音依赖（可选；不装则 `speech.asr` 为 false、麦克风按钮不出现） |
 | `agent.py` | 缺少密钥时可导入；增加事件回调、取消信号、隔离模式和可注入客户端；评分可分批解析全部记录 |
 | `tests/test_web.py` | WebSocket 链路、场次隔离、取消与迟到回复、重试去重、重启、校验、流式输出与完整评分覆盖 |
-| `requirements-web.txt` / `requirements-dev.txt` | Web 和测试依赖 |
+| `requirements-web.txt` / `requirements-lock.txt` / `requirements-dev.txt` | Web 运行依赖（部署用锁文件）与测试依赖 |
 | `start-web.ps1` | 构建完成后启动本地服务 |
 | `.gitignore` | 忽略数据库、依赖目录、前端产物与测试缓存 |
 
@@ -34,10 +34,10 @@ npm run build
 cd ..
 ```
 
-设置模型密钥后启动（默认 Kimi，`PROVIDER=deepseek` 可切回）：
+设置模型密钥后启动（默认 DeepSeek，`PROVIDER=kimi` 可切到 Kimi）：
 
 ```powershell
-$env:ANTHROPIC_API_KEY = "你的 Kimi 密钥"
+$env:ANTHROPIC_API_KEY = "你的 DeepSeek 密钥"
 .\start-web.ps1
 ```
 
@@ -112,9 +112,15 @@ WebSocket：`/api/sessions/{id}/ws`。客户端提交：
 `item` 是这道题的四维分数、evidence、suggestion。前端据此边收边显示，
 不必等到整份报告生成完（完整报告要跑两三分钟）。顺序不保证——按 `index` 排即可。
 
-连接时发送 `session.snapshot`，包含最新序号和正在生成的部分文本。随后发送业务事件，并推送最新权威快照。
-重连以完整快照恢复，不重放已显示的文字；客户端按序号拒绝旧快照。断线不取消工作，结果继续落盘。
-`command.accepted / command.error` 是提交确认消息，不属于持久业务事件。
+连接时先发送 `session.snapshot`（取自内存态，包含正在生成的部分文本）。之后只推送业务事件：
+`reply.delta` 是**合并后的增量**（快流最多每 50ms 一条，慢流每个增量一条），前端按增量追加；
+轮次结束、取消或失败时再推一次权威快照。重连以完整快照恢复，不重放已显示的文字；
+客户端按序号拒绝旧快照。断线不取消工作，结果继续落盘。
+客户端重连按 1s→2s→4s… 最多 30 秒指数退避并加随机抖动，连上后重置；连接被拒绝（1008）不重试。
+
+增量文本按秒级/字符阈值批量落库（崩溃后可由快照与聚合事件恢复），不再逐 token 提交事务。
+每场事件只保留最近 200 条（回合结束裁剪，启动时统一收敛旧库）；重连与报告以快照/报告为权威，
+不依赖历史增量。`command.accepted / command.error` 是提交确认消息，不属于持久业务事件。
 
 取消后立即让页面恢复可操作状态，并通过 `turn_id` 丢弃迟到结果。当前同步 SDK 使用协作式取消：在文本增量、工具和评分调用边界检查。
 正在等待的网络调用并非强制终止；Web 调用默认 **300 秒**超时、至多一次 SDK 重试

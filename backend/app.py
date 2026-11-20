@@ -14,6 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from interview_spec import DEFAULT_ROUNDS
+from settings import env_flag
 
 from .auth import COOKIE, TTL_SECONDS, AuthStore
 from .profile import build_profile
@@ -32,6 +33,32 @@ MAX_AUDIO_BYTES = 5 * 1024 * 1024
 # 浏览器 MediaRecorder 可能产出的容器。PyAV 三种都能解，这里只做早期拦截给出清晰报错。
 AUDIO_TYPES = ("audio/webm", "audio/ogg", "audio/mp4", "audio/aac", "audio/wav", "audio/x-wav")
 
+# 公网部署的基础防护。CSP 只放行同源脚本/样式与 WebSocket，
+# 避免 XSS 直接读走登录 cookie 或会话内容。
+SECURITY_HEADERS = {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "no-referrer",
+    "Permissions-Policy": "microphone=(self), camera=(), geolocation=()",
+}
+CONTENT_SECURITY_POLICY = (
+    "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
+    "img-src 'self' data:; media-src 'self' blob:; connect-src 'self' ws: wss:; "
+    "font-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'")
+# /docs 的 Swagger UI 从 CDN 加载脚本，套 CSP 会白屏；文档页不套 CSP。
+CSP_EXEMPT_PATHS = ("/docs", "/redoc", "/openapi.json")
+
+
+def apply_security_headers(response, secure=False, csp=True):
+    """给响应补安全头；已有同名头不覆盖，便于反向代理自行调整。"""
+    for name, value in SECURITY_HEADERS.items():
+        if name not in response.headers:
+            response.headers[name] = value
+    if csp and "Content-Security-Policy" not in response.headers:
+        response.headers["Content-Security-Policy"] = CONTENT_SECURITY_POLICY
+    if secure and "Strict-Transport-Security" not in response.headers:
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+
 
 def _build_recognizer():
     """按环境尝试构建本地语音识别器；依赖没装就返回 None，不抛异常。
@@ -40,7 +67,7 @@ def _build_recognizer():
     必须在函数内部 import：CI 只装 requirements-web.txt + requirements-dev.txt，
     模块级 import 会把 faster-whisper 变成硬依赖，也会让每次 import backend.app 都变慢。
     """
-    if (os.environ.get("WEB_SPEECH") or "").strip().lower() in ("off", "0", "false", "no"):
+    if not env_flag("WEB_SPEECH", True):
         print("[语音] 已由 WEB_SPEECH 关闭（麦克风按钮不会出现）", flush=True)
         return None
     try:
@@ -141,6 +168,16 @@ def create_app(directory=None, adapter=None, recognizer=_AUTO):
         request.state.user = user
         return await call_next(request)
 
+    @app.middleware("http")
+    async def security_headers(request: Request, call_next):
+        # 最后注册 = 最外层：401/403 等早退响应也会带上这些头。
+        response = await call_next(request)
+        secure = (request.url.scheme == "https"
+                  or request.headers.get("x-forwarded-proto") == "https")
+        apply_security_headers(response, secure,
+                               csp=request.url.path not in CSP_EXEMPT_PATHS)
+        return response
+
     def get_session(session_id):
         try:
             return app.state.service.store.get(session_id)
@@ -170,8 +207,20 @@ def create_app(directory=None, adapter=None, recognizer=_AUTO):
         auth = app.state.auth
         if not auth.enabled():
             return {"user": None, "enabled": False}
+        # nginx / Tunnel 反代时 client.host 通常是 127.0.0.1，限流会退化为全局计数；
+        # 单用户评审场景可接受，也避免因伪造 X-Forwarded-For 绕过限制。
+        client = request.client.host if request.client else "unknown"
+        attempt_key = f"{client}:{body.username.strip().lower()}"
+        # 同时按 IP 和 IP+用户名计数：换用户名试密码也会被 IP 维度拦住。
+        attempt_keys = (f"ip:{client}", attempt_key)
+        if any(auth.blocked(key) for key in attempt_keys):
+            raise HTTPException(429, "登录尝试过于频繁，请稍后再试")
         if not auth.verify(body.username, body.password):
+            for key in attempt_keys:
+                auth.record_failure(key)
             raise HTTPException(401, "用户名或密码错误")
+        for key in attempt_keys:
+            auth.record_success(key)
         token = auth.issue(body.username)
         # 走 HTTPS（或 Cloudflare Tunnel 转发）时加 Secure；本机 http 不加，否则 cookie 存不住。
         secure = (request.url.scheme == "https"
@@ -191,24 +240,23 @@ def create_app(directory=None, adapter=None, recognizer=_AUTO):
         return {"user": user, "enabled": True}
 
     @app.post("/api/logout")
-    def logout(response: Response):
+    def logout(request: Request, response: Response):
+        auth = app.state.auth
+        if auth.enabled():
+            # 只删 cookie 只让浏览器不再发送；服务端版本号 +1 才能让旧 token 真正作废。
+            auth.revoke(request.cookies.get(COOKIE))
         response.delete_cookie(COOKIE, path="/")
         return {"ok": True}
 
     @app.get("/api/sessions")
     def sessions():
-        # 老场次没有 mode 字段，按文字处理
-        return [{
-            "id": s["id"], "candidate": s["candidate"], "role": s["role"],
-            "created_at": s["created_at"], "status": s["status"],
-            "mode": s.get("mode") or "text",
-            "rounds": s.get("rounds") or DEFAULT_ROUNDS,
-        } for s in app.state.service.store.list()]
+        # 只读摘要列：列表页不需要完整问答和报告，避免每次刷新反序列化整库。
+        return app.state.service.store.summaries()
 
     @app.get("/api/profile")
     def profile():
         """跨场次能力画像：只聚合已生成报告的场次，不调用模型。"""
-        return build_profile(app.state.service.store.list())
+        return build_profile(app.state.service.store.list_reports())
 
     @app.post("/api/sessions", status_code=201)
     def create_session(body: SessionInput):
@@ -216,7 +264,11 @@ def create_app(directory=None, adapter=None, recognizer=_AUTO):
 
     @app.get("/api/sessions/{session_id}")
     def session(session_id: str):
-        return get_session(session_id)
+        # 回合进行中优先返回内存态：刷新页面时不会比流式输出慢一拍。
+        try:
+            return app.state.service.snapshot(session_id)
+        except KeyError:
+            raise HTTPException(404, "找不到面试场次")
 
     @app.delete("/api/sessions/{session_id}")
     def delete_session(session_id: str):
@@ -300,40 +352,89 @@ def create_app(directory=None, adapter=None, recognizer=_AUTO):
         if origin and origin not in _allowed_origins(websocket):
             await websocket.close(code=1008)
             return
+        service = app.state.service
         try:
-            state = app.state.service.store.get(session_id)
+            state = service.snapshot(session_id)
         except KeyError:
             await websocket.close(code=1008)
             return
         await websocket.accept()
-        cursor = state["seq"]
-        await websocket.send_json({"type": "session.snapshot", "seq": cursor, "data": state})
-        try:
+
+        # 回合线程只往这个队列投事件；发送统一由一个 task 串行做，
+        # 避免「接收命令的 task」和「推送事件的 task」同时写 socket。
+        outgoing: asyncio.Queue = asyncio.Queue()
+        loop = asyncio.get_running_loop()
+
+        def on_event(event):
+            if loop.is_closed():
+                return
+            try:
+                loop.call_soon_threadsafe(outgoing.put_nowait, event)
+            except RuntimeError:
+                logging.getLogger(__name__).debug("WebSocket 已关闭，丢弃事件")
+
+        unsubscribe = service.listen(session_id, on_event)
+        await websocket.send_json({"type": "session.snapshot", "seq": state.get("seq", 0),
+                                   "data": state})
+        last_snapshot = (state.get("seq", 0), state.get("active_turn"),
+                         len(state.get("messages") or []),
+                         ((state.get("messages") or [{}])[-1].get("text", "")))
+
+        async def push():
+            nonlocal last_snapshot
             while True:
-                events = app.state.service.store.events(session_id, cursor)
-                if events:
-                    for event in events:
-                        await websocket.send_json(event)
-                    # Snapshot is authoritative, including partial output on reconnect.
-                    state = app.state.service.store.get(session_id)
-                    cursor = state["seq"]
-                    await websocket.send_json({"type": "session.snapshot", "seq": cursor, "data": state})
-                try:
-                    raw = await asyncio.wait_for(websocket.receive_text(), timeout=0.1)
-                except asyncio.TimeoutError:
-                    continue
+                event = await outgoing.get()
+                if event.get("type") == "session.snapshot":
+                    data = event.get("data") or {}
+                    messages = data.get("messages") or []
+                    key = (event.get("seq", 0), data.get("active_turn"), len(messages),
+                           messages[-1].get("text", "") if messages else "")
+                    if key == last_snapshot:
+                        continue
+                    last_snapshot = key
+                await websocket.send_json(event)
+
+        async def receive():
+            while True:
+                # 事件驱动：不再每 100ms 轮询数据库，也不再重复发全量快照。
+                raw = await websocket.receive_text()
                 if len(raw) > 64000:
                     await websocket.close(code=1009)
                     return
                 try:
                     command = Command.model_validate_json(raw)
-                    state = app.state.service.submit(session_id, **command.model_dump())
-                    await websocket.send_json({"type": "command.accepted", "request_id": command.request_id})
-                    await websocket.send_json({"type": "session.snapshot", "seq": state["seq"], "data": state})
+                    # submit 会加锁、读写 SQLite；放到线程里，别卡事件循环。
+                    await asyncio.to_thread(
+                        service.submit, session_id, **command.model_dump())
+                    await outgoing.put({"type": "command.accepted",
+                                        "request_id": command.request_id})
+                    # 用内存态而不是 submit 的返回值：worker 可能已经推了增量，
+                    # 晚到的旧快照会把前端刚追加的文字覆盖掉。
+                    state = service.snapshot(session_id)
+                    await outgoing.put({"type": "session.snapshot",
+                                        "seq": state.get("seq", 0), "data": state})
                 except (ValueError, ValidationError, json.JSONDecodeError) as exc:
-                    await websocket.send_json({"type": "command.error", "data": {"message": str(exc)}})
-        except WebSocketDisconnect:
-            pass  # The worker persists its result even if the browser closes.
+                    await outgoing.put({"type": "command.error", "data": {"message": str(exc)}})
+
+        tasks = [asyncio.create_task(push()), asyncio.create_task(receive())]
+        try:
+            done, _ = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+            for task in done:
+                if task.cancelled():
+                    continue
+                error = task.exception()
+                if error is not None and not isinstance(error, WebSocketDisconnect):
+                    logging.getLogger(__name__).warning(
+                        "WebSocket 会话异常：%s：%r", session_id, error)
+        finally:
+            unsubscribe()
+            for task in tasks:
+                task.cancel()
+            try:
+                # The worker persists its result even if the browser closes.
+                await asyncio.gather(*tasks, return_exceptions=True)
+            except asyncio.CancelledError:
+                logging.getLogger(__name__).debug("WebSocket 父任务已取消，跳过清理等待")
 
     dist = ROOT / "frontend" / "dist"
     if (dist / "assets").is_dir():

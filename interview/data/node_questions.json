@@ -1,0 +1,2261 @@
+[
+  {
+    "question": "What is NodeJS?",
+    "keywords": [
+      "What",
+      "is",
+      "NodeJS",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "How can you avoid callback hells?",
+    "keywords": [
+      "How",
+      "can",
+      "you",
+      "avoid",
+      "callback",
+      "hells",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "When are background or worker processes useful?",
+    "keywords": [
+      "When",
+      "are",
+      "background",
+      "or",
+      "worker",
+      "processes",
+      "useful",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Why is NodeJS Single threaded?",
+    "keywords": [
+      "Why",
+      "is",
+      "NodeJS",
+      "Single",
+      "threaded",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Name the types of API functions in Node?",
+    "keywords": [
+      "Name",
+      "the",
+      "types",
+      "of",
+      "API",
+      "functions",
+      "in",
+      "Node",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Explain chaining in Nodejs?",
+    "keywords": [
+      "Explain",
+      "chaining",
+      "in",
+      "Nodejs",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What are streams in Nodejs Explain the different types of streams present in Nodejs?",
+    "keywords": [
+      "What",
+      "are",
+      "streams",
+      "in",
+      "Nodejs",
+      "Explain",
+      "the",
+      "different",
+      "types",
+      "of"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What is package json?",
+    "keywords": [
+      "What",
+      "is",
+      "package",
+      "json",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "List down the major security implementations within Node.js?",
+    "keywords": [
+      "List",
+      "down",
+      "the",
+      "major",
+      "security",
+      "implementations",
+      "within",
+      "Node.js",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Explain the concept of URL module?",
+    "keywords": [
+      "Explain",
+      "the",
+      "concept",
+      "of",
+      "URL",
+      "module",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Explain the concept of middleware in Nodejs?",
+    "keywords": [
+      "Explain",
+      "the",
+      "concept",
+      "of",
+      "middleware",
+      "in",
+      "Nodejs",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Explain libuv?",
+    "keywords": [
+      "Explain",
+      "libuv",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "List down the two arguments that async queue takes as input?",
+    "keywords": [
+      "List",
+      "down",
+      "the",
+      "two",
+      "arguments",
+      "that",
+      "async",
+      "queue",
+      "takes",
+      "as"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Differentiate between spawn and fork methods in Nodejs?",
+    "keywords": [
+      "Differentiate",
+      "between",
+      "spawn",
+      "and",
+      "fork",
+      "methods",
+      "in",
+      "Nodejs",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Explain the purpose of ExpressJS package?",
+    "keywords": [
+      "Explain",
+      "the",
+      "purpose",
+      "of",
+      "ExpressJS",
+      "package",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Explain the usage of a buffer class in Nodejs?",
+    "keywords": [
+      "Explain",
+      "the",
+      "usage",
+      "of",
+      "a",
+      "buffer",
+      "class",
+      "in",
+      "Nodejs",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "How does Nodejs handle the child threads?",
+    "keywords": [
+      "How",
+      "does",
+      "Nodejs",
+      "handle",
+      "the",
+      "child",
+      "threads",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Explain stream in Nodejs along with its various types?",
+    "keywords": [
+      "Explain",
+      "stream",
+      "in",
+      "Nodejs",
+      "along",
+      "with",
+      "its",
+      "various",
+      "types",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Describe the exit codes of Nodejs?",
+    "keywords": [
+      "Describe",
+      "the",
+      "exit",
+      "codes",
+      "of",
+      "Nodejs",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Is cryptography supported in Nodejs?",
+    "keywords": [
+      "Is",
+      "cryptography",
+      "supported",
+      "in",
+      "Nodejs",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Explain the reason as to why Express app and server folder must be kept separate?",
+    "keywords": [
+      "Explain",
+      "the",
+      "reason",
+      "as",
+      "to",
+      "why",
+      "Express",
+      "app",
+      "and",
+      "server"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What is the role of asset module in nodejs?",
+    "keywords": [
+      "What",
+      "is",
+      "the",
+      "role",
+      "of",
+      "asset",
+      "module",
+      "in",
+      "nodejs",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What is the role of asynchooks module in nodejs?",
+    "keywords": [
+      "What",
+      "is",
+      "the",
+      "role",
+      "of",
+      "asynchooks",
+      "module",
+      "in",
+      "nodejs",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What are buffer objects in nodejs?",
+    "keywords": [
+      "What",
+      "are",
+      "buffer",
+      "objects",
+      "in",
+      "nodejs",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What are the different ways of implementing Addons in NodeJS?",
+    "keywords": [
+      "What",
+      "are",
+      "the",
+      "different",
+      "ways",
+      "of",
+      "implementing",
+      "Addons",
+      "in",
+      "NodeJS"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "How can we spawn the child process asynchronously without blocking the Nodejs event loop?",
+    "keywords": [
+      "How",
+      "can",
+      "we",
+      "spawn",
+      "the",
+      "child",
+      "process",
+      "asynchronously",
+      "without",
+      "blocking"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "How can we take advantage of multi-core system in Nodejs as nodejs works on single thread?",
+    "keywords": [
+      "How",
+      "can",
+      "we",
+      "take",
+      "advantage",
+      "of",
+      "multi-core",
+      "system",
+      "in",
+      "Nodejs"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What is the datatype of console?",
+    "keywords": [
+      "What",
+      "is",
+      "the",
+      "datatype",
+      "of",
+      "console",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Which are the different console methods available?",
+    "keywords": [
+      "Which",
+      "are",
+      "the",
+      "different",
+      "console",
+      "methods",
+      "available",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Can node js perform cryptographic functions?",
+    "keywords": [
+      "Can",
+      "node",
+      "js",
+      "perform",
+      "cryptographic",
+      "functions",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "How can we read or write files in node js?",
+    "keywords": [
+      "How",
+      "can",
+      "we",
+      "read",
+      "or",
+      "write",
+      "files",
+      "in",
+      "node",
+      "js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Which are the global objects in Node JS?",
+    "keywords": [
+      "Which",
+      "are",
+      "the",
+      "global",
+      "objects",
+      "in",
+      "Node",
+      "JS",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "How can we perform asynchronous network API in Node JS?",
+    "keywords": [
+      "How",
+      "can",
+      "we",
+      "perform",
+      "asynchronous",
+      "network",
+      "API",
+      "in",
+      "Node",
+      "JS"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What are the utilities of OS module in NodeJS?",
+    "keywords": [
+      "What",
+      "are",
+      "the",
+      "utilities",
+      "of",
+      "OS",
+      "module",
+      "in",
+      "NodeJS",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Which are the areas where it is suitable to use NodeJS?",
+    "keywords": [
+      "Which",
+      "are",
+      "the",
+      "areas",
+      "where",
+      "it",
+      "is",
+      "suitable",
+      "to",
+      "use"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Which are the areas where it is not suitable to use NodeJS?",
+    "keywords": [
+      "Which",
+      "are",
+      "the",
+      "areas",
+      "where",
+      "it",
+      "is",
+      "not",
+      "suitable",
+      "to"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What Are The Key Features Of NodeJs?",
+    "keywords": [
+      "What",
+      "Are",
+      "The",
+      "Key",
+      "Features",
+      "Of",
+      "NodeJs",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Explain REPL In NodeJs?",
+    "keywords": [
+      "Explain",
+      "REPL",
+      "In",
+      "NodeJs",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Can you write CRUD operations in Node js without using frameworks?",
+    "keywords": [
+      "Can",
+      "you",
+      "write",
+      "CRUD",
+      "operations",
+      "in",
+      "Node",
+      "js",
+      "without",
+      "using"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Can You Create HTTP Server In Nodejs Explain The Code Used For It?",
+    "keywords": [
+      "Can",
+      "You",
+      "Create",
+      "HTTP",
+      "Server",
+      "In",
+      "Nodejs",
+      "Explain",
+      "The",
+      "Code"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What Is The Difference Between Nodejs AJAX And JQuery?",
+    "keywords": [
+      "What",
+      "Is",
+      "The",
+      "Difference",
+      "Between",
+      "Nodejs",
+      "AJAX",
+      "And",
+      "JQuery",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What Is EventEmitter In NodeJs?",
+    "keywords": [
+      "What",
+      "Is",
+      "EventEmitter",
+      "In",
+      "NodeJs",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What Is A Childprocess Module In NodeJs?",
+    "keywords": [
+      "What",
+      "Is",
+      "A",
+      "Childprocess",
+      "Module",
+      "In",
+      "NodeJs",
+      "Node/Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node/Go",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What is ExpressJS?",
+    "keywords": [
+      "What",
+      "is",
+      "ExpressJS",
+      "Node Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What are some of the salient features of express?",
+    "keywords": [
+      "What",
+      "are",
+      "some",
+      "of",
+      "the",
+      "salient",
+      "features",
+      "express",
+      "Node Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Explain with an example a working of a simple express app?",
+    "keywords": [
+      "Explain",
+      "with",
+      "an",
+      "example",
+      "a",
+      "working",
+      "of",
+      "simple",
+      "express",
+      "app"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Mention few properties of request parameter in express?",
+    "keywords": [
+      "Mention",
+      "few",
+      "properties",
+      "of",
+      "request",
+      "parameter",
+      "in",
+      "express",
+      "Node Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "How to get the name parameters in express?",
+    "keywords": [
+      "How",
+      "to",
+      "get",
+      "the",
+      "name",
+      "parameters",
+      "in",
+      "express",
+      "Node Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "How to retrieve the get query string parameters using express? ?",
+    "keywords": [
+      "How",
+      "to",
+      "retrieve",
+      "the",
+      "get",
+      "query",
+      "string",
+      "parameters",
+      "using",
+      "express"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "How to send a response back using express?",
+    "keywords": [
+      "How",
+      "to",
+      "send",
+      "a",
+      "response",
+      "back",
+      "using",
+      "express",
+      "Node Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "How to set http response status using express?",
+    "keywords": [
+      "How",
+      "to",
+      "set",
+      "http",
+      "response",
+      "status",
+      "using",
+      "express",
+      "Node Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What are the different http status codes?",
+    "keywords": [
+      "What",
+      "are",
+      "the",
+      "different",
+      "http",
+      "status",
+      "codes",
+      "Node Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "How can you change http header value of a response?",
+    "keywords": [
+      "How",
+      "can",
+      "you",
+      "change",
+      "http",
+      "header",
+      "value",
+      "of",
+      "a",
+      "response"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "How to redirect to other pages server-side?",
+    "keywords": [
+      "How",
+      "to",
+      "redirect",
+      "other",
+      "pages",
+      "server-side",
+      "Node Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "How does routing work in express?",
+    "keywords": [
+      "How",
+      "does",
+      "routing",
+      "work",
+      "in",
+      "express",
+      "Node Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What are the tasks that a middleware can do?",
+    "keywords": [
+      "What",
+      "are",
+      "the",
+      "tasks",
+      "that",
+      "a",
+      "middleware",
+      "can",
+      "do",
+      "Node Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What are the different types of middleware?",
+    "keywords": [
+      "What",
+      "are",
+      "the",
+      "different",
+      "types",
+      "of",
+      "middleware",
+      "Node Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "How to serve static assests from express?",
+    "keywords": [
+      "How",
+      "to",
+      "serve",
+      "static",
+      "assests",
+      "from",
+      "express",
+      "Node Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "How to provide file download using express?",
+    "keywords": [
+      "How",
+      "to",
+      "provide",
+      "file",
+      "download",
+      "using",
+      "express",
+      "Node Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "How to use the Response.cookie() method to manipulate your cookies?",
+    "keywords": [
+      "How",
+      "to",
+      "use",
+      "the",
+      "Response.cookie",
+      "method",
+      "manipulate",
+      "your",
+      "cookies",
+      "Node Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "How to manage sessions using express?",
+    "keywords": [
+      "How",
+      "to",
+      "manage",
+      "sessions",
+      "using",
+      "express",
+      "Node Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "How To Allow Cors In Expressjs Explain With An Example?",
+    "keywords": [
+      "How",
+      "To",
+      "Allow",
+      "Cors",
+      "In",
+      "Expressjs",
+      "Explain",
+      "With",
+      "An",
+      "Example"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Node Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What is MongoDB?",
+    "keywords": [
+      "What",
+      "is",
+      "MongoDB",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What are the difference between NoSQL and SQL",
+    "keywords": [
+      "What",
+      "are",
+      "the",
+      "difference",
+      "between",
+      "NoSQL",
+      "and",
+      "SQL",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "How to establish MongoDB database connection in a node application?",
+    "keywords": [
+      "How",
+      "to",
+      "establish",
+      "MongoDB",
+      "database",
+      "connection",
+      "in",
+      "a",
+      "node",
+      "application"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What are virtual property in mongoose",
+    "keywords": [
+      "What",
+      "are",
+      "virtual",
+      "property",
+      "in",
+      "mongoose",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "How can we add or create our own instance methods in mongoose",
+    "keywords": [
+      "How",
+      "can",
+      "we",
+      "add",
+      "or",
+      "create",
+      "our",
+      "own",
+      "instance",
+      "methods"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "How can we add or create our own static methods in mongoose",
+    "keywords": [
+      "How",
+      "can",
+      "we",
+      "add",
+      "or",
+      "create",
+      "our",
+      "own",
+      "static",
+      "methods"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What are the mongoose middlewares?",
+    "keywords": [
+      "What",
+      "are",
+      "the",
+      "mongoose",
+      "middlewares",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "How to query data using mongoose?",
+    "keywords": [
+      "How",
+      "to",
+      "query",
+      "data",
+      "using",
+      "mongoose",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What is Population in mongoose",
+    "keywords": [
+      "What",
+      "is",
+      "Population",
+      "in",
+      "mongoose",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What is Datamasking?",
+    "keywords": [
+      "What",
+      "is",
+      "Datamasking",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What is hashing and explain how it works?",
+    "keywords": [
+      "What",
+      "is",
+      "hashing",
+      "and",
+      "explain",
+      "how",
+      "it",
+      "works",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What are salts and why are they so important?",
+    "keywords": [
+      "What",
+      "are",
+      "salts",
+      "and",
+      "why",
+      "they",
+      "so",
+      "important",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What are pepper and why are they so important?",
+    "keywords": [
+      "What",
+      "are",
+      "pepper",
+      "and",
+      "why",
+      "they",
+      "so",
+      "important",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What are JWT?",
+    "keywords": [
+      "What",
+      "are",
+      "JWT",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What are different authentication methods?",
+    "keywords": [
+      "What",
+      "are",
+      "different",
+      "authentication",
+      "methods",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What are disadvantages of using session based authentication?",
+    "keywords": [
+      "What",
+      "are",
+      "disadvantages",
+      "of",
+      "using",
+      "session",
+      "based",
+      "authentication",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What are disadvantages of using jwt based authentication?",
+    "keywords": [
+      "What",
+      "are",
+      "disadvantages",
+      "of",
+      "using",
+      "jwt",
+      "based",
+      "authentication",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What is Golang?",
+    "keywords": [
+      "What",
+      "is",
+      "Golang",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What are the pros and cons of Golang?",
+    "keywords": [
+      "What",
+      "are",
+      "the",
+      "pros",
+      "and",
+      "cons",
+      "of",
+      "Golang",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What kind of projects are suitable to be built in Golang?",
+    "keywords": [
+      "What",
+      "kind",
+      "of",
+      "projects",
+      "are",
+      "suitable",
+      "to",
+      "be",
+      "built",
+      "in"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Is Golang an object oriented language?",
+    "keywords": [
+      "Is",
+      "Golang",
+      "an",
+      "object",
+      "oriented",
+      "language",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What are the data types in Golang?",
+    "keywords": [
+      "What",
+      "are",
+      "the",
+      "data",
+      "types",
+      "in",
+      "Golang",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Can you return multiple values from a function?",
+    "keywords": [
+      "Can",
+      "you",
+      "return",
+      "multiple",
+      "values",
+      "from",
+      "a",
+      "function",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What is a GOPATH?",
+    "keywords": [
+      "What",
+      "is",
+      "a",
+      "GOPATH",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What are Goroutines?",
+    "keywords": [
+      "What",
+      "are",
+      "Goroutines",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What is nil in Go?",
+    "keywords": [
+      "What",
+      "is",
+      "nil",
+      "in",
+      "Go",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What is the difference between array and slice in Go?",
+    "keywords": [
+      "What",
+      "is",
+      "the",
+      "difference",
+      "between",
+      "array",
+      "and",
+      "slice",
+      "in",
+      "Go"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "How does a go compiler work?",
+    "keywords": [
+      "How",
+      "does",
+      "a",
+      "go",
+      "compiler",
+      "work",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What is an Interface and Why do you use it?",
+    "keywords": [
+      "What",
+      "is",
+      "an",
+      "Interface",
+      "and",
+      "Why",
+      "do",
+      "you",
+      "use",
+      "it"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What are concurrency and parralism and what is the difference between both?",
+    "keywords": [
+      "What",
+      "are",
+      "concurrency",
+      "and",
+      "parralism",
+      "what",
+      "is",
+      "the",
+      "difference",
+      "between"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What are the difference between goroutines and threads?",
+    "keywords": [
+      "What",
+      "are",
+      "the",
+      "difference",
+      "between",
+      "goroutines",
+      "and",
+      "threads",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What are channels for?",
+    "keywords": [
+      "What",
+      "are",
+      "channels",
+      "for",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Can you do something in goroutines using channels?",
+    "keywords": [
+      "Can",
+      "you",
+      "do",
+      "something",
+      "in",
+      "goroutines",
+      "using",
+      "channels",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What is a Closure?",
+    "keywords": [
+      "What",
+      "is",
+      "a",
+      "Closure",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What are runtime and runtime packages?",
+    "keywords": [
+      "What",
+      "are",
+      "runtime",
+      "and",
+      "packages",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "How can you get how many cores your computer has?",
+    "keywords": [
+      "How",
+      "can",
+      "you",
+      "get",
+      "how",
+      "many",
+      "cores",
+      "your",
+      "computer",
+      "has"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "How would you tell a goroutine to use less core than what you have?",
+    "keywords": [
+      "How",
+      "would",
+      "you",
+      "tell",
+      "a",
+      "goroutine",
+      "to",
+      "use",
+      "less",
+      "core"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "How would you determine the type of a variable and Which package to use for it?",
+    "keywords": [
+      "How",
+      "would",
+      "you",
+      "determine",
+      "the",
+      "type",
+      "of",
+      "a",
+      "variable",
+      "and"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What all types can map store?",
+    "keywords": [
+      "What",
+      "all",
+      "types",
+      "can",
+      "map",
+      "store",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What are microservices?",
+    "keywords": [
+      "What",
+      "are",
+      "microservices",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Why are there no classes in Go?",
+    "keywords": [
+      "Why",
+      "are",
+      "there",
+      "no",
+      "classes",
+      "in",
+      "Go",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Difference between Compile time and runtime?",
+    "keywords": [
+      "Difference",
+      "between",
+      "Compile",
+      "time",
+      "and",
+      "runtime",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "How to generate a true random number in golang?",
+    "keywords": [
+      "How",
+      "to",
+      "generate",
+      "a",
+      "true",
+      "random",
+      "number",
+      "in",
+      "golang",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Why are goroutines light-weight?",
+    "keywords": [
+      "Why",
+      "are",
+      "goroutines",
+      "light-weight",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "If capacity is not defined in slice, what would the capacity be?",
+    "keywords": [
+      "If",
+      "capacity",
+      "is",
+      "not",
+      "defined",
+      "in",
+      "slice",
+      "what",
+      "would",
+      "the"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What is the easiest way to check if a slice is empty?",
+    "keywords": [
+      "What",
+      "is",
+      "the",
+      "easiest",
+      "way",
+      "to",
+      "check",
+      "if",
+      "a",
+      "slice"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What is an advantage of Go evaluating implicit types at compile time?",
+    "keywords": [
+      "What",
+      "is",
+      "an",
+      "advantage",
+      "of",
+      "Go",
+      "evaluating",
+      "implicit",
+      "types",
+      "at"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What is ACID Model in Database?",
+    "keywords": [
+      "What",
+      "is",
+      "ACID",
+      "Model",
+      "in",
+      "Database",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What does ACID acronym mean?",
+    "keywords": [
+      "What",
+      "does",
+      "ACID",
+      "acronym",
+      "mean",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Explain in brief the ACID Model?",
+    "keywords": [
+      "Explain",
+      "in",
+      "brief",
+      "the",
+      "ACID",
+      "Model",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What are the read phenomena in Isolation?",
+    "keywords": [
+      "What",
+      "are",
+      "the",
+      "read",
+      "phenomena",
+      "in",
+      "Isolation",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What are the four Isolation levels?",
+    "keywords": [
+      "What",
+      "are",
+      "the",
+      "four",
+      "Isolation",
+      "levels",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "Which isolation levels can prevent problems that occur in read phenomena?",
+    "keywords": [
+      "Which",
+      "isolation",
+      "levels",
+      "can",
+      "prevent",
+      "problems",
+      "that",
+      "occur",
+      "in",
+      "read"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What does Eventually Consistent Mean?",
+    "keywords": [
+      "What",
+      "does",
+      "Eventually",
+      "Consistent",
+      "Mean",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What is indexing in SQL?",
+    "keywords": [
+      "What",
+      "is",
+      "indexing",
+      "in",
+      "SQL",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "How does SQL create an Index?",
+    "keywords": [
+      "How",
+      "does",
+      "SQL",
+      "create",
+      "an",
+      "Index",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  },
+  {
+    "question": "What is difference between index scan and index only scan?",
+    "keywords": [
+      "What",
+      "is",
+      "difference",
+      "between",
+      "index",
+      "scan",
+      "and",
+      "only",
+      "Express Js"
+    ],
+    "role": "Node.js 工程师",
+    "category": "Express Js",
+    "level": "",
+    "stage": "",
+    "lang": "en",
+    "source": "Gauthamjm007/Backend-NodeJS-Golang-Interview_QA (MIT)"
+  }
+]

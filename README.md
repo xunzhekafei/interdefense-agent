@@ -4,7 +4,7 @@
 支持浏览器中的文字面试，也保留终端交互模式。面试围绕候选人背景和项目经历展开，结束后生成四维评分、逐题证据与改进建议。
 
 核心运行时按 [learn-claude-code](https://github.com/shareAI-lab/learn-claude-code) s01→s17 逐章实现，包含工具调用、hooks、记忆、上下文压缩、任务系统、团队协作和工作流编排。
-模型通过 Anthropic Python SDK 调用，默认连接 Kimi 的 Anthropic 兼容端点（`PROVIDER=deepseek` 可切回 DeepSeek）。
+模型通过 Anthropic Python SDK 调用，默认连接 DeepSeek 的 Anthropic 兼容端点（`PROVIDER=kimi` 可切到 Kimi）。
 
 ## 导航
 
@@ -33,7 +33,7 @@
 | 弱点追踪 | 把各场短板聚合成主题（指标口径、架构与故障等），记录首次/最近出现、次数、是否改善；按 1/3/7/14 天给出复习建议 |
 | Web 场次管理 | 独立场次、完整问答保存、历史记录、报告 JSON 下载。**立即结束**：保留记录直接出报告，或删除这一场（无需先答完） |
 | 运行恢复 | 取消、重试、提交去重、断线后恢复快照、服务重启后保留未完成记录 |
-| 题库检索 | 内置 8990 道 AI 与前端岗位题，支持中英文关键词、类别、岗位和阶段筛选 |
+| 题库检索 | 内置 11073 道 AI、前端、后端、Android、iOS、DevOps、数据工程、PHP、Node、算法与产品岗位题，支持中英文关键词、类别、岗位和阶段筛选 |
 | CLI 运行时 | 32 个主工具、hooks、任务图、记忆、上下文压缩、cron、子代理、团队、MCP 与 workflow |
 | 语音转文字 | **可选、默认关闭**（要另装依赖，占 4 GB 左右磁盘）。本地 faster-whisper，录音 → 转写 → 确认后按文字提交。纯语音会话用浏览器 TTS 朗读回复；后端 TTS 与实时转写尚未接入 |
 | 纯语音会话 | 创建时选「纯语音」：不显示文字输入框，说话后自动转写提交；面试官回复用浏览器 TTS 朗读，读完自动开始下一轮，点麦克风可打断。ASR 沿用本地 faster-whisper，没有新增模型 |
@@ -49,7 +49,7 @@ Web 对话仅开放 `search_questions` 和 `load_skill`，评分与存档由后�
 
 - Python 3.10+。
 - Web 前端构建使用 Node.js，建议使用 22.12+ 的 22.x 或 24.x；仅运行 CLI 不需要 Node.js。
-- 开始模型对话需要有效的 Kimi API Key（或设 `PROVIDER=deepseek` 后使用 DeepSeek Key）。
+- 开始模型对话需要有效的 DeepSeek API Key（或设 `PROVIDER=kimi` 后使用 Kimi Key）。
 
 ```powershell
 python -m venv .venv
@@ -62,7 +62,8 @@ python -m venv .venv
 安装后端依赖：
 
 ```powershell
-.\.venv\Scripts\python.exe -m pip install -r requirements-web.txt
+# 评审/生产环境用锁文件；想要最新版时再换 requirements-web.txt
+.\.venv\Scripts\python.exe -m pip install -r requirements-lock.txt
 ```
 
 安装前端依赖并构建页面：
@@ -74,20 +75,31 @@ npm run build
 cd ..
 ```
 
-在同一终端设置密钥并启动：
+在同一终端启动（推荐）：
 
 ```powershell
-$env:ANTHROPIC_API_KEY = "你的 Kimi 密钥"
-.\start-web.ps1
+.\start.ps1 -ApiKey "你的 DeepSeek 密钥"
 ```
+
+`start.ps1` 会自动选择 Python（优先 `.venv`，否则系统 Python）、检查运行依赖、
+检查前端产物是否过期（过期会自动 build）、设置密钥，然后启动并打开浏览器。
+
+也可以先设环境变量再启动：
+
+```powershell
+$env:ANTHROPIC_API_KEY = "你的 DeepSeek 密钥"
+.\start.ps1
+```
+
+常用参数：`-Port 8001`、`-Reload`（开发热重载）、`-NoBrowser`、`-CheckOnly`（只检查不启动）。
 
 打开 [面试练习室](http://127.0.0.1:8000)。停止服务使用 Ctrl+C。
 
-后续启动只需设置密钥并执行 `start-web.ps1`。前端源代码修改后需重新执行 `npm run build`。
-如果 PowerShell 阻止执行启动脚本，可直接运行等效命令：
+后续启动只需 `.\start.ps1 -ApiKey ...`。前端源代码修改后脚本会自动重新 build。
+如果 PowerShell 阻止执行启动脚本，可直接运行等效命令（有 `.venv` 时用 `.venv\Scripts\python.exe`）：
 
 ```powershell
-.\.venv\Scripts\python.exe -m uvicorn backend.app:app --host 127.0.0.1 --port 8000
+python -m uvicorn backend.app:app --host 127.0.0.1 --port 8000
 ```
 
 没有密钥也能启动 Web 服务并查看已有记录，但不能开始模型对话。修改密钥后需重启后端。
@@ -98,7 +110,7 @@ $env:ANTHROPIC_API_KEY = "你的 Kimi 密钥"
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
-$env:ANTHROPIC_API_KEY = "你的 Kimi 密钥"
+$env:ANTHROPIC_API_KEY = "你的 DeepSeek 密钥"
 .\.venv\Scripts\python.exe agent.py
 ```
 
@@ -166,7 +178,7 @@ CLI 启动会恢复最近一次对话，开始新场面试前建议先 `/clear`�
 
 ### 题库
 
-题库共 **8990 道题**，九个来源（都只导入题目、不含答案——对模拟面试反而好，不泄题）：
+题库共 **11073 道题**，十八个来源（20 个仓库/数据集；都只导入题目、不含答案——对模拟面试反而好，不泄题）：
 
 | 来源 | 文件 | 题数 | 方向 | 许可 |
 | ---- | ---- | ---- | ---- | ---- |
@@ -179,6 +191,15 @@ CLI 启动会恢复最近一次对话，开始新场面试前建议先 `/clear`�
 | [bcefghj/ai-agent-interview-guide](https://github.com/bcefghj/ai-agent-interview-guide) | `zh_questions.json` | 181 | AI Agent 开发 | MIT |
 | [bcefghj/learn-nanobot](https://github.com/bcefghj/learn-nanobot) | `zh_questions.json` | 134 | AI Agent（10 个板块） | MIT |
 | [aceliuchanghong/FAQ_Of_LLM_Interview](https://github.com/aceliuchanghong/FAQ_Of_LLM_Interview) | `zh_questions.json` | 20 | 大模型算法 | MIT |
+| [yongxinz/backend-interview](https://github.com/yongxinz/backend-interview) | `backend_questions.json` | 492 | 后端（Go / MySQL / Redis / 网络 / 系统编程等） | MIT |
+| [JsonChao/Awesome-Android-Interview](https://github.com/JsonChao/Awesome-Android-Interview) · [stormzhang/android-interview-questions-cn](https://github.com/stormzhang/android-interview-questions-cn) · [amitshekhariitbhu/android-interview-questions](https://github.com/amitshekhariitbhu/android-interview-questions) | `android_questions.json` | 812 | Android（含 Java 基础） | Apache-2.0 |
+| [dashvlas/awesome-ios-interview](https://github.com/dashvlas/awesome-ios-interview) | `ios_questions.json` | 100 | iOS | MIT |
+| [chassing/linux-sysadmin-interview-questions](https://github.com/chassing/linux-sysadmin-interview-questions) | `devops_questions.json` | 159 | DevOps / SRE | Unlicense |
+| [landedjobs/ai-pm-interview-prep](https://github.com/landedjobs/ai-pm-interview-prep) | `product_questions.json` | 87 | 产品经理（AI 产品） | MIT |
+| [SepidehHosseinian/MLOPs-Interview-Questions](https://github.com/SepidehHosseinian/MLOPs-Interview-Questions) | `data_engineering_questions.json` | 36 | 数据工程 / MLOps | CC0-1.0 |
+| [colinlet/PHP-Interview-QA](https://github.com/colinlet/PHP-Interview-QA) | `php_questions.json` | 145 | PHP 后端 | Apache-2.0 |
+| [Gauthamjm007/Backend-NodeJS-Golang-Interview_QA](https://github.com/Gauthamjm007/Backend-NodeJS-Golang-Interview_QA) | `node_questions.json` | 119 | Node / Go 后端 | MIT |
+| [YaxeZhang/Just-Code](https://github.com/YaxeZhang/Just-Code) | `algorithm_questions.json` | 133 | 字节跳动（后端 / 客户端 / 前端 / 算法 / 测试） | MIT |
 
 ```bash
 # 导入英文题库（huggingface.co 直连不通时用 hf-mirror 镜像）
@@ -201,7 +222,9 @@ python interview/import_github_bank.py
   `大模型算法工程师` 下，跨岗位取会落空
 
 `role` 取值：`AI 应用开发`（AI 岗主力）、`AI/ML Engineer`、`Data Scientist`、`Data Analyst`、
-`AI Agent 开发`、`大模型算法工程师`、`前端工程师`。`stage="Stage 3"` 可筛出行为面/团队协作类
+`AI Agent 开发`、`大模型算法工程师`、`前端工程师`、`后端开发工程师`、`Android 工程师`、
+`iOS 工程师`、`DevOps 工程师`、`数据工程师`、`PHP 工程师`、`Node.js 工程师`、`算法工程师`、`产品经理`。
+`stage="Stage 3"` 可筛出行为面/团队协作类
 题目（导入时按信号词标注）。英文题检索到后由面试官翻译/改写成中文提问。
 
 > 注：`role`、`category`、`stage` 只作为**过滤器**，不参与相关性打分——否则 query 里
@@ -326,7 +349,7 @@ npm run build
 npm run format
 ```
 
-最近一次验证（2026-11-04）：**268 个离线测试通过，2 个真实 API 测试未运行；前端已通过 TypeScript 检查和生产构建**。
+最近一次验证（2026-11-20）：P0-1/P0-2 已修复，WebSocket 用例需本机全量复验（沙箱禁止回环）；前端 eslint 0 警告、vitest 9 通过、TypeScript/build 通过。
 
 | 测试文件 | 覆盖 |
 | --- | --- |
@@ -338,6 +361,13 @@ npm run format
 | `test_interview.py` | 题库检索、评分流程与面试存档 |
 | `test_web.py` | 场次隔离、流式事件、取消重试、重连去重、重启恢复、完整评分与错误提示 |
 | `test_providers.py` | 提供商默认值、环境变量覆盖、Bearer / x-api-key 切换 |
+| `test_streaming.py` | 增量批量落库、流式快照、摘要/报告轻量读取、旧库迁移、事件裁剪 |
+| `test_security.py` | 登出吊销、登录限流、安全头、候选人资料隔离、auth 文件权限 |
+| `test_settings.py` | 环境变量布尔/数字解析 |
+| `test_backup.py` | 备份一致快照、恢复、保留策略 |
+| `test_role_banks.py` | 七类新增岗位题库结构、来源与检索 |
+| `test_backend_bank.py` | 后端题库结构、来源与检索 |
+| `test_algorithm_bank.py` | 字节算法题库结构、来源与检索 |
 | `test_smoke_api.py` | 真实模型工具轮与目标判断器（`slow`） |
 
 测试使用临时目录和模拟模型；CLI 测试通过 `iso` fixture 重置运行时状态，Web 测试注入独立适配器和数据库。
@@ -346,7 +376,7 @@ npm run format
 
 | 配置 | 作用 |
 | --- | --- |
-| `PROVIDER` | 模型提供商，默认 `kimi`；可选 `deepseek`、`custom`（Ollama / 代理 / 国际站） |
+| `PROVIDER` | 模型提供商，默认 `deepseek`；现有评审服务器用 `/etc/myagent.env` 的 `PROVIDER=kimi` 覆盖；可选 `kimi`、`custom`（Ollama / 代理 / 国际站） |
 | `ANTHROPIC_API_KEY` | 模型密钥，Kimi 和 DeepSeek 都填这里 |
 | `ANTHROPIC_AUTH_TOKEN` | 显式 Bearer token（Kimi 官方推荐写法）；设置后优先于 `ANTHROPIC_API_KEY` |
 | `AUX_MODEL` | 辅助模型，默认跟随 `MODEL` |
@@ -360,7 +390,7 @@ npm run format
 | `WEB_SPEECH` | 设 `off` 关闭语音转文字（装了依赖但不想用时） |
 | `INTERVIEW_MEMORY` | 设 `off` 关闭面试笔记（跨项目覆盖与对比）。关闭后每轮不再额外调用模型 |
 | `INTERVIEW_DECAY` | 面试笔记的指数衰减系数，默认 `0.5`。越小越只关注最近几轮（取值 0.1–0.95） |
-| `MODEL` | 主模型请求名。Kimi 默认 `kimi-k3.1-pro`；DeepSeek 默认 `claude-haiku-4-5`（映射到 `deepseek-v4-flash`，成本低）。DeepSeek 下评测脚本强制用 flash |
+| `MODEL` | 主模型请求名。DeepSeek 默认 `claude-haiku-4-5`（映射到 `deepseek-v4-flash`，成本低）；Kimi 默认 `kimi-k3.1-pro`。DeepSeek 下评测脚本强制用 flash |
 | `REASONING_EFFORT` | Kimi 推理深度：`low`（默认）/ `medium` / `high` / `xhigh` / `max`；设 `off` 不发送该字段 |
 | `WORKFLOW_MAX_PARALLEL` | 报告 workflow 的并发上限，默认 8。Kimi 未充值到 Tier1 时并发只有 1 路，设 `1` 可避免 429 |
 | `ANTHROPIC_BASE_URL` | 接口地址，**只在 `PROVIDER=custom` 时生效**；接 Ollama 时设 `http://localhost:11434` |
@@ -465,7 +495,7 @@ $env:WEB_SPEECH = "off"
 
 ## 本地模型（可选，默认关闭）
 
-默认调用云端 Kimi（`PROVIDER=deepseek` 可切回 DeepSeek）。也可以用
+默认调用云端 DeepSeek（`PROVIDER=kimi` 可切到 Kimi）。也可以用
 [Ollama](https://ollama.com) 在本机跑模型——Ollama 从 v0.13 起原生支持
 Anthropic 的 `/v1/messages`，所以**不需要额外代理层**。
 
@@ -518,13 +548,22 @@ $env:LOCAL_MODEL        = "on"          # 历史只带最近 1.2 万字符
   s01→s17 教程路径逐章搭建（工具分发、权限、hooks、技能、压缩、记忆、任务图、后台任务、cron、
   团队协作、MCP、workflow、目标循环），全部集成在同一个循环上。
 
-**题库来源**（9 个仓库/数据集，均为 MIT 许可，**只导入题目、不复制答案**）
+**题库来源**（20 个仓库/数据集，许可证见下方「许可」，**只导入题目、不复制答案**）
 
 | 方向 | 来源 |
 | --- | --- |
 | AI（英文） | [InterviewForge_GenDS](https://huggingface.co/datasets/Davichick/InterviewForge_GenDS) |
 | AI（中文） | [guocong-bincai/ai-interview-guide](https://github.com/guocong-bincai/ai-interview-guide) · [bcefghj/learn-nanobot](https://github.com/bcefghj/learn-nanobot) · [bcefghj/ai-agent-interview-guide](https://github.com/bcefghj/ai-agent-interview-guide) · [aceliuchanghong/FAQ_Of_LLM_Interview](https://github.com/aceliuchanghong/FAQ_Of_LLM_Interview) · [lengyue1024/BAT_interviews](https://github.com/lengyue1024/BAT_interviews) |
 | 前端 | [haizlin/fe-interview](https://github.com/haizlin/fe-interview) · [lf2021/Front-End-Interview](https://github.com/lf2021/Front-End-Interview) · [FEGuideTeam/FEGuide](https://github.com/FEGuideTeam/FEGuide) · [lengyue1024/BAT_interviews](https://github.com/lengyue1024/BAT_interviews) |
+| 后端 | [yongxinz/backend-interview](https://github.com/yongxinz/backend-interview) |
+| Android | [JsonChao/Awesome-Android-Interview](https://github.com/JsonChao/Awesome-Android-Interview) · [stormzhang/android-interview-questions-cn](https://github.com/stormzhang/android-interview-questions-cn) · [amitshekhariitbhu/android-interview-questions](https://github.com/amitshekhariitbhu/android-interview-questions) |
+| iOS | [dashvlas/awesome-ios-interview](https://github.com/dashvlas/awesome-ios-interview) |
+| DevOps | [chassing/linux-sysadmin-interview-questions](https://github.com/chassing/linux-sysadmin-interview-questions) |
+| 产品 | [landedjobs/ai-pm-interview-prep](https://github.com/landedjobs/ai-pm-interview-prep) |
+| 数据工程 | [SepidehHosseinian/MLOPs-Interview-Questions](https://github.com/SepidehHosseinian/MLOPs-Interview-Questions) |
+| PHP | [colinlet/PHP-Interview-QA](https://github.com/colinlet/PHP-Interview-QA) |
+| Node / Go | [Gauthamjm007/Backend-NodeJS-Golang-Interview_QA](https://github.com/Gauthamjm007/Backend-NodeJS-Golang-Interview_QA) |
+| 算法 / 字节 | [YaxeZhang/Just-Code](https://github.com/YaxeZhang/Just-Code) |
 
 各自的题数与版权声明见上面「面试题库」和下面「许可」两节。
 
@@ -556,7 +595,7 @@ $env:LOCAL_MODEL        = "on"          # 历史只带最近 1.2 万字符
 
 本项目代码：MIT License（见 [LICENSE](LICENSE)）。
 
-面试题库只导入**题目**、不复制答案，九个来源均为 MIT 许可，各自的版权声明如下：
+面试题库只导入**题目**、不复制答案；各来源的许可证（MIT / Apache-2.0 / Unlicense / CC0-1.0）如下：
 
 | 来源 | 版权声明 |
 | ---- | ---- |
@@ -569,5 +608,16 @@ $env:LOCAL_MODEL        = "on"          # 历史只带最近 1.2 万字符
 | [bcefghj/ai-agent-interview-guide](https://github.com/bcefghj/ai-agent-interview-guide) | Copyright (c) 2026 |
 | [bcefghj/learn-nanobot](https://github.com/bcefghj/learn-nanobot) | Copyright (c) 2026 bcefghj |
 | [aceliuchanghong/FAQ_Of_LLM_Interview](https://github.com/aceliuchanghong/FAQ_Of_LLM_Interview) | Copyright (c) 2024 Lawrence kraft |
+| [YaxeZhang/Just-Code](https://github.com/YaxeZhang/Just-Code) | MIT |
+| [yongxinz/backend-interview](https://github.com/yongxinz/backend-interview) | Copyright (c) 2022 yongxinz |
+| [JsonChao/Awesome-Android-Interview](https://github.com/JsonChao/Awesome-Android-Interview) | Apache-2.0 |
+| [stormzhang/android-interview-questions-cn](https://github.com/stormzhang/android-interview-questions-cn) | Apache-2.0 |
+| [amitshekhariitbhu/android-interview-questions](https://github.com/amitshekhariitbhu/android-interview-questions) | Apache-2.0 |
+| [dashvlas/awesome-ios-interview](https://github.com/dashvlas/awesome-ios-interview) | MIT |
+| [chassing/linux-sysadmin-interview-questions](https://github.com/chassing/linux-sysadmin-interview-questions) | Unlicense |
+| [landedjobs/ai-pm-interview-prep](https://github.com/landedjobs/ai-pm-interview-prep) | MIT |
+| [SepidehHosseinian/MLOPs-Interview-Questions](https://github.com/SepidehHosseinian/MLOPs-Interview-Questions) | CC0-1.0 |
+| [colinlet/PHP-Interview-QA](https://github.com/colinlet/PHP-Interview-QA) | Apache-2.0 |
+| [Gauthamjm007/Backend-NodeJS-Golang-Interview_QA](https://github.com/Gauthamjm007/Backend-NodeJS-Golang-Interview_QA) | MIT |
 
-导入脚本：`interview/import_dataset.py`（英文）、`interview/import_github_bank.py`（中文与前端）。
+导入脚本：`interview/import_dataset.py`（英文）、`interview/import_github_bank.py`（中文与前端）、`interview/import_role_banks.py`（新增岗位）。

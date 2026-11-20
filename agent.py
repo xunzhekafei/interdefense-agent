@@ -32,6 +32,7 @@ import anthropic
 from anthropic import beta_tool
 
 import providers
+from cron_utils import cron_matches, validate_cron
 
 from interview_spec import (DEFAULT_ROUNDS, DIMENSION_NAMES, DIMENSION_WEIGHTS,
                             SCORING_VERSION, SKIP_REASONS, classify_answer,
@@ -769,82 +770,7 @@ cron_queue: list[CronJob] = []
 cron_lock = threading.RLock()
 
 
-def _cron_field_matches(field: str, value: int) -> bool:
-    if field == "*":
-        return True
-    if field.startswith("*/"):
-        return value % int(field[2:]) == 0
-    if "," in field:
-        return any(_cron_field_matches(part.strip(), value) for part in field.split(","))
-    if "-" in field:
-        start, end = field.split("-", 1)
-        return int(start) <= value <= int(end)
-    return value == int(field)
-
-
-def cron_matches(cron_expr: str, moment: datetime.datetime) -> bool:
-    """5 段 cron 匹配；日期/星期同时给定时按标准语义取「或」（任一匹配即触发）。"""
-    fields = cron_expr.strip().split()
-    if len(fields) != 5:
-        return False
-    minute, hour, day, month, weekday = fields
-    cron_weekday = (moment.weekday() + 1) % 7  # 转成 cron 的 0=周日
-    if not (_cron_field_matches(minute, moment.minute)
-            and _cron_field_matches(hour, moment.hour)
-            and _cron_field_matches(month, moment.month)):
-        return False
-    day_matches = _cron_field_matches(day, moment.day)
-    weekday_matches = _cron_field_matches(weekday, cron_weekday)
-    if day == "*" and weekday == "*":
-        return True
-    if day == "*":
-        return weekday_matches
-    if weekday == "*":
-        return day_matches
-    return day_matches or weekday_matches
-
-
-def validate_cron(cron_expr: str) -> str | None:
-    """校验 5 段 cron 表达式，返回错误信息或 None。"""
-    fields = cron_expr.strip().split()
-    if len(fields) != 5:
-        return f"需要 5 段（分 时 日 月 星期），实际 {len(fields)} 段"
-    rules = [("分钟", 0, 59), ("小时", 0, 23), ("日", 1, 31), ("月", 1, 12), ("星期", 0, 6)]
-    for field, (name, lo, hi) in zip(fields, rules):
-        error = _validate_cron_field(field, lo, hi)
-        if error:
-            return f"{name}: {error}"
-    return None
-
-
-def _validate_cron_field(field: str, lo: int, hi: int) -> str | None:
-    if field == "*":
-        return None
-    if field.startswith("*/"):
-        step = field[2:]
-        if not step.isdigit() or int(step) <= 0:
-            return f"非法步长 {field}"
-        return None
-    if "," in field:
-        for part in field.split(","):
-            error = _validate_cron_field(part.strip(), lo, hi)
-            if error:
-                return error
-        return None
-    if "-" in field:
-        start, end = field.split("-", 1)
-        if not start.isdigit() or not end.isdigit():
-            return f"非法区间 {field}"
-        if int(start) > int(end):
-            return f"区间起点大于终点 {field}"
-        if int(start) < lo or int(end) > hi:
-            return f"区间 {field} 超出 [{lo}-{hi}]"
-        return None
-    if not field.isdigit():
-        return f"非法字段 {field}"
-    if not (lo <= int(field) <= hi):
-        return f"取值 {field} 超出 [{lo}-{hi}]"
-    return None
+# cron 表达式匹配/校验已移到 cron_utils.py（纯函数，无全局状态）。
 
 
 def _new_cron_id() -> str:
@@ -2510,11 +2436,18 @@ def _goal_stop_hook(messages: list) -> str | None:
 
 
 # ---------- 面试题库：本地检索（AI 模拟面试官的数据层） ----------
-# 三个来源（均为 MIT 许可，都只导入题目、不含答案——对模拟面试反而好，不泄题）：
-#   ai_questions.json  InterviewForge_GenDS    1647 道英文 AI 岗题，带 level/stage 标注
-#   zh_questions.json  GitHub 中文 AI 岗题库     201 道（AI Agent 开发/大模型算法工程师）
-#   fe_questions.json  haizlin/fe-interview   约 5400 道中文前端题，带分类标签
-# 字段有 question/keywords/category/level/role/stage。导入方式见 README「面试题库」一节。
+# 题库来源（都只导入题目、不含答案；许可证与版权见 README 与 interview/data/*_SOURCE.md）：
+#   ai_questions.json / zh_questions.json / fe_questions.json   原有 AI 与前端题
+#   backend_questions.json        MIT              492 道中文后端题
+#   android_questions.json        Apache-2.0       812 道 Android/Java 题（中文为主）
+#   ios_questions.json            MIT              100 道 iOS 英文题
+#   devops_questions.json         Unlicense        159 道 DevOps 英文题
+#   product_questions.json        MIT              87 道 AI 产品经理英文题
+#   data_engineering_questions.json CC0-1.0         36 道数据工程/MLOps 英文题
+#   php_questions.json            Apache-2.0       145 道中文 PHP 后端题
+#   node_questions.json           MIT              119 道 Node/Go 英文题
+#   algorithm_questions.json      MIT              133 道字节跳动/算法题（只取题干）
+# 字段有 question/keywords/category/level/role/stage/lang/source。导入方式见 README「面试题库」一节。
 
 QUESTION_BANK_PATH = WORKDIR / "interview" / "data" / "ai_questions.json"
 _QUESTION_CACHE: list | None = None
@@ -2553,7 +2486,8 @@ def _bank_values(bank: list, field: str, limit: int = 12) -> list[str]:
 @beta_tool
 def search_questions(query: str, category: str = "", level: str = "", role: str = "",
                      stage: str = "", limit: int = 5) -> str:
-    """从本地面试题库检索题目。岗位覆盖 AI 方向和前端方向，中英文题目都有。
+    """从本地面试题库检索题目。岗位覆盖 AI、前端、后端、Android、iOS、DevOps、
+    数据工程、PHP、Node、算法与产品经理，中英文题目都有。
     检索到英文题后自己翻译/改写成中文向候选人提问。
 
     **面试时一定要带 role**，否则会跨岗位混题（前端题库有 6000 多道，会淹没 AI 题目）。
@@ -2566,14 +2500,17 @@ def search_questions(query: str, category: str = "", level: str = "", role: str 
         level: 难度过滤，如 "Level 1"。**只有英文题库有这个字段**，中文题库全是空的，
             传了会一道都搜不到——中文题用提问方式控制难度。
         role: 岗位过滤。取值："AI/ML Engineer"、"Data Scientist"、"Data Analyst"、
-            "AI Agent 开发"、"大模型算法工程师"、"前端工程师"。
+            "AI Agent 开发"、"大模型算法工程师"、"前端工程师"、"后端开发工程师"、
+            "Android 工程师"、"iOS 工程师"、"DevOps 工程师"、"数据工程师"、
+            "PHP 工程师"、"Node.js 工程师"、"算法工程师"、"产品经理"。
         stage: 面试阶段过滤。传 "Stage 3" 可筛出行为面/团队协作题（中英文题库都适用）。
         limit: 返回条数（默认 5，最多 10）。
     """
     bank = _load_question_bank()
     if not bank:
         return ("错误：题库为空——先运行 python interview/import_dataset.py <原始CSV路径> 导入英文题，"
-                "再运行 python interview/import_github_bank.py 导入中文与前端题；"
+                "再运行 python interview/import_github_bank.py 导入中文与前端题、"
+                "python interview/import_role_banks.py 导入新增岗位题；"
                 "英文原始数据在 https://hf-mirror.com/datasets/Davichick/InterviewForge_GenDS")
     terms = _text_terms(query) if query.strip() else set()
     candidates = []

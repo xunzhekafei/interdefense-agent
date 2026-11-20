@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""提供商配置：默认 Kimi，鉴权方式按提供商切换，环境变量可覆盖。"""
+"""提供商配置：默认 DeepSeek，鉴权方式按提供商切换，环境变量可覆盖。"""
 import providers
 
 
@@ -10,15 +10,15 @@ def _clear(monkeypatch):
         monkeypatch.delenv(name, raising=False)
 
 
-def test_default_provider_is_kimi(monkeypatch):
+def test_default_provider_is_deepseek(monkeypatch):
     _clear(monkeypatch)
     p = providers.resolve()
-    assert p.name == "kimi"
-    assert p.base_url == "https://api.moonshot.cn/anthropic"
-    assert p.model == "kimi-k3.1-pro"
-    assert p.auth == "bearer"
-    assert p.thinking is False
-    assert p.effort == "low"
+    assert p.name == "deepseek"
+    assert p.base_url == "https://api.deepseek.com/anthropic"
+    assert p.model == "claude-haiku-4-5"
+    assert p.auth == "x-api-key"
+    assert p.thinking is True
+    assert p.effort is None
 
 
 def test_deepseek_provider_defaults(monkeypatch):

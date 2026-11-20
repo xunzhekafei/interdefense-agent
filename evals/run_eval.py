@@ -25,9 +25,9 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-# 评测默认跟着 PROVIDER 走（默认 Kimi）。DeepSeek 下强制 flash：pro 太贵，
+# 评测默认跟着 PROVIDER 走（默认 DeepSeek）。DeepSeek 下强制 flash：pro 太贵，
 # 而且一次评测要跑几十次调用；需要对比更强模型时用 EVAL_MODEL 显式覆盖。
-os.environ.setdefault("PROVIDER", "kimi")
+os.environ.setdefault("PROVIDER", "deepseek")
 _provider = os.environ["PROVIDER"].strip().lower()
 if os.environ.get("EVAL_MODEL"):
     os.environ["MODEL"] = os.environ["EVAL_MODEL"]

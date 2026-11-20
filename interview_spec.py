@@ -54,23 +54,52 @@ DEFAULT_ROUNDS = 15
 # 去掉开场自我介绍和反问后，剩余题目按这个比例分配
 ROUND_MIX = (("项目深挖", 0.40), ("技术基础", 0.30), ("系统设计", 0.20), ("行为协作", 0.10))
 
+# 岗位不同，考察重心也不同：前端多问项目与工程，AI 多问原理，
+# 数据岗多问指标与协作。未识别的岗位沿用通用比例，行为与旧版完全一致。
+ROLE_MIXES = {
+    "frontend": (("项目深挖", 0.45), ("技术基础", 0.25), ("系统设计", 0.20), ("行为协作", 0.10)),
+    "ai": (("项目深挖", 0.40), ("技术基础", 0.35), ("系统设计", 0.15), ("行为协作", 0.10)),
+    "data": (("项目深挖", 0.35), ("技术基础", 0.25), ("系统设计", 0.20), ("行为协作", 0.20)),
+    "backend": (("项目深挖", 0.35), ("技术基础", 0.30), ("系统设计", 0.25), ("行为协作", 0.10)),
+}
 
-def round_plan(rounds: int) -> dict:
+
+def role_mix(role: str):
+    """按岗位关键词挑题目配比；识别不了就用通用配比。"""
+    text = str(role or "").lower()
+    if any(word in text for word in ("前端", "frontend", "web")):
+        return ROLE_MIXES["frontend"]
+    if any(word in text for word in ("ai", "ml", "算法", "机器学习", "人工智能")):
+        return ROLE_MIXES["ai"]
+    if any(word in text for word in ("数据", "data", "分析")):
+        return ROLE_MIXES["data"]
+    if any(word in text for word in ("后端", "backend", "服务端")):
+        return ROLE_MIXES["backend"]
+    return ROUND_MIX
+
+
+def round_plan(rounds: int, role: str = "") -> dict:
     """把总轮数拆成各类题目的配额；总题数包含开场和反问。
 
     返回 {"rounds": 15, "intro": 1, "project": 5, "technical": 4,
           "design": 3, "behavior": 1, "reverse": 1}
+
+    `role` 只影响配额，不影响总数；默认空串保持旧版通用比例。
     """
     rounds = rounds if rounds in ROUND_OPTIONS else DEFAULT_ROUNDS
+    mix = role_mix(role)
     core = max(1, rounds - 2)                 # 去掉开场和反问
     plan = {"rounds": rounds, "intro": 1, "reverse": 1}
     allocated = 0
-    for index, (name, weight) in enumerate(ROUND_MIX):
-        if index == len(ROUND_MIX) - 1:
+    for index, (name, weight) in enumerate(mix):
+        if index == len(mix) - 1:
             count = max(0, core - allocated)  # 最后一项吃掉四舍五入的余数
         else:
             count = max(0, round(core * weight))
             allocated += count
+            if allocated > core:              # 各项四舍五入可能超额，削掉多出来的
+                count -= allocated - core
+                allocated = core
         plan[{"项目深挖": "project", "技术基础": "technical",
               "系统设计": "design", "行为协作": "behavior"}[name]] = count
     return plan

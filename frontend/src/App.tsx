@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import Markdown from "react-markdown";
 import { api, connectSession, deleteSession, logout, me, transcribe } from "./api";
+import { draftKey, mergeDelta, nextRetryDelay } from "./logic";
 import type {
   Action,
   Health,
   InputMode,
+  Message,
   Pressure,
   ScoredQuestion,
   Session,
@@ -74,6 +76,64 @@ const date = (value: string) =>
     day: "2-digit",
   });
 
+/** 单条消息。流式时只有最后一条在变，memo 让其余消息跳过重渲染和 Markdown 重解析。 */
+const MessageRow = memo(function MessageRow({
+  message,
+  candidate,
+}: {
+  message: Message;
+  candidate: string;
+}) {
+  // 模型（尤其 DeepSeek）可能一次推来一大段；按字平滑展开，
+  // 让人看得出回复在逐步生成，而不是突然整段出现。
+  const [shown, setShown] = useState(message.text);
+  useEffect(() => {
+    if (shown.length >= message.text.length) {
+      if (shown.length > message.text.length) setShown(message.text);
+      return;
+    }
+    const timer = setTimeout(() => {
+      const remaining = message.text.length - shown.length;
+      const step = Math.max(1, Math.min(12, Math.ceil(remaining / 40)));
+      setShown(message.text.slice(0, shown.length + step));
+    }, 24);
+    return () => clearTimeout(timer);
+  }, [message.text, shown]);
+
+  return (
+    <article
+      className={`message ${message.role}${message.status === "streaming" ? " streaming" : ""}`}
+    >
+      <div className="avatar">
+        {message.role === "assistant" ? "i." : candidate.slice(0, 1)}
+      </div>
+      <div className="message-body">
+        <div className="message-name">
+          {message.role === "assistant" ? "面试官" : candidate}
+          <span>
+            {message.status === "interrupted"
+              ? "未完成 · 不计入评分"
+              : message.status === "streaming"
+                ? "正在回复"
+                : ""}
+          </span>
+        </div>
+        <div className="bubble">
+          {shown ? (
+            <Markdown>{shown}</Markdown>
+          ) : message.status === "streaming" ? (
+            <span className="thinking">
+              正在思考<span>•••</span>
+            </span>
+          ) : (
+            <span className="thinking">本轮未生成完整回复</span>
+          )}
+        </div>
+      </div>
+    </article>
+  );
+});
+
 export default function App() {
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
   const [selected, setSelected] = useState<string | null>(() =>
@@ -84,7 +144,11 @@ export default function App() {
   const [health, setHealth] = useState<Health | null>(null);
   const [error, setError] = useState("");
   const [progress, setProgress] = useState("");
-  const [draft, setDraft] = useState("");
+  const [draft, setDraft] = useState(() =>
+    selected ? localStorage.getItem(draftKey(selected)) ?? "" : "",
+  );
+  // 草稿属于哪个场次；切换场次时用它决定写回哪个 key，避免串场。
+  const draftSession = useRef(selected);
   const [candidate, setCandidate] = useState("");
   const [role, setRole] = useState("AI / ML 工程师");
   const [background, setBackground] = useState("");
@@ -103,6 +167,8 @@ export default function App() {
     { index: number; total: number; item: ScoredQuestion }[]
   >([]);
   const [showEndDialog, setShowEndDialog] = useState(false);
+  // 长对话只渲染最近 N 条，避免整页 Markdown 一次性重排；顶部可手动加载更早的。
+  const [visibleMessages, setVisibleMessages] = useState(40);
   const [recording, setRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [speaking, setSpeaking] = useState(false);
@@ -163,7 +229,8 @@ export default function App() {
   }, [refresh]);
   useEffect(() => {
     setSession(null);
-    setDraft("");
+    setVisibleMessages(40);
+
     setError("");
     setProgress("");
     setView("chat");
@@ -177,6 +244,9 @@ export default function App() {
     let disposed = false;
     let timer: ReturnType<typeof setTimeout>;
     let ws: WebSocket;
+    // 断线重连从 1 秒起翻倍，最多 30 秒；连上就重置。
+    // 加一点随机抖动，避免多标签页在同一毫秒同时重连。
+    let retryDelay = 1000;
     let lastSeq = -1;
     const acknowledge = () => {
       const command = pendingCommand.current;
@@ -188,6 +258,9 @@ export default function App() {
     const open = () => {
       ws = connectSession(selected);
       socket.current = ws;
+      ws.onopen = () => {
+        retryDelay = 1000;   // 连上就重置退避，下一次断线重新从 1 秒开始
+      };
       ws.onmessage = (event) => {
         if (disposed) return;
         const message = JSON.parse(event.data);
@@ -206,6 +279,13 @@ export default function App() {
           }
         }
         if (message.type === "command.accepted") acknowledge();
+        if (message.type === "reply.delta") {
+          const chunk = String(message.data?.text ?? "");
+          if (chunk) {
+            setConnected(true);
+            setSession((current) => mergeDelta(current, chunk));
+          }
+        }
         if (message.type === "command.error") {
           setError(message.data.message);
           setPending(false);
@@ -247,7 +327,9 @@ export default function App() {
           setError("无法连接此场次，请返回并新建面试。");
           return;
         }
-        timer = setTimeout(open, 1500);
+        const delay = retryDelay + Math.floor(Math.random() * 400);
+        retryDelay = nextRetryDelay(retryDelay);
+        timer = setTimeout(open, delay);
       };
       ws.onerror = () => ws.close();
     };
@@ -270,13 +352,31 @@ export default function App() {
       setSpeaking(false);
     };
   }, [selected, refresh, releaseMic, auth?.user]);
+  // 切换场次：先同步草稿归属，再加载新场次草稿。
+  useEffect(() => {
+    draftSession.current = selected;
+  }, [selected]);
+  // 输入时按场次写回 localStorage；空草稿直接移除，避免残留。
+  useEffect(() => {
+    const id = draftSession.current;
+    if (!id) return;
+    const key = draftKey(id);
+    if (draft) localStorage.setItem(key, draft);
+    else localStorage.removeItem(key);
+  }, [draft]);
+  useEffect(() => {
+    setDraft(
+      selected ? localStorage.getItem(draftKey(selected)) ?? "" : "",
+    );
+  }, [selected]);
   useEffect(() => {
     // 切场次时清掉上一场的逐题预览，避免串到新场次
     setLiveQuestions([]);
   }, [selected]);
+  const lastMessageText = session?.messages.at(-1)?.text;
   useEffect(() => {
     bottom.current?.scrollIntoView({ behavior: "smooth" });
-  }, [session?.messages.at(-1)?.text, view]);
+  }, [lastMessageText, view]);
   // 草稿空了就说明这一条已经交出去（或被清掉），来源标记跟着复位
   useEffect(() => {
     if (!draft) setVoiceOrigin(false);
@@ -323,7 +423,7 @@ export default function App() {
     speakRef.current = speak;
   }, [speak]);
 
-  const send = (action: Action, textOverride?: string) => {
+  const send = useCallback((action: Action, textOverride?: string) => {
     if (socket.current?.readyState !== WebSocket.OPEN || pending) return false;
     const text = action === "answer" ? (textOverride ?? draft) : "";
     const inputMode: InputMode =
@@ -340,7 +440,7 @@ export default function App() {
     setError("");
     socket.current.send(JSON.stringify(command));
     return true;
-  };
+  }, [pending, draft, voiceOrigin]);
   const keepAndReport = () => {
     setShowEndDialog(false);
     send("finish");
@@ -350,6 +450,7 @@ export default function App() {
     setShowEndDialog(false);
     try {
       await deleteSession(selected);
+      localStorage.removeItem(draftKey(selected));
       setSelected(null);
       setSession(null);
       setView("chat");
@@ -361,12 +462,12 @@ export default function App() {
       setError(reason instanceof Error ? reason.message : "删除失败，请重试");
     }
   };
-  const stopRecording = () => {
+  const stopRecording = useCallback(() => {
     const active = recorder.current;
     if (active && active.state !== "inactive") active.stop();
-  };
+  }, []);
 
-  const runTranscribe = async (blob: Blob, mimeType: string) => {
+  const runTranscribe = useCallback(async (blob: Blob, mimeType: string) => {
     if (!selected) return;
     if (blob.size < 1024) {
       setMicNote("录得太短了，再说一次？");
@@ -406,9 +507,9 @@ export default function App() {
       if (micAbort.current === controller) micAbort.current = null;
       setTranscribing(false);
     }
-  };
+  }, [selected, send]);
 
-  const startRecording = async () => {
+  const startRecording = useCallback(async () => {
     if (!selected || recording || transcribing) return;
     // 纯语音模式下，点麦克风也等于打断正在朗读的面试官
     if ("speechSynthesis" in window) window.speechSynthesis.cancel();
@@ -447,7 +548,8 @@ export default function App() {
     active.start();
     setRecording(true);
     micTimer.current = setTimeout(stopRecording, MAX_RECORD_MS);
-  };
+  }, [selected, recording, transcribing, stopRecording, runTranscribe, releaseMic]);
+
 
   useEffect(() => {
     startRecordingRef.current = () => {
@@ -487,6 +589,13 @@ export default function App() {
     }
   };
   const busy = !!session?.active_turn;
+  // 只渲染最近 visibleMessages 条；hiddenMessages 用于顶部「加载更早」按钮。
+  const windowedMessages = session
+    ? session.messages.slice(-visibleMessages)
+    : [];
+  const hiddenMessages = session
+    ? Math.max(0, session.messages.length - visibleMessages)
+    : 0;
   const askedCount = session
     ? session.messages.filter(
         (m) => m.role === "assistant" && m.status === "completed",
@@ -679,8 +788,18 @@ export default function App() {
                   <option>AI / ML 工程师</option>
                   <option>数据科学家</option>
                   <option>数据分析师</option>
+                  <option>AI Agent 开发</option>
+                  <option>大模型算法工程师</option>
+                  <option>前端工程师</option>
                   <option>后端开发工程师</option>
-                  <option>前端开发工程师</option>
+                  <option>Android 工程师</option>
+                  <option>iOS 工程师</option>
+                  <option>DevOps 工程师</option>
+                  <option>数据工程师</option>
+                  <option>PHP 工程师</option>
+                  <option>Node.js 工程师</option>
+                  <option>算法工程师</option>
+                  <option>产品经理</option>
                 </select>
               </label>
               <label>
@@ -846,42 +965,20 @@ export default function App() {
                       </button>
                     </div>
                   )}
-                  {session.messages.map((message) => (
-                    <article
-                      key={message.id}
-                      className={`message ${message.role}`}
+                  {hiddenMessages > 0 && (
+                    <button
+                      className="secondary load-earlier"
+                      onClick={() => setVisibleMessages((count) => count + 40)}
                     >
-                      <div className="avatar">
-                        {message.role === "assistant"
-                          ? "i."
-                          : session.candidate.slice(0, 1)}
-                      </div>
-                      <div className="message-body">
-                        <div className="message-name">
-                          {message.role === "assistant"
-                            ? "面试官"
-                            : session.candidate}
-                          <span>
-                            {message.status === "interrupted"
-                              ? "未完成 · 不计入评分"
-                              : message.status === "streaming"
-                                ? "正在回复"
-                                : ""}
-                          </span>
-                        </div>
-                        <div className="bubble">
-                          {message.text ? (
-                            <Markdown>{message.text}</Markdown>
-                          ) : message.status === "streaming" ? (
-                            <span className="thinking">
-                              正在思考<span>•••</span>
-                            </span>
-                          ) : (
-                            <span className="thinking">本轮未生成完整回复</span>
-                          )}
-                        </div>
-                      </div>
-                    </article>
+                      加载更早的 {Math.min(hiddenMessages, 40)} 条
+                    </button>
+                  )}
+                  {windowedMessages.map((message) => (
+                    <MessageRow
+                      key={message.id}
+                      message={message}
+                      candidate={session.candidate}
+                    />
                   ))}
                   {session.error && (
                     <div className="turn-error" role="status">
