@@ -3,6 +3,7 @@ import threading
 import time
 import uuid
 from types import SimpleNamespace
+from weakref import WeakKeyDictionary
 
 import pytest
 from fastapi.testclient import TestClient
@@ -44,11 +45,11 @@ def wait_done(service, session_id):
     pytest.fail("Turn did not complete")
 
 
-_WS_LAST_SEQ = {}
+_WS_LAST_SEQ = WeakKeyDictionary()
 
 
 def ws_done(ws):
-    last = _WS_LAST_SEQ.get(id(ws), -1)
+    last = _WS_LAST_SEQ.get(ws, -1)
     for _ in range(150):
         event = ws.receive_json()
         if event["type"] != "session.snapshot":
@@ -56,7 +57,7 @@ def ws_done(ws):
         seq = event.get("seq", 0)
         if seq <= last:
             continue
-        _WS_LAST_SEQ[id(ws)] = seq
+        _WS_LAST_SEQ[ws] = seq
         if not event["data"]["active_turn"]:
             return event["data"]
     pytest.fail("No terminal snapshot")

@@ -4,6 +4,7 @@
 能力声明、会话不被写入、错误不外泄。
 """
 import time
+from weakref import WeakKeyDictionary
 
 import pytest
 from fastapi.testclient import TestClient
@@ -69,11 +70,11 @@ def wait_done(service, session_id):
     pytest.fail("轮次没有结束")
 
 
-_WS_LAST_SEQ = {}
+_WS_LAST_SEQ = WeakKeyDictionary()
 
 
 def ws_done(ws):
-    last = _WS_LAST_SEQ.get(id(ws), -1)
+    last = _WS_LAST_SEQ.get(ws, -1)
     for _ in range(150):
         event = ws.receive_json()
         if event["type"] != "session.snapshot":
@@ -81,7 +82,7 @@ def ws_done(ws):
         seq = event.get("seq", 0)
         if seq <= last:
             continue
-        _WS_LAST_SEQ[id(ws)] = seq
+        _WS_LAST_SEQ[ws] = seq
         if not event["data"]["active_turn"]:
             return event["data"]
     pytest.fail("没等到终态快照")
