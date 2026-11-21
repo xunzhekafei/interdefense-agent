@@ -349,7 +349,7 @@ npm run build
 npm run format
 ```
 
-最近一次验证（2026-11-20）：P0-1/P0-2 已修复，WebSocket 用例需本机全量复验（沙箱禁止回环）；前端 eslint 0 警告、vitest 9 通过、TypeScript/build 通过。
+最近一次验证（2026-11-21）：离线测试连续 3 次全绿（2 slow skipped）；前端 eslint 0 警告、vitest 9 通过、TypeScript/build 通过。
 
 | 测试文件 | 覆盖 |
 | --- | --- |

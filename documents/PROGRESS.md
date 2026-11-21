@@ -56,11 +56,12 @@ Ollama 从 v0.13 起原生支持 Anthropic `/v1/messages`，设 `PROVIDER=custom
 | 11-17 | 安全与工程化（P1/P2/P3 + A/B/C） | 登出 token 失效、登录限流、CSP/HSTS、候选人注入防护、备份/恢复；settings.py、cron_utils.py、ruff、CI、前端 vitest/eslint、start.ps1 |
 | 11-18~11-20 | 岗位与公司题库 | 题库 11073 道 / 18 来源 / 20 仓库；新增 Android、iOS、DevOps、产品、数据工程、PHP、Node、算法 8 类岗位；Just-Code 字节题 133 |
 | 11-19~11-20 | 长面试评测 | 10/15/20/30 轮 × 3 岗位 × 2 场；四类口径（开场/项目、技术、行为协作、判断/案例）；DevOps 最稳，数据后段补词表后 60% |
+| 11-21 | WebSocket 稳定性 | 快照去重、关闭时的 CancelledError、测试按对象记录 seq；离线测试连续 3 次全绿（2 slow skipped） |
 
 ## 当前状态速览
 
-- **提交**：55 个（当前 72 个文件改动未提交）；**测试**：307 collected / 2 slow skipped；WebSocket 用例待本机全量复验；**评测用例**：26 条
-- **未完成**：P0-1/P0-2 本机连跑 3 次、分块提交、公网重新部署、区域赛材料
+- **提交**：基线 `c78b01f` + 本次 4 个 commit；**测试**：离线测试连续 3 次全绿（2 slow skipped）；**评测用例**：26 条
+- **未完成**：公网重新部署、区域赛材料；WebSocket 稳定性已复验
 - **评测基线**（DeepSeek flash，旧用例规模）：追问 17/17、行为 5/5、评分 4/4。**Kimi 尚未重跑**；当前用例已扩到 26 条，换模型后需重新建立基线
 - **评分区分度**（v3 加权）：优秀 8.07 / 较好 6.87 / 空洞 2.58 / 事实错误 1.32（0–10）
 - **模型**：默认 `claude-haiku-4-5`（`PROVIDER=deepseek`）；`PROVIDER=kimi` 切到 `kimi-k3.1-pro`；DeepSeek 下评测脚本强制 flash，`EVAL_MODEL` 才能覆盖
