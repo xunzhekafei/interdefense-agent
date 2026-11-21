@@ -395,6 +395,7 @@ def create_app(directory=None, adapter=None, recognizer=_AUTO):
                 await websocket.send_json(event)
 
         async def receive():
+            nonlocal last_snapshot
             while True:
                 # 事件驱动：不再每 100ms 轮询数据库，也不再重复发全量快照。
                 raw = await websocket.receive_text()
@@ -403,6 +404,9 @@ def create_app(directory=None, adapter=None, recognizer=_AUTO):
                     return
                 try:
                     command = Command.model_validate_json(raw)
+                    # 重连后可能用同一 request_id 重发命令；submit 返回原状态时，
+                    # 客户端仍需要一份快照作为确认，不能按「内容相同」跳过。
+                    last_snapshot = None
                     # submit 会加锁、读写 SQLite；放到线程里，别卡事件循环。
                     await asyncio.to_thread(
                         service.submit, session_id, **command.model_dump())
