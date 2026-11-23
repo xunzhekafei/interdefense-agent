@@ -167,6 +167,7 @@ export default function App() {
     { index: number; total: number; item: ScoredQuestion }[]
   >([]);
   const [showEndDialog, setShowEndDialog] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   // 长对话只渲染最近 N 条，避免整页 Markdown 一次性重排；顶部可手动加载更早的。
   const [visibleMessages, setVisibleMessages] = useState(40);
   const [recording, setRecording] = useState(false);
@@ -445,21 +446,33 @@ export default function App() {
     setShowEndDialog(false);
     send("finish");
   };
-  const removeSession = async () => {
-    if (!selected) return;
+  const removeSession = async (id: string | null = selected) => {
+    if (!id) return;
     setShowEndDialog(false);
     try {
-      await deleteSession(selected);
-      localStorage.removeItem(draftKey(selected));
-      setSelected(null);
-      setSession(null);
-      setView("chat");
-      setDraft("");
-      setLiveQuestions([]);
-      setMicNote("");
+      await deleteSession(id);
+      localStorage.removeItem(draftKey(id));
+      if (selected === id) {
+        setSelected(null);
+        setSession(null);
+        setView("chat");
+        setDraft("");
+        setLiveQuestions([]);
+        setMicNote("");
+      }
       await refresh();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "删除失败，请重试");
+    }
+  };
+  const deleteFromList = async (id: string, role: string) => {
+    if (deletingId) return;
+    if (!window.confirm(`删除「${role}」这场练习记录？删除后无法恢复。`)) return;
+    setDeletingId(id);
+    try {
+      await removeSession(id);
+    } finally {
+      setDeletingId(null);
     }
   };
   const stopRecording = useCallback(() => {
@@ -657,22 +670,36 @@ export default function App() {
             </p>
           ) : (
             sessions.map((s) => (
-              <button
-                className={`history-item ${selected === s.id ? "selected" : ""}`}
+              <div
+                className={`history-row ${selected === s.id ? "selected" : ""}`}
                 key={s.id}
-                onClick={() => {
-                  setPage("session");
-                  setSelected(s.id);
-                }}
               >
-                <strong>{s.role}</strong>
-                <span>
-                  {s.candidate} · {date(s.created_at)}
-                  <i className={s.status === "completed" ? "done" : ""}>
-                    {labels[s.status]}
-                  </i>
-                </span>
-              </button>
+                <button
+                  className={`history-item ${selected === s.id ? "selected" : ""}`}
+                  onClick={() => {
+                    setPage("session");
+                    setSelected(s.id);
+                  }}
+                >
+                  <strong>{s.role}</strong>
+                  <span>
+                    {s.candidate} · {date(s.created_at)}
+                    <i className={s.status === "completed" ? "done" : ""}>
+                      {labels[s.status]}
+                    </i>
+                  </span>
+                </button>
+                <button
+                  className="history-delete"
+                  type="button"
+                  title="删除这场记录"
+                  aria-label={`删除 ${s.role} 的练习记录`}
+                  disabled={deletingId === s.id}
+                  onClick={() => void deleteFromList(s.id, s.role)}
+                >
+                  {deletingId === s.id ? "…" : "×"}
+                </button>
+              </div>
             ))
           )}
         </nav>
@@ -1162,7 +1189,7 @@ export default function App() {
         <EndDialog
           answered={answered}
           onKeep={keepAndReport}
-          onDelete={() => void removeSession()}
+          onDelete={() => void removeSession(selected)}
           onCancel={() => setShowEndDialog(false)}
         />
       )}

@@ -117,14 +117,53 @@ p {
   overflow-y: auto;
   flex: 1;
 }
+.history-row {
+  position: relative;
+  margin-bottom: 7px;
+}
 .history-item {
   width: 100%;
   text-align: left;
   color: #b7c9c1;
   background: transparent;
-  padding: 14px 10px;
+  padding: 14px 34px 14px 10px;
   border-radius: 7px;
-  margin-bottom: 7px;
+}
+.history-delete {
+  position: absolute;
+  top: 9px;
+  right: 7px;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #92aaa2;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .15s, color .15s, background .15s;
+}
+.history-row:hover .history-delete,
+.history-row:focus-within .history-delete,
+.history-delete:disabled {
+  opacity: 1;
+}
+.history-delete:hover {
+  color: #ffb4a8;
+  background: rgba(220, 80, 60, .18);
+}
+.history-delete:disabled {
+  cursor: wait;
+}
+@media (hover: none) {
+  .history-delete {
+    opacity: 1;
+  }
 }
 .history-item:hover,
 .history-item.selected {
@@ -1004,11 +1043,21 @@ meter::-webkit-meter-optimum-value {
     gap: 8px;
     max-height: 85px;
   }
+  .history-row {
+    margin: 0;
+  }
   .history-item {
     min-width: 165px;
     width: 165px;
     margin: 0;
-    padding: 10px;
+    padding: 10px 26px 10px 10px;
+  }
+  .history-delete {
+    top: 5px;
+    right: 4px;
+    width: 18px;
+    height: 18px;
+    font-size: 13px;
   }
   .history-item strong {
     font-size: 10px;

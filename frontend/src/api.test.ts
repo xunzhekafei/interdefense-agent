@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { api } from "./api";
+import { api, deleteSession } from "./api";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -39,5 +39,20 @@ describe("api", () => {
       ),
     );
     await expect(api("/sessions")).rejects.toThrow("当前场次仍在处理");
+  });
+
+  it("deletes a session with the DELETE method", async () => {
+    const fetchMock = vi.fn(
+      async (_url: string, _init?: RequestInit) =>
+        new Response(null, { status: 204 }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await deleteSession("abc123");
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe("/api/sessions/abc123");
+    expect(init?.method).toBe("DELETE");
   });
 });
