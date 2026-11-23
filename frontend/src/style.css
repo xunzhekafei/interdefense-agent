@@ -876,8 +876,14 @@ meter::-webkit-meter-optimum-value {
   padding: 10px 16px;
   background: #f7f9f2;
 }
-.report > .secondary {
+.report-downloads {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
   margin-top: 20px;
+}
+.report-downloads .secondary {
+  margin: 0;
 }
 .loading {
   text-align: center;

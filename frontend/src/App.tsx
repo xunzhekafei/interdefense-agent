@@ -957,7 +957,7 @@ export default function App() {
             {session.status === "scoring" && liveQuestions.length > 0 ? (
               <LiveReport questions={liveQuestions} progress={progress} />
             ) : view === "report" && session.report ? (
-              <ReportView report={session.report} />
+              <ReportView report={session.report} sessionId={session.id} />
             ) : (
               <div className="conversation">
                 <div className="conversation-top">

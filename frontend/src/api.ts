@@ -116,6 +116,28 @@ export async function deleteSession(sessionId: string): Promise<void> {
   }
 }
 
+/** 下载报告：format 为 md 或 pdf，由后端渲染。 */
+export async function downloadReport(
+  sessionId: string,
+  format: "md" | "pdf",
+): Promise<void> {
+  const response = await request(
+    `/api/sessions/${sessionId}/report.${format}`,
+    {},
+    30_000,
+  );
+  if (!response.ok) {
+    throw new Error(await readError(response, "报告下载失败，请重试"));
+  }
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `interview-report.${format}`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 export function connectSession(id: string) {
   return new WebSocket(
     `${location.protocol === "https:" ? "wss:" : "ws:"}//${location.host}/api/sessions/${id}/ws`,

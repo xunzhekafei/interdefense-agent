@@ -1,6 +1,31 @@
+import { useState } from "react";
+
+import { downloadReport } from "../api";
 import type { Report } from "../types";
 
-export default function ReportView({ report }: { report: Report }) {
+export default function ReportView({
+  report,
+  sessionId,
+}: {
+  report: Report;
+  sessionId: string;
+}) {
+  const [busy, setBusy] = useState<"md" | "pdf" | null>(null);
+  const [error, setError] = useState("");
+
+  const download = async (format: "md" | "pdf") => {
+    if (busy) return;
+    setBusy(format);
+    setError("");
+    try {
+      await downloadReport(sessionId, format);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "下载失败，请重试");
+    } finally {
+      setBusy(null);
+    }
+  };
+
   return (
     <div className="report">
       <div className="report-lead">
@@ -85,23 +110,40 @@ export default function ReportView({ report }: { report: Report }) {
           ))}
         </>
       ) : null}
-      <button
-        className="secondary"
-        onClick={() => {
-          const url = URL.createObjectURL(
-            new Blob([JSON.stringify(report, null, 2)], {
-              type: "application/json",
-            }),
-          );
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = "interview-report.json";
-          a.click();
-          URL.revokeObjectURL(url);
-        }}
-      >
-        下载完整报告 ↓
-      </button>
+      <div className="report-downloads">
+        <button
+          className="secondary"
+          disabled={busy !== null}
+          onClick={() => void download("md")}
+        >
+          {busy === "md" ? "生成中…" : "下载 Markdown ↓"}
+        </button>
+        <button
+          className="secondary"
+          disabled={busy !== null}
+          onClick={() => void download("pdf")}
+        >
+          {busy === "pdf" ? "生成中…" : "下载 PDF ↓"}
+        </button>
+        <button
+          className="secondary"
+          onClick={() => {
+            const url = URL.createObjectURL(
+              new Blob([JSON.stringify(report, null, 2)], {
+                type: "application/json",
+              }),
+            );
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "interview-report.json";
+            a.click();
+            URL.revokeObjectURL(url);
+          }}
+        >
+          下载 JSON ↓
+        </button>
+      </div>
+      {error ? <small className="evidence-warning">{error}</small> : null}
     </div>
   );
 }

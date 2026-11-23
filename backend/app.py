@@ -18,6 +18,7 @@ from settings import env_flag
 
 from .auth import COOKIE, TTL_SECONDS, AuthStore
 from .profile import build_profile
+from .report_export import to_markdown, to_pdf
 from .service import InterviewService
 from .speech import CAPABILITIES
 
@@ -285,6 +286,32 @@ def create_app(directory=None, adapter=None, recognizer=_AUTO):
         if result is None:
             raise HTTPException(404, "报告尚未生成")
         return result
+
+    @app.get("/api/sessions/{session_id}/report.md")
+    def report_markdown(session_id: str):
+        result = get_session(session_id)["report"]
+        if result is None:
+            raise HTTPException(404, "报告尚未生成")
+        return Response(
+            content=to_markdown(result),
+            media_type="text/markdown; charset=utf-8",
+            headers={
+                "Content-Disposition": f'attachment; filename="interview-report-{session_id[:8]}.md"'
+            },
+        )
+
+    @app.get("/api/sessions/{session_id}/report.pdf")
+    def report_pdf(session_id: str):
+        result = get_session(session_id)["report"]
+        if result is None:
+            raise HTTPException(404, "报告尚未生成")
+        return Response(
+            content=to_pdf(result),
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f'attachment; filename="interview-report-{session_id[:8]}.pdf"'
+            },
+        )
 
     @app.post("/api/sessions/{session_id}/transcribe")
     async def transcribe(session_id: str, request: Request):
