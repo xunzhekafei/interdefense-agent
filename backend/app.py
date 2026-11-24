@@ -87,12 +87,29 @@ class SessionInput(BaseModel):
     # 追问锚定到单元而不是泛泛提问。
     scene: Literal["interview", "defense", "presentation"] = "interview"
     script: str = Field(default="", max_length=20000)
+    # 从上一场继承检验点：服务端读上一场已确认的摘要卡，不接收客户端伪造的内容
+    focus_from: str | None = Field(default=None, max_length=64)
     # 面试压力档位，各档规则见 skills/mock-interviewer/SKILL.md
     pressure: Literal["温和", "标准", "压力"] = "标准"
     # 交互方式：文字 / 纯语音。纯语音会话不显示文字输入框，回答自动转写提交。
     mode: Literal["text", "voice"] = "text"
     # 目标总题数（含开场和反问），只允许几个固定档位
     rounds: Literal[10, 15, 20, 30, 50] = DEFAULT_ROUNDS
+
+
+class SummaryEdit(BaseModel):
+    id: str = Field(min_length=1, max_length=16)
+    status: Literal["pending", "confirmed", "rejected", "resolved", "dismissed"] = "pending"
+    edited_text: str | None = Field(default=None, max_length=200)
+
+
+class SummaryPatch(BaseModel):
+    claims: list[SummaryEdit] = Field(default_factory=list)
+    open_questions: list[SummaryEdit] = Field(default_factory=list)
+
+
+class SummaryRefresh(BaseModel):
+    refresh: bool = False
 
 
 class Command(BaseModel):
@@ -265,7 +282,10 @@ def create_app(directory=None, adapter=None, recognizer=_AUTO):
 
     @app.post("/api/sessions", status_code=201)
     def create_session(body: SessionInput):
-        return app.state.service.create(**body.model_dump())
+        try:
+            return app.state.service.create(**body.model_dump())
+        except ValueError as error:
+            raise HTTPException(400, str(error))
 
     @app.get("/api/sessions/{session_id}")
     def session(session_id: str):
@@ -283,6 +303,42 @@ def create_app(directory=None, adapter=None, recognizer=_AUTO):
         except KeyError:
             raise HTTPException(404, "场次不存在")
         return {"deleted": True}
+
+    @app.post("/api/sessions/{session_id}/summary-card")
+    def summary_card(session_id: str, body: SummaryRefresh | None = None):
+        """生成摘要卡：AI 对讲稿的理解清单 + 缺少证据的地方。"""
+        try:
+            card = app.state.service.summary_card(
+                session_id, refresh=bool(body and body.refresh))
+        except KeyError:
+            raise HTTPException(404, "找不到面试场次")
+        except ValueError as error:
+            raise HTTPException(409, str(error))
+        return {"summary_card": card}
+
+    @app.patch("/api/sessions/{session_id}/summary-card")
+    def edit_summary_card(session_id: str, body: SummaryPatch):
+        """学生逐条确认 / 驳回 / 改写摘要卡的理解。"""
+        try:
+            card = app.state.service.patch_summary_card(
+                session_id,
+                claims=[item.model_dump() for item in body.claims],
+                open_questions=[item.model_dump() for item in body.open_questions])
+        except KeyError:
+            raise HTTPException(404, "找不到面试场次")
+        except ValueError as error:
+            raise HTTPException(409, str(error))
+        return {"summary_card": card}
+
+    @app.post("/api/sessions/{session_id}/summary-card/confirm")
+    def confirm_summary_card(session_id: str):
+        """确认摘要卡，并把确认结果转成下一场的定向检验点。"""
+        try:
+            return app.state.service.confirm_summary_card(session_id)
+        except KeyError:
+            raise HTTPException(404, "找不到面试场次")
+        except ValueError as error:
+            raise HTTPException(409, str(error))
 
     @app.get("/api/sessions/{session_id}/report")
     def report(session_id: str):

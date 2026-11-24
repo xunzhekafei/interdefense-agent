@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from interview_spec import DEFAULT_ROUNDS, classify_answer
+from script_summary import apply_edits, build_card, confirm, focus_items
 from script_units import normalize_script, segment, split_markers
 
 from .agent_adapter import InterviewAgent
@@ -142,18 +143,29 @@ class InterviewService:
     # ---- 场次操作 ----
 
     def create(self, candidate, role, background, pressure="标准", mode="text",
-               rounds=DEFAULT_ROUNDS, scene="interview", script=""):
+               rounds=DEFAULT_ROUNDS, scene="interview", script="", focus_from=None):
         """新建场次。
 
         ``scene`` 取 interview / defense / presentation；答辩与课程汇报会先把
         ``script`` 切成陈述单元，追问时才能锚定到「你第 2 部分」这样的原话位置。
         讲稿在这里统一换行符，保证单元偏移和入库文本逐字对应。
+
+        ``focus_from`` 指向上一场：从它已确认的摘要卡里取检验点，本轮会定向追问。
         """
         text = normalize_script(script)
         units = segment(text, scene) if text.strip() else []
+        focus = []
+        if focus_from:
+            try:
+                previous = self.store.get(focus_from)
+            except KeyError:
+                raise ValueError("上一场次不存在，无法继承检验点") from None
+            focus = focus_items(previous.get("summary_card") or {},
+                                previous.get("units") or [])
         session = dict(id=uuid.uuid4().hex, candidate=candidate, role=role, background=background,
                        pressure=pressure, mode=mode, rounds=rounds, created_at=now(),
                        scene=scene, script=text, units=units,
+                       focus=focus, focus_from=focus_from,
                        status="ready", active_turn=None, messages=[], report=None, seq=0,
                        error=None, last_action=None, requests=[])
         self.store.save(session)
@@ -369,6 +381,64 @@ class InterviewService:
             with self.lock:
                 self.runs.pop(turn_id, None)
                 self.cancels.pop(turn_id, None)
+
+    def summary_card(self, session_id, refresh=False):
+        """生成（或返回已有的）摘要卡。
+
+        模型调用走 memory_executor，不占用回合队列：摘要卡通常在开场前生成，
+        但如果用户在对话中途点"重新生成"，也不该把下一轮对话挡在后面。
+        模型失败、输出不合法时 build_card 会退回规则生成，接口仍然成功。
+        """
+        with self.lock:
+            session = self.store.get(session_id)
+        if not session.get("units"):
+            raise ValueError("这一场没有可复盘的陈述单元")
+        if session.get("summary_card") and not refresh:
+            return session["summary_card"]
+        raw = None
+        summarizer = getattr(self.adapter, "summarize", None)
+        if summarizer is not None:
+            try:
+                raw = self.memory_executor.submit(summarizer, session).result()
+            except Exception:
+                logging.getLogger(__name__).exception("摘要卡生成失败：%s", session_id)
+        with self.lock:
+            current = self.store.get(session_id)
+            card = build_card(current.get("units") or [], raw)
+            current["summary_card"] = card
+            current["last_action"] = "summary-card"
+            self.store.save(current, "summary.card", {"card": card})
+            self._publish_snapshot(current)
+            return card
+
+    def patch_summary_card(self, session_id, claims=None, open_questions=None):
+        """应用学生的逐条修正：确认、驳回、改写。"""
+        with self.lock:
+            session = self.store.get(session_id)
+            card = session.get("summary_card")
+            if not card:
+                raise ValueError("摘要卡还没生成")
+            updated = apply_edits(card, claims, open_questions)
+            session["summary_card"] = updated
+            self.store.save(session, "summary.edited", {"card": updated})
+            self._publish_snapshot(session)
+            return updated
+
+    def confirm_summary_card(self, session_id):
+        """确认摘要卡，并把它转成下一场的检验点。"""
+        with self.lock:
+            session = self.store.get(session_id)
+            card = session.get("summary_card")
+            if not card:
+                raise ValueError("摘要卡还没生成")
+            updated = confirm(card)
+            updated["confirmed_at"] = now()
+            session["summary_card"] = updated
+            session["focus"] = focus_items(updated, session.get("units") or [])
+            self.store.save(session, "summary.confirmed",
+                            {"card": updated, "focus": session["focus"]})
+            self._publish_snapshot(session)
+            return {"summary_card": updated, "focus": session["focus"]}
 
     def _refresh_memory(self, session_id):
         """后台更新结构化笔记；失败或场次已删就静默跳过。"""

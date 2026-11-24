@@ -38,6 +38,7 @@ from interview_spec import (DEFAULT_ROUNDS, DIMENSION_NAMES, DIMENSION_WEIGHTS,
                             SCORING_VERSION, SKIP_REASONS, classify_answer,
                             weighted_overall)
 from script_units import coverage as unit_coverage, resolve_refs, unit_of_quote
+from script_summary import focus_checks as check_focus
 
 logger = logging.getLogger(__name__)
 
@@ -2732,6 +2733,9 @@ def _interview_report(ctx: WorkflowContext, args: dict) -> dict:
     # 答辩/汇报场景才有陈述单元；求职面试传空列表，行为与改造前完全一致。
     units = [unit for unit in (args.get("units") or [])
              if isinstance(unit, dict) and unit.get("id")]
+    # 上一场确认过的检验点；本轮有没有问到由代码统计，不靠模型自评。
+    focus = [item for item in (args.get("focus") or [])
+             if isinstance(item, dict) and str(item.get("text") or "").strip()]
 
     # Web 端手里本来就有结构化的 messages，直接传 qa 过来，不必再让模型解析一遍。
     # 实测 Kimi 在低推理强度下会把不同题目的回答张冠李戴（四道题全填同一段回答），
@@ -2919,13 +2923,20 @@ def _interview_report(ctx: WorkflowContext, args: dict) -> dict:
         ids = "、".join(row["id"] for row in unit_report["uncovered"])
         unit_note = (f"\n\n本次有 {len(unit_report['uncovered'])} 个陈述单元没有被追问到（{ids}），"
                      "在 summary 里提醒下次重点补充；不要编造对这些单元的评价。")
+    focus_checks = check_focus(focus, scored_questions) if focus else []
+    unchecked = [item for item in focus_checks if not item["checked"]]
+    focus_note = ""
+    if unchecked:
+        focus_note = (f"\n\n上一场有 {len(unchecked)} 个待检验点这一场没有被追问到："
+                      + "；".join(str(item.get("text", ""))[:40] for item in unchecked[:3])
+                      + "。在 summary 里如实提醒，不要假装已经检验过。")
     report = ctx.agent(
         f"根据下面的逐题评分，汇总一份{role}模拟面试报告：给出总分、各维度均分、"
         f"优势、短板和改进建议（建议要可执行、按优先级排序）。"
         "**所有分数一律用 0-10 分制**：各维度分是逐题分数的平均，"
         "总分是四个维度分的加权和（技术正确性 30%、深度与原理 30%、"
         "工程与场景思考 25%、表达与结构 15%）；不要用 100 分制或 5 分制："
-        + skipped_note + unit_note + "\n\n"
+        + skipped_note + unit_note + focus_note + "\n\n"
         + json.dumps(scored_questions, ensure_ascii=False),
         schema=INTERVIEW_REPORT_SCHEMA, label="summary")
     # 总分由代码算，不用模型返回的那个：同一个 prompt 下模型会在 0-10、0-100、
@@ -2946,6 +2957,8 @@ def _interview_report(ctx: WorkflowContext, args: dict) -> dict:
         result["unit_coverage"] = unit_report
         result["units"] = [{"id": unit["id"], "section": unit.get("section"),
                             "text": unit.get("text")} for unit in units]
+    if focus_checks:
+        result["focus_checks"] = focus_checks
     return result
 
 
