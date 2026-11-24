@@ -83,6 +83,10 @@ class SessionInput(BaseModel):
     candidate: str = Field(min_length=1, max_length=80)
     role: str = Field(min_length=1, max_length=120)
     background: str = Field(default="", max_length=8000)
+    # 场景：求职面试 / 毕业答辩 / 课程汇报。后两者会用讲稿切出陈述单元，
+    # 追问锚定到单元而不是泛泛提问。
+    scene: Literal["interview", "defense", "presentation"] = "interview"
+    script: str = Field(default="", max_length=20000)
     # 面试压力档位，各档规则见 skills/mock-interviewer/SKILL.md
     pressure: Literal["温和", "标准", "压力"] = "标准"
     # 交互方式：文字 / 纯语音。纯语音会话不显示文字输入框，回答自动转写提交。
@@ -122,7 +126,7 @@ def create_app(directory=None, adapter=None, recognizer=_AUTO):
         finally:
             await asyncio.to_thread(app.state.service.close)
 
-    app = FastAPI(title="Interview Studio", lifespan=lifespan)
+    app = FastAPI(title="InterDefense Studio", lifespan=lifespan)
     # 部署到公网时用 WEB_ALLOWED_HOSTS 放行域名/隧道地址；默认只允许本机。
     allowed_hosts = [h.strip() for h in os.environ.get(
         "WEB_ALLOWED_HOSTS", "localhost,127.0.0.1,testserver").split(",") if h.strip()]

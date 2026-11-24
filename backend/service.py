@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from interview_spec import DEFAULT_ROUNDS, classify_answer
+from script_units import normalize_script, segment, split_markers
 
 from .agent_adapter import InterviewAgent
 from .sessions import SessionStore
@@ -141,9 +142,18 @@ class InterviewService:
     # ---- 场次操作 ----
 
     def create(self, candidate, role, background, pressure="标准", mode="text",
-               rounds=DEFAULT_ROUNDS):
+               rounds=DEFAULT_ROUNDS, scene="interview", script=""):
+        """新建场次。
+
+        ``scene`` 取 interview / defense / presentation；答辩与课程汇报会先把
+        ``script`` 切成陈述单元，追问时才能锚定到「你第 2 部分」这样的原话位置。
+        讲稿在这里统一换行符，保证单元偏移和入库文本逐字对应。
+        """
+        text = normalize_script(script)
+        units = segment(text, scene) if text.strip() else []
         session = dict(id=uuid.uuid4().hex, candidate=candidate, role=role, background=background,
                        pressure=pressure, mode=mode, rounds=rounds, created_at=now(),
+                       scene=scene, script=text, units=units,
                        status="ready", active_turn=None, messages=[], report=None, seq=0,
                        error=None, last_action=None, requests=[])
         self.store.save(session)
@@ -320,6 +330,11 @@ class InterviewService:
                 else:
                     message = session["messages"][-1]
                     message["text"] = message["text"] or result
+                    # 单元标记在流式阶段已经推送，收尾时统一剥离：展示层看不到 [[U2]]，
+                    # 但编号会落到消息上，评分与报告才有可靠的回链依据。
+                    clean, unit_ref = split_markers(message["text"])
+                    message["text"] = clean
+                    message["unit_ref"] = unit_ref
                     if not message["text"].strip():
                         raise ValueError("模型没有返回文字，请重试")
                     message["status"] = "completed"

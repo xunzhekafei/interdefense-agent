@@ -37,6 +37,7 @@ from cron_utils import cron_matches, validate_cron
 from interview_spec import (DEFAULT_ROUNDS, DIMENSION_NAMES, DIMENSION_WEIGHTS,
                             SCORING_VERSION, SKIP_REASONS, classify_answer,
                             weighted_overall)
+from script_units import coverage as unit_coverage, resolve_refs, unit_of_quote
 
 logger = logging.getLogger(__name__)
 
@@ -2728,6 +2729,9 @@ def _split_transcript(text: str, max_chars: int = 6000) -> list[str]:
 def _interview_report(ctx: WorkflowContext, args: dict) -> dict:
     """面试评分：解析完整问答记录 → 逐题并行评分（分批发，遵守并发上限）→ 汇总报告。"""
     role = str(args.get("role", "技术岗")).strip() or "技术岗"
+    # 答辩/汇报场景才有陈述单元；求职面试传空列表，行为与改造前完全一致。
+    units = [unit for unit in (args.get("units") or [])
+             if isinstance(unit, dict) and unit.get("id")]
 
     # Web 端手里本来就有结构化的 messages，直接传 qa 过来，不必再让模型解析一遍。
     # 实测 Kimi 在低推理强度下会把不同题目的回答张冠李戴（四道题全填同一段回答），
@@ -2741,7 +2745,8 @@ def _interview_report(ctx: WorkflowContext, args: dict) -> dict:
             question = str(item.get("question", "")).strip()
             answer = str(item.get("answer", "")).strip()
             if question and answer:
-                qa.append({"question": question, "answer": answer})
+                qa.append({"question": question, "answer": answer,
+                           "unit_ref": resolve_refs(units, item.get("unit_ref") or [])})
         if raw_qa and not qa:
             raise WorkflowInputError("args.qa 里没有有效的问答对")
 
@@ -2822,6 +2827,20 @@ def _interview_report(ctx: WorkflowContext, args: dict) -> dict:
     qa = scored_qa
 
     def score_answer(_value, item, index):
+        # 这一问锚定的陈述单元：让评分看到「他先前怎么陈述的」和「本轮怎么答的」，
+        # 才能判断是补充证据、偏离主题，还是与讲稿自相矛盾。
+        unit_hint = ""
+        refs = resolve_refs(units, item.get("unit_ref") or [])
+        if refs:
+            quoted = "\n".join(
+                f"{unit['id']}【{unit.get('section', '其他')}】{unit.get('text', '')}"
+                for unit in units if unit["id"] in refs)
+            if quoted:
+                unit_hint = (
+                    "\n\n本轮追问锚定的陈述单元（候选人先前提交的讲稿原文，不是本轮回答）：\n"
+                    + quoted +
+                    "\n评分时对照这段陈述：本轮回答是否偏离、是否补充了新证据、"
+                    "有没有和讲稿自相矛盾。")
         prompt = (
             f"你是{role}方向的资深面试官，给下面这道题的候选人回答打分"
             f"（每个维度 0-10 的整数）：\n\n问题：{item['question']}\n\n"
@@ -2841,7 +2860,7 @@ def _interview_report(ctx: WorkflowContext, args: dict) -> dict:
             "**这类拼写问题不要计入「技术正确性」**；但概念、原理、方案上的错误照常扣分。"
             "evidence 字段必须是候选人回答里的**逐字原文**：只摘录，不改写、"
             "不概括、不加「候选人说」之类的前缀；不要跨轮拼接；引用面试官的问题不算。"
-            "suggestion 给具体改进建议。"
+            "suggestion 给具体改进建议。" + unit_hint
         )
         correction = ""
         scored = None
@@ -2865,7 +2884,12 @@ def _interview_report(ctx: WorkflowContext, args: dict) -> dict:
         else:
             # 重试耗尽：保留分数，但明确标记证据没通过核验
             scored["evidence_verified"] = False
-        return {"question": item["question"], **scored}
+        linked = list(refs)
+        if not linked:
+            hit = unit_of_quote(units, scored.get("evidence", ""))
+            if hit:
+                linked = [hit]
+        return {"question": item["question"], "unit_ref": linked, **scored}
 
     scored_questions: list = []
     total_questions = len(qa)
@@ -2888,13 +2912,20 @@ def _interview_report(ctx: WorkflowContext, args: dict) -> dict:
         reasons = "、".join(sorted({item["reason_text"] for item in skipped_questions}))
         skipped_note = (f"\n\n另有 {len(skipped_questions)} 轮没有有效作答（{reasons}），"
                         "已从均分中剔除；可以在报告里提醒候选人，但不要按 0 分计入。")
+    # 单元覆盖由代码统计，不让模型数：漏掉一个单元就在报告里说漏掉一个。
+    unit_report = unit_coverage(units, scored_questions) if units else None
+    unit_note = ""
+    if unit_report and unit_report["uncovered"]:
+        ids = "、".join(row["id"] for row in unit_report["uncovered"])
+        unit_note = (f"\n\n本次有 {len(unit_report['uncovered'])} 个陈述单元没有被追问到（{ids}），"
+                     "在 summary 里提醒下次重点补充；不要编造对这些单元的评价。")
     report = ctx.agent(
         f"根据下面的逐题评分，汇总一份{role}模拟面试报告：给出总分、各维度均分、"
         f"优势、短板和改进建议（建议要可执行、按优先级排序）。"
         "**所有分数一律用 0-10 分制**：各维度分是逐题分数的平均，"
         "总分是四个维度分的加权和（技术正确性 30%、深度与原理 30%、"
         "工程与场景思考 25%、表达与结构 15%）；不要用 100 分制或 5 分制："
-        + skipped_note + "\n\n"
+        + skipped_note + unit_note + "\n\n"
         + json.dumps(scored_questions, ensure_ascii=False),
         schema=INTERVIEW_REPORT_SCHEMA, label="summary")
     # 总分由代码算，不用模型返回的那个：同一个 prompt 下模型会在 0-10、0-100、
@@ -2906,10 +2937,16 @@ def _interview_report(ctx: WorkflowContext, args: dict) -> dict:
     weighted = weighted_overall(dimensions)
     if weighted is not None:
         report["overall"] = weighted
-    return {**report, "per_question": scored_questions,
-            "skipped_questions": skipped_questions,
-            "target_rounds": target_rounds,
-            "scoring_version": SCORING_VERSION}
+    result = {**report, "per_question": scored_questions,
+              "skipped_questions": skipped_questions,
+              "target_rounds": target_rounds,
+              "scoring_version": SCORING_VERSION}
+    if unit_report is not None:
+        # 只有答辩/汇报场景才带这两个字段；旧前端忽略未知字段，不受影响。
+        result["unit_coverage"] = unit_report
+        result["units"] = [{"id": unit["id"], "section": unit.get("section"),
+                            "text": unit.get("text")} for unit in units]
+    return result
 
 
 register_workflow(

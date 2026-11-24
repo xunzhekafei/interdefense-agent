@@ -1,9 +1,14 @@
-# myagent · AI 面试练习室
+# interdefense-agent · 答辩与课程汇报复盘
 
-一个从零构建的 Python Agent 运行时，以及基于它实现的 **AI 技术岗模拟面试应用**。
-支持浏览器中的文字面试，也保留终端交互模式。面试围绕候选人背景和项目经历展开，结束后生成四维评分、逐题证据与改进建议。
+从 [myagent](https://github.com/xunzhekafei/myagent) 分叉出的场景化版本。保留原有的 Python Agent 运行时与 AI 模拟面试能力，新增**毕业答辩**与**课程汇报**两个学习场景。
 
-核心运行时按 [learn-claude-code](https://github.com/shareAI-lab/learn-claude-code) s01→s17 逐章实现，包含工具调用、hooks、记忆、上下文压缩、任务系统、团队协作和工作流编排。
+三个场景共享同一套运行时，区别在追问对象：
+
+- **求职面试**：按候选人刚说的话追问，题库、评分口径、语音能力与上游一致。
+- **毕业答辩**：讲稿先切成带编号的陈述单元（背景/方法/结果/创新/局限），每个问题锚定到具体单元，报告附带哪些单元没被问到。
+- **课程汇报**：按问题/做法/结果/反思推进，重点核对分工、个人贡献与依据。
+
+核心运行时仍按 [learn-claude-code](https://github.com/shareAI-lab/learn-claude-code) s01→s17 逐章实现，包含工具调用、hooks、记忆、上下文压缩、任务系统、团队协作和工作流编排。
 模型通过 Anthropic Python SDK 调用，默认连接 DeepSeek 的 Anthropic 兼容端点（`PROVIDER=kimi` 可切到 Kimi）。
 
 ## 导航

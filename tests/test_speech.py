@@ -256,8 +256,9 @@ def test_answered_qa_puts_voice_mark_in_answer():
         _msg("user", "这是手打的回答"),
     ])
     assert qa == [
-        {"question": "请自我介绍", "answer": f"我用 LightGBM 做建模（{agent.VOICE_MARK}）"},
-        {"question": "追问一下", "answer": "这是手打的回答"},
+        {"question": "请自我介绍",
+         "answer": f"我用 LightGBM 做建模（{agent.VOICE_MARK}）", "unit_ref": []},
+        {"question": "追问一下", "answer": "这是手打的回答", "unit_ref": []},
     ]
 
 
