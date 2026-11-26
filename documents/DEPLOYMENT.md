@@ -1,4 +1,6 @@
-# 部署（给评审用）
+# 部署（给评审 / 试用用）
+
+> 本文档对应 `interdefense-agent`（答辩复盘）版本；旧版 `myagent` 的部署步骤仍基本适用。
 
 目标：把一个**公网 HTTPS 地址 + 评审账号**交给大赛评委。
 本机开发不需要这些步骤——没有 `auth.json` 时系统默认**不启用登录**。
@@ -13,15 +15,26 @@
 ## 二、安装
 
 ```bash
-git clone https://github.com/xunzhekafei/myagent.git
-cd myagent
+git clone https://github.com/xunzhekafei/interdefense-agent.git
+cd interdefense-agent
 python3 -m venv .venv
 .venv/bin/pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements-lock.txt
 cd frontend && npm ci && npm run build && cd ..
 ```
 
-**不装** `requirements-speech.txt`：语音依赖约 2.3 GB、模型 1.6 GB；不装时
-纯语音会话自动隐藏，文字面试完全正常。评审先用文字模式即可。
+语音是可选功能，两种装法二选一：
+
+- **只用文字**：不装任何语音依赖。`/api/health` 里 `speech.asr=false`，麦克风按钮不出现，
+  其余功能完全正常。
+- **要语音（CPU，推荐）**：只装一个包，**不要**装 `requirements-speech.txt` 里的 CUDA 依赖：
+
+  ```bash
+  .venv/bin/pip install "faster-whisper>=1.2,<2"
+  ```
+
+  启动时设 `WHISPER_DEVICE=cpu`、`WHISPER_MODEL=small`（约 460MB，首次使用
+  自动下载；国内先 `export HF_ENDPOINT=https://hf-mirror.com`）。
+  2C2G 内存偏紧：模型常驻约 500MB–1GB，报告生成时并发高，建议试用期同时在线人数控制在 3–5 人。
 
 ## 三、建评审账号
 
@@ -54,6 +67,9 @@ export WEB_ALLOWED_HOSTS="你的域名或隧道地址"
 | `AUTH_TTL_DAYS` | 登录有效期，默认 7 天 |
 | `WEB_ALLOWED_HOSTS` | 允许的 Host，逗号分隔；公网部署**必须**加上域名/隧道地址 |
 | `WEB_ALLOWED_ORIGINS` | 额外的跨源来源；同源请求自动放行，一般不用设 |
+| `WHISPER_DEVICE` | `cpu` / `cuda` / `auto`（默认）。没有显卡就用 `cpu` |
+| `WHISPER_MODEL` | 默认 CPU 下用 `small`；有显卡可用 `large-v3-turbo`（约 1.6GB，中文更准） |
+| `HF_ENDPOINT` | 首次下载模型走镜像：`https://hf-mirror.com` |
 
 ### 登录与会话安全
 
@@ -70,15 +86,18 @@ export WEB_ALLOWED_HOSTS="你的域名或隧道地址"
 
 ```ini
 [Unit]
-Description=Interview Studio
+Description=InterDefense Studio
 After=network.target
 
 [Service]
-WorkingDirectory=/opt/myagent
+WorkingDirectory=/opt/interdefense-agent
 Environment=PROVIDER=deepseek
 Environment=ANTHROPIC_API_KEY=你的密钥
 Environment=WEB_ALLOWED_HOSTS=你的域名
-ExecStart=/opt/myagent/.venv/bin/uvicorn backend.app:app --host 127.0.0.1 --port 8000
+Environment=WHISPER_DEVICE=cpu
+Environment=WHISPER_MODEL=small
+Environment=HF_ENDPOINT=https://hf-mirror.com
+ExecStart=/opt/interdefense-agent/.venv/bin/uvicorn backend.app:app --host 127.0.0.1 --port 8000
 Restart=always
 
 [Install]
@@ -130,7 +149,10 @@ location / {
 - [ ] 用评审账号登录 → 能看到界面
 - [ ] 界面里**没有**学校、姓名、指导教师
 - [ ] `/api/sessions` 里**没有**测试记录（有就「立即结束 → 删除记录」清掉）
-- [ ] HTTPS 下点麦克风能弹出授权
+- [ ] 手机打开同一地址，能「添加到主屏幕」，图标打开后无地址栏
+- [ ] 上传一份 `.docx` 讲稿，能正确解析出段落
+- [ ] 答辩场景跑一场：摘要卡 → 追问 → 报告（四维是答辩四维）
+- [ ] HTTPS 下点麦克风能弹出授权；说话后转写结果能填进输入框
 - [ ] `git status` 干净，密钥和账号文件都没进仓库
 
 ## 七、额度控制（可选）
@@ -175,9 +197,9 @@ POSIX 上备份目录自动设为 0700、文件 0600；`.web-data` 已被 gitign
 恢复前**必须先停服务**，否则运行中的进程会继续写旧库：
 
 ```bash
-sudo systemctl stop myagent
+sudo systemctl stop interdefense
 python tools/backup.py --restore .web-data/backups/20261110-120000
-sudo systemctl start myagent
+sudo systemctl start interdefense
 ```
 
 脚本会先做 `PRAGMA integrity_check`，校验失败拒绝恢复；并把当前库另存为
