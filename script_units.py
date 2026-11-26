@@ -17,6 +17,7 @@
 偏移量是刻意保留的：单元文本必须能在用户提交的原文里原样定位，这样报告里的
 引用和讲稿才能对得上。所有函数只做确定性处理，不调用模型，便于离线测试。
 """
+import difflib
 import re
 
 # 单元编号只允许 U + 数字；标记形如 [[U2]] 或 [[U2,U5]]。
@@ -77,29 +78,38 @@ def _is_heading(line: str) -> bool:
 
 
 def _blocks(text):
-    """按空行和标题行切块，返回 [(start, end, raw)]。"""
+    """按空行和标题行切块，返回 [(start, end, raw, heading)]。
+
+    标题行只用来判定段落类型（``heading``），**不进入正文**：单元文本要能直接
+    展示给学生、并作为追问的引用位置，`## 研究背景` 这种标记不该出现在里面。
+    """
     blocks = []
     current = []
     current_start = None
+    heading = None
     position = 0
     for line in text.splitlines(keepends=True):
         line_start = position
         position += len(line)
         if not line.strip():
             if current:
-                blocks.append((current_start, line_start, "".join(current)))
+                blocks.append((current_start, line_start, "".join(current), heading))
                 current = []
                 current_start = None
+                heading = None
             continue
-        if _is_heading(line) and current:
-            blocks.append((current_start, line_start, "".join(current)))
-            current = []
-            current_start = None
+        if _is_heading(line):
+            if current:
+                blocks.append((current_start, line_start, "".join(current), heading))
+                current = []
+                current_start = None
+            heading = line.strip()
+            continue
         if current_start is None:
             current_start = line_start
         current.append(line)
     if current:
-        blocks.append((current_start, position, "".join(current)))
+        blocks.append((current_start, position, "".join(current), heading))
     return blocks
 
 
@@ -188,8 +198,10 @@ def segment(script, scene="defense", max_units=MAX_UNITS,
         return []
     section = DEFAULT_SECTION
     raw_units = []
-    for start, end, block in _blocks(text):
-        found = _section_of(block)
+    for start, end, block, heading in _blocks(text):
+        # 标题优先：正文里往往没有「背景」「方法」这类词，靠标题才判得准。
+        found = _section_of(heading) if heading else None
+        found = found or _section_of(block)
         if found:
             section = found
         raw_units.extend(_split_long(text, start, end, max_chars, section))
@@ -216,8 +228,10 @@ def render(units, limit_chars=PROMPT_LIMIT_CHARS) -> str:
         if len(body) > PROMPT_HEAD_CHARS:
             body = body[:PROMPT_HEAD_CHARS] + "…"
         lines.append(f"{unit['id']}【{unit.get('section', '其他')}】{body}")
-    lines.append("规则：某一问确实锚定某个单元时，在该句末尾加 [[U3]]；一句最多引用一个，"
-                 "不得编造编号；没锚定就不要加标记。")
+    lines.append("规则：只要这一问针对某个单元的具体内容（数字、方法、贡献、局限、背景判断），"
+                 "就在句末加 [[U3]]；改写了措辞也要标——标记说的是「问的是哪一段」，"
+                 "不是「有没有照抄原话」。一句最多引用一个，不得编造编号；"
+                 "只有与讲稿无关的泛泛之问才不加标记。")
     return "\n".join(lines)[:limit_chars]
 
 
@@ -260,6 +274,38 @@ def unit_of_quote(units, quote):
     for unit in units or []:
         if target in _normalize(unit.get("text", "")):
             return unit.get("id")
+    return None
+
+
+# 问题与单元的最长公共片段达到这个长度、且明显领先次优，才认为锚定成功。
+# 实测真实问句：正确的回链在 9–22 字，与讲稿无关的泛问最多 2 字，中间是空的。
+QUESTION_LINK_MIN = 6
+QUESTION_LINK_MARGIN = 4
+
+
+def unit_of_question(units, question):
+    """模型漏写 ``[[U3]]`` 时，用问题与单元的最长公共片段补回链。
+
+    追问常常改写措辞，但针对的段落通常仍与之共享一段原文（数字、短语、判断句）。
+    只在证据足够强时才回链：**宁可漏链，不要错链**——报告里「这一段没被问到」
+    是诚实的缺省，链错一段则会让回链失去可信度。
+    """
+    query = re.sub(r"[^\w%]", "", str(question or ""))
+    if len(query) < QUESTION_LINK_MIN:
+        return None
+    ranked = []
+    for unit in units or []:
+        body = re.sub(r"[^\w%]", "", str(unit.get("text", "")))
+        match = difflib.SequenceMatcher(None, query, body, autojunk=False
+                                         ).find_longest_match()
+        ranked.append((match.size, str(unit.get("id"))))
+    if not ranked:
+        return None
+    ranked.sort(reverse=True)
+    best, best_id = ranked[0]
+    runner_up = ranked[1][0] if len(ranked) > 1 else 0
+    if best >= QUESTION_LINK_MIN and best - runner_up >= QUESTION_LINK_MARGIN:
+        return best_id
     return None
 
 

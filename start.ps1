@@ -99,6 +99,9 @@ if ($CheckOnly) {
     exit 0
 }
 
+# 语音首次使用要从 Hugging Face 下载模型；国内直连常超时，默认走镜像。
+if (-not $env:HF_ENDPOINT) { $env:HF_ENDPOINT = 'https://hf-mirror.com' }
+
 # 5. 启动
 $url = "http://127.0.0.1:$Port"
 if (-not $NoBrowser) {

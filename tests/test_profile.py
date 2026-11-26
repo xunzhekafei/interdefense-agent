@@ -7,14 +7,14 @@ from backend.profile import build_profile
 
 def session(sid, created, role="AI 应用开发", overall=6.0, dims=None,
             weaknesses=None, status="completed", report=True,
-            scoring_version=None):
+            scoring_version=None, scene=None):
     payload = {"overall": overall, "dimension_scores": dims or {},
                "weaknesses": weaknesses or []}
     if scoring_version is not None:
         payload["scoring_version"] = scoring_version
     return {
         "id": sid, "candidate": "甲", "role": role, "created_at": created,
-        "pressure": "标准", "status": status,
+        "pressure": "标准", "status": status, "scene": scene,
         "report": payload if report else None,
     }
 
@@ -22,6 +22,38 @@ def session(sid, created, role="AI 应用开发", overall=6.0, dims=None,
 def dims(tech=6, depth=6, engineering=6, expression=6):
     return {"技术正确性": tech, "深度与原理": depth,
             "工程与场景思考": engineering, "表达与结构": expression}
+
+
+def defense_dims(method=6, workload=8, contribution=7, answering=9):
+    return {"方法与论证严谨性": method, "工作量与完整性": workload,
+            "创新与个人贡献": contribution, "表达与应答": answering}
+
+
+def test_defense_session_keeps_its_dimensions_and_weight():
+    """答辩场次按答辩四维与权重算分；不能因为画像只认面试四维而整场消失。"""
+    profile = build_profile([
+        session("d", "2026-11-25T10:00:00", role="毕业设计答辩",
+                dims=defense_dims(), scoring_version=5, scene="defense"),
+    ])
+    assert profile["sessions"] == 1
+    # 6*.35 + 8*.25 + 7*.25 + 9*.15 = 7.2
+    assert profile["overall"]["latest"] == 7.2
+    assert profile["dimensions"]["方法与论证严谨性"]["latest"] == 6
+    assert profile["dimensions"]["表达与应答"]["latest"] == 9
+    assert "技术正确性" not in profile["dimensions"]
+
+
+def test_mixed_scenes_aggregate_without_losing_either():
+    """面试与答辩混用同一画像时，两套维度各自成列，互不吞并。"""
+    profile = build_profile([
+        session("i", "2026-11-20T10:00:00", dims=dims(tech=8), scoring_version=5),
+        session("d", "2026-11-25T10:00:00", role="毕业设计答辩",
+                dims=defense_dims(), scoring_version=5, scene="defense"),
+    ])
+    assert profile["sessions"] == 2
+    assert profile["dimensions"]["技术正确性"]["latest"] == 8
+    assert profile["dimensions"]["方法与论证严谨性"]["latest"] == 6
+    assert profile["overall"]["latest"] == 7.2
 
 
 def test_empty_returns_zero():

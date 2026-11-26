@@ -1843,3 +1843,554 @@ meter::-webkit-meter-optimum-value {
     visibility: hidden;
   }
 }
+/* ---------- 摘要卡：先确认理解，再开始追问 ---------- */
+.summary-page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 42px 28px 80px;
+}
+.summary-head h1 {
+  font-size: clamp(28px, 4vw, 40px);
+  margin: 8px 0 12px;
+}
+.summary-head p {
+  color: #5f6f66;
+  max-width: 640px;
+}
+.summary-source {
+  display: block;
+  margin-top: 10px;
+  color: #a8622f;
+}
+.summary-section {
+  margin-top: 34px;
+}
+.summary-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  border-bottom: 1px solid #e3e7df;
+  padding-bottom: 8px;
+  margin-bottom: 14px;
+}
+.summary-section-head h3 {
+  margin: 0;
+}
+.summary-section-head small {
+  color: #7c8a80;
+}
+.summary-item {
+  background: #fff;
+  border: 1px solid #e3e7df;
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+}
+.summary-item.confirmed,
+.summary-item.resolved {
+  border-color: #b7cdbd;
+}
+.summary-item.rejected,
+.summary-item.dismissed {
+  opacity: 0.65;
+}
+.summary-item-head {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.unit-badge {
+  display: inline-block;
+  background: #172e2e;
+  color: #eaf1ec;
+  border-radius: 6px;
+  padding: 1px 7px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+.summary-item p {
+  margin: 0 0 12px;
+  line-height: 1.7;
+}
+.summary-item textarea {
+  width: 100%;
+  border: 1px solid #d8ded5;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+  resize: vertical;
+  background: #fbfcf9;
+}
+.summary-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.summary-action {
+  background: #f2f4ef;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 12px;
+  color: #41544a;
+}
+.summary-action.active,
+.summary-action.primary-lite {
+  background: #172e2e;
+  color: #fff;
+}
+.summary-empty {
+  color: #7c8a80;
+}
+.summary-footer {
+  margin-top: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.summary-footer small {
+  color: #7c8a80;
+}
+.summary-loading {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 80px 0;
+}
+
+/* ---------- 报告：单元覆盖与上一场检验点 ---------- */
+.unit-coverage,
+.focus-checks {
+  margin: 28px 0;
+}
+.unit-coverage ul,
+.focus-checks ul {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.unit-coverage li {
+  background: #fff;
+  border: 1px solid #e3e7df;
+  border-radius: 10px;
+  padding: 10px 14px;
+  line-height: 1.6;
+}
+.unit-coverage li .unit-badge {
+  margin-right: 8px;
+}
+.focus-checks li {
+  border-left: 3px solid #d8ded5;
+  padding: 8px 12px;
+  background: #fff;
+}
+.focus-checks li.checked {
+  border-left-color: #5f8f6d;
+}
+.focus-checks li.missing {
+  border-left-color: #ca7349;
+}
+.focus-checks li span {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: #7c8a80;
+  margin-right: 10px;
+}
+.unit-tag {
+  display: block;
+  margin-top: 8px;
+  color: #7c8a80;
+}
+
+/* 讲稿上传：解析结果是初稿，填进输入框后可继续编辑 */
+.setup-card .script-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.setup-card .file-button {
+  display: inline-block;
+  position: relative;
+  margin: 0;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #32463d;
+  background: #fbfcf9;
+  border: 1px dashed #b9c9b1;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.setup-card .file-button:hover {
+  border-color: #6f8f6f;
+  background: #f2f6ee;
+}
+.setup-card .file-button.busy {
+  opacity: .6;
+  cursor: progress;
+}
+/* 不用 display:none：那样键盘无法聚焦，上传按钮就成了只能点鼠标的控件 */
+.setup-card .file-button input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: inherit;
+}
+.setup-card .file-button:focus-within {
+  outline: 2px solid #6f8f6f;
+  outline-offset: 2px;
+}
+.script-note {
+  font-size: 11px;
+  color: #5d7a5d;
+  margin: 0 0 10px;
+}
+.script-note.error {
+  color: #b23b2e;
+}
+
+/* 摘要卡生成失败的兜底：给出原因、重试和退回改讲稿，而不是永远转圈 */
+.summary-error {
+  padding: 64px 0;
+  max-width: 520px;
+}
+.summary-error strong {
+  display: block;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+.summary-error p {
+  color: #8b5b52;
+  font-size: 12px;
+  line-height: 1.7;
+  margin-bottom: 18px;
+}
+
+/* 有效回答不足时不给分：明确写成「样本不足」，避免显示成 0 分 */
+.score.empty strong {
+  color: #a3aaa0;
+}
+.score.empty span {
+  color: #a3aaa0;
+}
+
+/* ---------- PWA：安装入口与手机端适配 ---------- */
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.install-wrap {
+  position: relative;
+  display: inline-flex;
+}
+.install-button {
+  font-size: 10px;
+  color: #50635b;
+  background: #fbfcf9;
+  border: 1px solid #dce3d6;
+  border-radius: 20px;
+  padding: 6px 11px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.install-button:hover {
+  border-color: #9fb59a;
+  color: #2f4a3d;
+}
+.install-hint {
+  position: absolute;
+  right: 0;
+  top: 34px;
+  z-index: 20;
+  width: 210px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: #33473d;
+  background: #fbfcf9;
+  border: 1px solid #dce3d6;
+  border-radius: 8px;
+  padding: 10px 12px;
+  box-shadow: 0 8px 24px rgba(23, 44, 44, .12);
+}
+
+/* 手机竖屏：对话区按视口高度算，别用写死的 620px 把输入框顶出屏幕 */
+@media (max-width: 580px) {
+  .app {
+    min-height: 100dvh;
+  }
+  .sidebar {
+    height: auto;
+  }
+  .topbar {
+    height: auto;
+    min-height: 48px;
+    padding-top: max(0px, env(safe-area-inset-top));
+    padding-bottom: 8px;
+  }
+  .tag {
+    display: none;          /* 手机上优先给安装按钮和标题让位 */
+  }
+  .conversation {
+    height: auto;
+    min-height: 0;
+    max-height: none;
+  }
+  .composer {
+    padding-bottom: calc(14px + env(safe-area-inset-bottom));
+  }
+  /* iOS Safari 在输入框字号 <16px 时会自动放大页面 */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* ---------- 侧栏操作区与练习记录页 ---------- */
+.sidebar {
+  /* PWA 全屏时内容会顶进状态栏；0 在桌面上不产生任何影响 */
+  padding-top: calc(35px + env(safe-area-inset-top));
+}
+.sidebar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 40px 0 30px;
+}
+.sidebar-actions .new-session {
+  margin: 0;
+}
+.sidebar-actions .profile-link {
+  margin: 0;
+}
+
+.history-page {
+  padding: 48px;
+  max-width: 920px;
+}
+.history-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  margin-bottom: 26px;
+}
+.history-head h2 {
+  font-size: 24px;
+  margin: 8px 0 6px;
+}
+.history-head p {
+  font-size: 12px;
+  color: #8b958b;
+}
+.history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.history-entry {
+  display: flex;
+  align-items: stretch;
+  background: #fbfcf9;
+  border: 1px solid #e5e8df;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.history-entry.selected {
+  border-color: #9fb59a;
+}
+.history-open {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  padding: 16px 18px;
+  cursor: pointer;
+}
+.history-open strong {
+  font-size: 14px;
+  color: #2f4a3d;
+}
+.history-open span {
+  font-size: 11px;
+  color: #8b958b;
+}
+.history-open small {
+  font-size: 10px;
+  color: #a3aaa0;
+}
+.history-remove {
+  border: 0;
+  border-left: 1px solid #edf0e8;
+  background: transparent;
+  color: #a3aaa0;
+  font-size: 11px;
+  padding: 0 18px;
+  cursor: pointer;
+}
+.history-remove:hover {
+  color: #b23b2e;
+  background: #fbf2ef;
+}
+.history-empty {
+  padding: 60px 0;
+  text-align: center;
+  color: #8b958b;
+}
+.history-empty p {
+  margin-bottom: 16px;
+}
+
+@media (max-width: 580px) {
+  .sidebar {
+    grid-template-columns: 1fr;
+    padding-top: max(16px, env(safe-area-inset-top));
+  }
+  .sidebar-actions {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    margin: 12px 0 0;
+    gap: 8px;
+  }
+  .sidebar-actions .new-session {
+    flex: 1.3;
+    padding: 12px 10px;
+    font-size: 12px;
+  }
+  .sidebar-actions .new-session span {
+    font-size: 16px;
+    margin-right: 6px;
+  }
+  .sidebar-actions .profile-link {
+    flex: 1;
+    justify-content: center;
+    padding: 12px 8px;
+    font-size: 11px;
+  }
+  .sidebar-actions .profile-link span {
+    display: none;
+  }
+  .history-page {
+    padding: 20px 16px;
+  }
+  .history-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .history-head .primary {
+    width: 100%;
+  }
+  .history-open {
+    padding: 14px;
+  }
+}
+
+/* ---------- 手机竖屏：紧凑头部 + 对话区固定高度（输入框不再被内容顶着跑） ---------- */
+html,
+body {
+  overflow-x: hidden;
+}
+
+@media (max-width: 580px) {
+  .app {
+    min-height: 100dvh;
+  }
+
+  /* 顶部导航压成一行，滚动时固定在顶部，不占掉半屏 */
+  .sidebar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    height: auto;
+    padding: max(8px, env(safe-area-inset-top)) 12px 8px;
+  }
+  .sidebar .brand {
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 0;
+  }
+  .sidebar .brand div {
+    display: none;
+  }
+  .sidebar-actions {
+    flex: 1;
+    margin: 0;
+    justify-content: flex-end;
+  }
+  .sidebar-actions .new-session {
+    flex: 0 0 auto;
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+  .sidebar-actions .profile-link {
+    flex: 0 0 auto;
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+
+  /* 手机上不需要这么大的开场标语，直接进入表单 */
+  .intro {
+    display: none;
+  }
+  .setup {
+    padding: 16px 14px 28px;
+    gap: 0;
+  }
+  .setup-card {
+    padding: 18px;
+  }
+  .setup-card label {
+    margin-bottom: 16px;
+  }
+
+  .workspace {
+    padding: 10px 12px 0;
+  }
+  .session-heading {
+    margin-bottom: 10px;
+    gap: 8px;
+  }
+  .session-heading h1 {
+    font-size: 18px;
+    margin: 6px 0;
+  }
+
+  /* 对话区固定占满剩余视口：消息在内部滚动，输入框始终停在底部 */
+  .conversation {
+    height: calc(100vh - 190px);
+    height: calc(100dvh - 190px);
+    min-height: 300px;
+  }
+  .messages {
+    padding: 14px 12px;
+  }
+  .bubble {
+    font-size: 14px;
+    line-height: 1.75;
+  }
+  .composer {
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  }
+  .composer textarea {
+    min-height: 56px;
+    height: 56px;
+    font-size: 16px;
+  }
+}

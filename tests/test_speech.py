@@ -326,3 +326,22 @@ def test_whisper_recognizer_build_is_import_safe():
     if recognizer is not None:
         assert recognizer.ready() is False        # 构建不该加载模型
         assert recognizer._load.__self__ is recognizer
+
+
+def test_av_open_patch_tolerates_metadata_errors(tmp_path):
+    """PyAV 19 去掉了 metadata_errors，faster-whisper 还在传；兼容层必须吃掉它。
+
+    CI 不一定装了 av（语音是可选项），没装就跳过。
+    """
+    import pytest
+
+    pytest.importorskip("av")
+    from backend.whisper_asr import _patch_av_open
+
+    _patch_av_open()
+    import av
+
+    # 文件不存在没关系：只要抛出的不是「unexpected keyword argument」就说明兼容层生效
+    with pytest.raises(Exception) as info:
+        av.open(tmp_path / "missing.wav", mode="r", metadata_errors="ignore")
+    assert not isinstance(info.value, TypeError)

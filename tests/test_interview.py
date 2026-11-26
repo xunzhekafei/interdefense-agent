@@ -338,7 +338,7 @@ def test_no_match_lists_available_filter_values(iso):
 
 # ---------- 面试评分 workflow ----------
 
-def _stub_interview_runner(calls, question_count=2):
+def _stub_interview_runner(calls, question_count=3):
     def stub(prompt, schema, label, stats):
         calls.append(label)
         stats["agents"] += 1
@@ -367,8 +367,92 @@ def test_interview_report_workflow(iso, monkeypatch):
         "args": {"role": "AI/ML 工程师", "transcript": "面试官：Q0\n候选人：A0"}}))
     assert out["status"] == "completed"
     assert out["result"]["overall"] == 7.35   # v3：按权重加权
-    assert len(out["result"]["per_question"]) == 2
+    assert len(out["result"]["per_question"]) == 3
     assert calls[0].startswith("parse") and "score:0" in calls and calls[-1] == "summary"
+
+
+def test_defense_report_uses_defense_dimensions(iso, monkeypatch):
+    """答辩场次评的是工作量/论证/个人贡献，不是面试的「技术正确性」。"""
+    import agent
+    seen: dict = {"schemas": []}
+
+    def stub(prompt, schema, label, stats):
+        stats["agents"] += 1
+        if label.startswith("parse"):
+            return {"qa": [{"question": "你说的 81% 是在多少条数据上测的？",
+                            "answer": "240 条，分三个学期。"},
+                           {"question": "基线是多少？", "answer": "规则方法是 62%。"},
+                           {"question": "这部分是你独立做的吗？",
+                            "answer": "切分规则是我写的，标注是两个人一起做的。"}]}
+        if label.startswith("score:"):
+            seen["schema"] = schema
+            seen["prompt"] = prompt
+            answer = prompt.split("候选人回答：", 1)[-1].split("\n\n", 1)[0].strip()
+            return {"方法与论证严谨性": 6, "工作量与完整性": 8, "创新与个人贡献": 7,
+                    "表达与应答": 9, "evidence": answer, "suggestion": "补充口径"}
+        return {"overall": 0,
+                "dimension_scores": {name: 0 for name in agent.score_dimensions("defense")},
+                "strengths": [], "weaknesses": [], "recommendations": [],
+                "summary": "答辩复盘"}
+
+    monkeypatch.setattr(agent, "_workflow_agent_call", stub)
+    out = json.loads(agent.run_workflow.call({
+        "name": "interview-report",
+        "args": {"role": "毕业设计答辩", "scene": "defense",
+                 "transcript": "评委：你说的 81% 是怎么测的？\n学生：240 条。"}}))
+    result = out["result"]
+
+    dims = set(agent.score_dimensions("defense"))
+    assert dims == {"方法与论证严谨性", "工作量与完整性", "创新与个人贡献", "表达与应答"}
+    assert set(seen["schema"]["required"]) == dims | {"evidence", "suggestion"}
+    assert "答辩评委" in seen["prompt"] and "方法与论证严谨性" in seen["prompt"]
+    # 6*.35 + 8*.25 + 7*.25 + 9*.15 = 7.2
+    assert result["dimension_scores"] == {"方法与论证严谨性": 6, "工作量与完整性": 8,
+                                          "创新与个人贡献": 7, "表达与应答": 9}
+    assert result["overall"] == 7.2
+    # 汇总报告 schema 的维度键也必须跟着换
+    assert set(result["dimension_scores"]) == dims
+
+
+def test_report_final_scores_are_computed_in_code(iso, monkeypatch):
+    """维度和总分以逐题分为准，模型在 summary 阶段另算的数一律不采信。
+
+    实测过：同一份逐题分（加权后 2.00），模型在 summary 文本里写成 2.15，
+    和结构化的 overall 对不上。这里让 stub 故意返回不一致的维度分。
+    """
+    import agent
+    prompts: list = []
+
+    def stub(prompt, schema, label, stats):
+        stats["agents"] += 1
+        prompts.append(prompt)
+        if label.startswith("parse"):
+            return {"qa": [{"question": "Q0", "answer": "A0"},
+                           {"question": "Q1", "answer": "A1"},
+                           {"question": "Q2", "answer": "A2"}]}
+        if label.startswith("score:"):
+            answer = prompt.split("候选人回答：", 1)[-1].split("\n\n", 1)[0].strip()
+            return {"技术正确性": 8, "深度与原理": 7, "工程与场景思考": 6, "表达与结构": 9,
+                    "evidence": answer, "suggestion": "建议……"}
+        return {"overall": 2.15,
+                "dimension_scores": {name: 2 for name in agent.INTERVIEW_SCORE_DIMENSIONS},
+                "strengths": [], "weaknesses": [], "recommendations": [],
+                "summary": "加权总分 2.15"}
+
+    monkeypatch.setattr(agent, "_workflow_agent_call", stub)
+    out = json.loads(agent.run_workflow.call({
+        "name": "interview-report",
+        "args": {"role": "AI/ML 工程师", "transcript": "面试官：Q0\n候选人：A0"}}))
+    result = out["result"]
+    assert result["dimension_scores"] == {"技术正确性": 8, "深度与原理": 7,
+                                         "工程与场景思考": 6, "表达与结构": 9}
+    assert result["overall"] == 7.35
+    # summary prompt 里给出的是系统算好的数，并要求模型直接引用
+    assert "直接引用、不要自己再计算" in prompts[-1]
+    assert "加权总分 7.35 分" in prompts[-1]
+    # 逐题建议要短：真实报告里每条建议曾写到 200 字，六题就变成一篇长文
+    score_prompts = [p for p in prompts if p.startswith("你是")]
+    assert score_prompts and "最多 80 字" in score_prompts[0]
 
 
 def test_interview_report_accepts_structured_qa(iso, monkeypatch):
@@ -403,7 +487,36 @@ def test_interview_report_skips_invalid_answers(iso, monkeypatch):
     assert len(result["skipped_questions"]) == 2
     assert {item["reason"] for item in result["skipped_questions"]} == {"copy", "reverse"}
     assert result["target_rounds"] == 10
-    assert result["scoring_version"] == 4
+    assert result["scoring_version"] == 5
+
+
+def test_report_is_short_when_too_few_answers(iso, monkeypatch):
+    """只答 1 题不给四维评分，也不调用模型写汇总。
+
+    真实事故：24 段讲稿只答 1 题，报告给出完整的四维分和 8 条 P0/P1/P2 建议，
+    还列出 23 个未覆盖编号。数字看着精确，实际只是把一次回答当成整体水平。
+    """
+    import agent
+    calls: list = []
+    monkeypatch.setattr(agent, "_workflow_agent_call",
+                        _stub_interview_runner(calls, question_count=1))
+    units = [{"id": f"U{index}", "section": "方法",
+              "text": f"第 {index} 段的陈述内容，长度足够作为一个单元。"}
+             for index in range(1, 25)]
+    out = json.loads(agent.run_workflow.call({
+        "name": "interview-report",
+        "args": {"qa": [{"question": "Q0", "answer": "A0"}], "scene": "defense",
+                 "units": units, "rounds": 15}}))
+    result = out["result"]
+
+    assert result["incomplete"] is True
+    assert result["overall"] is None
+    assert result["dimension_scores"] == {}
+    assert len(result["per_question"]) == 1
+    assert len(result["recommendations"]) <= 2
+    assert "summary" not in calls                 # 不花一次模型调用去编一份完整报告
+    assert result["unit_coverage"]["total"] == 24
+    assert "3 轮" in result["summary"]
 
 
 def test_interview_report_rejects_all_invalid(iso):

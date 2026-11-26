@@ -4,9 +4,14 @@
 
 faster-whisper>=1.2,<2
 
-# Windows 上 ctranslate2 需要 cuBLAS / cuDNN 的 DLL。
+# ---- 有 NVIDIA 显卡时才需要下面两个包 ----
+# 只跑 CPU 的话**不要装下面两行**（约 2 GB），直接：
+#   python -m pip install "faster-whisper>=1.2,<2"
+# 然后启动时设 WHISPER_DEVICE=cpu。模型默认会选 small（约 460MB）；
+# large-v3-turbo 在 CPU 上转一分钟音频要几十秒到几分钟，手机端会像卡死。
+#
+# Windows 上 ctranslate2 用 GPU 时需要 cuBLAS / cuDNN 的 DLL。
 # Python 3.8+ 不再用 PATH 解析扩展模块的 DLL 依赖，pip 装的这两个包把 DLL 放在
 # site-packages/nvidia/*/bin，需要 backend/whisper_asr.py 里显式 add_dll_directory 注册。
-# 想强制走 CPU（省掉这两个包和下载）就把 WHISPER_DEVICE 设成 cpu。
 nvidia-cublas-cu12>=12,<13 ; sys_platform == "win32"
 nvidia-cudnn-cu12>=9,<10 ; sys_platform == "win32"

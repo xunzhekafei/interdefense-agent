@@ -35,9 +35,11 @@ import providers
 from cron_utils import cron_matches, validate_cron
 
 from interview_spec import (DEFAULT_ROUNDS, DIMENSION_NAMES, DIMENSION_WEIGHTS,
-                            SCORING_VERSION, SKIP_REASONS, classify_answer,
+                            MIN_SCORED_ROUNDS, SCORING_VERSION, SKIP_REASONS, bands_for,
+                            classify_answer, dimension_names, dimensions_for, rubric_for,
                             weighted_overall)
-from script_units import coverage as unit_coverage, resolve_refs, unit_of_quote
+from script_units import (coverage as unit_coverage, resolve_refs, unit_of_question,
+                          unit_of_quote)
 from script_summary import focus_checks as check_focus
 
 logger = logging.getLogger(__name__)
@@ -2560,6 +2562,11 @@ def search_questions(query: str, category: str = "", level: str = "", role: str 
 # 维度名和评分版本来自 interview_spec.py（单一来源）
 INTERVIEW_SCORE_DIMENSIONS = DIMENSION_NAMES
 
+
+def score_dimensions(scene: str = "") -> tuple:
+    """对应场景的评分维度（答辩/汇报是另一套四维）。"""
+    return tuple(dimension_names(scene))
+
 # 语音转写的回答在打分时会带上这个标注：本地 ASR 会把技术名词听错
 # （实测「风控反欺诈」→「分控反击诈」、「CatBoost 做建模」→「CADBoost 做节目」），
 # 那不算候选人说错。标注由 Web 端按 input_mode 打上，CLI 里没有。
@@ -2582,6 +2589,19 @@ INTERVIEW_SCORE_SCHEMA = {
     },
     "required": [*INTERVIEW_SCORE_DIMENSIONS, "evidence", "suggestion"],
 }
+
+
+def score_schema(dims: tuple) -> dict:
+    """逐题评分 schema：维度名随场景变化，不能用一个固定的 module 级常量。"""
+    return {
+        "type": "object",
+        "properties": {
+            **{name: {"type": "number"} for name in dims},
+            "evidence": {"type": "string"},
+            "suggestion": {"type": "string"},
+        },
+        "required": [*dims, "evidence", "suggestion"],
+    }
 # ---- 评分证据的原话校验 ----
 # 报告里的 evidence 必须是候选人回答的逐字原文。模型经常改写、概括，或者把
 # 面试官的问题当成候选人的话——「有依据的反馈」就变成了摆设。
@@ -2667,6 +2687,28 @@ INTERVIEW_REPORT_SCHEMA = {
 }
 
 
+def report_schema(dims: tuple) -> dict:
+    """汇总报告 schema：dimension_scores 的键随场景变化。"""
+    return {
+        "type": "object",
+        "properties": {
+            "overall": {"type": "number", "minimum": 0, "maximum": 10,
+                        "description": "总分，0-10 分制，等于四个维度分按权重加权求和"},
+            "dimension_scores": {
+                "type": "object",
+                "properties": {name: {"type": "number", "minimum": 0, "maximum": 10}
+                               for name in dims},
+                "required": list(dims)},
+            "strengths": {"type": "array", "items": {"type": "string"}},
+            "weaknesses": {"type": "array", "items": {"type": "string"}},
+            "recommendations": {"type": "array", "items": {"type": "string"}},
+            "summary": {"type": "string"},
+        },
+        "required": ["overall", "dimension_scores", "strengths",
+                     "weaknesses", "recommendations", "summary"],
+    }
+
+
 def _render_transcript_file(path_text: str, tail: int = 80) -> str:
     """从压缩器存档（.transcripts/*.txt，消息 JSON 列表）重建对话文本。"""
     path = pathlib.Path(path_text)
@@ -2728,8 +2770,20 @@ def _split_transcript(text: str, max_chars: int = 6000) -> list[str]:
 
 
 def _interview_report(ctx: WorkflowContext, args: dict) -> dict:
-    """面试评分：解析完整问答记录 → 逐题并行评分（分批发，遵守并发上限）→ 汇总报告。"""
+    """评分：解析完整问答记录 → 逐题并行评分（分批发，遵守并发上限）→ 汇总报告。
+
+    答辩/汇报与求职面试用**两套不同的维度**（见 interview_spec.SCENE_DIMENSIONS）：
+    答辩评的是工作量、论证、个人贡献，不是「技术正确性」。维度、权重、分档标尺
+    和每个维度的判断依据都从 interview_spec 读，这里不硬编码维度名。
+    """
     role = str(args.get("role", "技术岗")).strip() or "技术岗"
+    scene = str(args.get("scene") or "interview")
+    dims = score_dimensions(scene)
+    weights = dimensions_for(scene)
+    rubrics = rubric_for(scene)
+    bands = bands_for(scene)
+    # 答辩场景下模型扮演的是评委，不是面试官——提示词里的称呼要跟着换。
+    examiner = "答辩评委" if scene in ("defense", "presentation") else f"{role}方向的资深面试官"
     # 答辩/汇报场景才有陈述单元；求职面试传空列表，行为与改造前完全一致。
     units = [unit for unit in (args.get("units") or [])
              if isinstance(unit, dict) and unit.get("id")]
@@ -2845,26 +2899,25 @@ def _interview_report(ctx: WorkflowContext, args: dict) -> dict:
                     + quoted +
                     "\n评分时对照这段陈述：本轮回答是否偏离、是否补充了新证据、"
                     "有没有和讲稿自相矛盾。")
+        rubric_lines = "\n".join(f"- {name}：{rubrics.get(name, '')}" for name in dims)
+        band_lines = "\n".join(f"- {span}：{desc}" for span, desc in bands)
         prompt = (
-            f"你是{role}方向的资深面试官，给下面这道题的候选人回答打分"
+            f"你是{examiner}，给下面这道题的候选人回答打分"
             f"（每个维度 0-10 的整数）：\n\n问题：{item['question']}\n\n"
             f"候选人回答：{item['answer']}\n\n"
+            "每个维度评什么：\n" + rubric_lines + "\n\n"
             # 没有锚点时，同一份回答重复打分会在 7.4–8.1 之间漂（实测 std 0.31）；
             # 加上分档描述后 std 降到 0.15，且优秀/空洞的区分度没变（8.0 vs 2.4）。
             "评分标尺（先判断落在哪一档，再在档内给分，不要凭印象）：\n"
-            "- 9-10：结论正确，讲清原理与取舍，主动给出量化证据和边界；追问能接住\n"
-            "- 7-8：结论正确，原理基本清楚，有一定证据，但细节或边界有缺口\n"
-            "- 5-6：方向对，但停留在表面或复述定义，缺少个人实践与证据\n"
-            "- 3-4：有明显错误或空洞表述，几乎没有可验证的信息\n"
-            "- 0-2：核心概念错误，或基本没有回答\n"
+            + band_lines + "\n"
             "同一份回答重复评分时应落在同一档、分数基本一致；"
             "不确定时按证据不足下调，不要按印象上调。\n\n"
             f"注意：带「{VOICE_MARK}」标注的回答是语音识别转出来的文字，"
-            "其中的技术名词拼写、同音字多半是识别错误而不是候选人说错——"
-            "**这类拼写问题不要计入「技术正确性」**；但概念、原理、方案上的错误照常扣分。"
+            "其中的术语拼写、同音字多半是识别错误而不是候选人说错——"
+            "**这类识别问题不要扣分**；但概念、原理、方案上的错误照常扣分。"
             "evidence 字段必须是候选人回答里的**逐字原文**：只摘录，不改写、"
             "不概括、不加「候选人说」之类的前缀；不要跨轮拼接；引用面试官的问题不算。"
-            "suggestion 给具体改进建议。" + unit_hint
+            "suggestion 用一两句话说清「改什么、怎么改」，最多 80 字，不要写成 1/2/3 分条。" + unit_hint
         )
         correction = ""
         scored = None
@@ -2873,7 +2926,7 @@ def _interview_report(ctx: WorkflowContext, args: dict) -> dict:
             # journal 的缓存键包含 prompt，所以同标签不同 prompt 不会串。
             label = f"score:{index}" if attempt == 0 else f"score:{index}:retry{attempt}"
             scored = ctx.agent(
-                prompt + correction, schema=INTERVIEW_SCORE_SCHEMA,
+                prompt + correction, schema=score_schema(dims),
                 label=label, phase="逐题评分")
             passed, quote, reason = validate_evidence(
                 scored.get("evidence", ""), item["answer"])
@@ -2889,6 +2942,12 @@ def _interview_report(ctx: WorkflowContext, args: dict) -> dict:
             # 重试耗尽：保留分数，但明确标记证据没通过核验
             scored["evidence_verified"] = False
         linked = list(refs)
+        if not linked:
+            # 模型漏写 [[U3]] 时补回链。先看问题本身——「问的是哪一段」由问题决定；
+            # 回答往往同时涉及多个单元，只作最后兜底。
+            hit = unit_of_question(units, item["question"])
+            if hit:
+                linked = [hit]
         if not linked:
             hit = unit_of_quote(units, scored.get("evidence", ""))
             if hit:
@@ -2920,46 +2979,105 @@ def _interview_report(ctx: WorkflowContext, args: dict) -> dict:
     unit_report = unit_coverage(units, scored_questions) if units else None
     unit_note = ""
     if unit_report and unit_report["uncovered"]:
-        ids = "、".join(row["id"] for row in unit_report["uncovered"])
-        unit_note = (f"\n\n本次有 {len(unit_report['uncovered'])} 个陈述单元没有被追问到（{ids}），"
-                     "在 summary 里提醒下次重点补充；不要编造对这些单元的评价。")
+        uncovered = unit_report["uncovered"]
+        head_ids = "、".join(row["id"] for row in uncovered[:5])
+        more = f" 等 {len(uncovered)} 段" if len(uncovered) > 5 else ""
+        # 讲稿段数多于练习轮数时，覆盖不全本来就正常；逐条列出来只会变成
+        # 「23 条作业」，把真正的重点淹掉。
+        if unit_report["total"] > target_rounds:
+            unit_note = (f"\n\n本次有 {len(uncovered)} 个陈述单元没有被追问到（{head_ids}{more}）。"
+                         "讲稿段数多于本轮计划，覆盖不全属正常：用一句话说明覆盖面，"
+                         "不要把未覆盖的编号逐条列出来，也不要写成必须逐条补准备的清单。")
+        else:
+            unit_note = (f"\n\n本次有 {len(uncovered)} 个陈述单元没有被追问到（{head_ids}{more}）。"
+                         "用一句话提醒下次补充，不要逐个列编号；不要编造对这些单元的评价。")
     focus_checks = check_focus(focus, scored_questions) if focus else []
+    # 报告里与模型无关的部分先装好：证据不足时的短报告也要带这些。
+    report_base = {
+        "per_question": scored_questions,
+        "skipped_questions": skipped_questions,
+        "target_rounds": target_rounds,
+        "scoring_version": SCORING_VERSION,
+    }
+    if unit_report is not None:
+        # 只有答辩/汇报场景才带这两个字段；旧前端忽略未知字段，不受影响。
+        report_base["unit_coverage"] = unit_report
+        report_base["units"] = [{"id": unit["id"], "section": unit.get("section"),
+                                 "text": unit.get("text")} for unit in units]
+    if focus_checks:
+        report_base["focus_checks"] = focus_checks
     unchecked = [item for item in focus_checks if not item["checked"]]
     focus_note = ""
     if unchecked:
         focus_note = (f"\n\n上一场有 {len(unchecked)} 个待检验点这一场没有被追问到："
                       + "；".join(str(item.get("text", ""))[:40] for item in unchecked[:3])
                       + "。在 summary 里如实提醒，不要假装已经检验过。")
+    # 证据不足时不给分。一场 24 段的讲稿只答 1 题就出「四维评分 + 8 条改进建议」，
+    # 数字看着精确，实际只是把一次回答的表现当成整体水平——这比不给分更误导。
+    if len(scored_questions) < MIN_SCORED_ROUNDS:
+        covered = unit_report["covered"] if unit_report else None
+        total_units = unit_report["total"] if unit_report else 0
+        lines = [f"本次只完成了 {len(scored_questions)} 题（计划约 {target_rounds} 轮），"
+                 f"有效回答少于 {MIN_SCORED_ROUNDS} 题，暂不给出维度评分——"
+                 "用一两次回答打四个维度分只会制造噪声。"]
+        if total_units:
+            lines.append(f"讲稿共切成 {total_units} 段，本场覆盖 {covered} 段。")
+        lines.append("下面保留了已答题目的逐题反馈；至少答满 3 轮后再生成报告，"
+                     "那时的分数才有参考价值。")
+        recommendations = ["按同一份讲稿至少再答 3 轮，再生成报告。"]
+        if total_units and covered is not None and covered < total_units:
+            recommendations.append("讲稿段数多于练习轮数时不用逐段准备，"
+                                   "优先把「方法」「结果」两段讲透。")
+        short = {**report_base,
+                 "overall": None, "dimension_scores": {}, "strengths": [], "weaknesses": [],
+                 "recommendations": recommendations, "summary": "\n\n".join(lines),
+                 "incomplete": True}
+        return short
+
+    # 维度均分与总分都由代码算：同一个 prompt 下模型会在 0-10、0-100、0-5 之间乱跳
+    # （评测实测出现过 1.875 / 27.5 / 67.5），实测还会把 2.00 算成 2.15——summary
+    # 里的数字和结构化的 overall 对不上，评委一眼就能看出来。
+    # 未考察的维度不计入均分，避免按 0 分拉低。
+    dimension_means = {}
+    for name in dims:
+        values = [float(item[name]) for item in scored_questions
+                  if isinstance(item.get(name), (int, float))
+                  and not isinstance(item.get(name), bool)]
+        if values:
+            dimension_means[name] = round(sum(values) / len(values), 2)
+    overall_value = weighted_overall(dimension_means, weights)
+    fixed_note = ""
+    if dimension_means:
+        fixed_note = ("\n\n下面的分数已由系统算好，summary 里**直接引用、不要自己再计算**："
+                      + "、".join(f"{name} {value} 分"
+                                 for name, value in dimension_means.items())
+                      + (f"；加权总分 {overall_value} 分。" if overall_value is not None else "。"))
+    report_kind = "答辩复盘报告" if scene in ("defense", "presentation") else "模拟面试报告"
     report = ctx.agent(
-        f"根据下面的逐题评分，汇总一份{role}模拟面试报告：给出总分、各维度均分、"
-        f"优势、短板和改进建议（建议要可执行、按优先级排序）。"
-        "**所有分数一律用 0-10 分制**：各维度分是逐题分数的平均，"
-        "总分是四个维度分的加权和（技术正确性 30%、深度与原理 30%、"
-        "工程与场景思考 25%、表达与结构 15%）；不要用 100 分制或 5 分制："
+        f"根据下面的逐题评分，汇总一份{role}的{report_kind}：给出各维度均分、"
+        "优势、短板和改进建议。"
+        "**所有分数一律用 0-10 分制**，不要用 100 分制或 5 分制。"
+        "优势、短板、建议各最多 4 条，每条一句话；不要用 P0/P1/P2 这类工程编号，"
+        "也不要换个说法重复同一条。summary 控制在 200 字以内。" + fixed_note
         + skipped_note + unit_note + focus_note + "\n\n"
         + json.dumps(scored_questions, ensure_ascii=False),
-        schema=INTERVIEW_REPORT_SCHEMA, label="summary")
-    # 总分由代码算，不用模型返回的那个：同一个 prompt 下模型会在 0-10、0-100、
-    # 0-5 之间乱跳（评测实测出现过 1.875 / 27.5 / 67.5），而前端直接显示这个数。
+        schema=report_schema(dims), label="summary")
     dimensions = report.get("dimension_scores") or {}
-    for name, value in list(dimensions.items()):
-        if isinstance(value, (int, float)):
-            dimensions[name] = max(0.0, min(10.0, float(value)))
-    weighted = weighted_overall(dimensions)
-    if weighted is not None:
-        report["overall"] = weighted
-    result = {**report, "per_question": scored_questions,
-              "skipped_questions": skipped_questions,
-              "target_rounds": target_rounds,
-              "scoring_version": SCORING_VERSION}
-    if unit_report is not None:
-        # 只有答辩/汇报场景才带这两个字段；旧前端忽略未知字段，不受影响。
-        result["unit_coverage"] = unit_report
-        result["units"] = [{"id": unit["id"], "section": unit.get("section"),
-                            "text": unit.get("text")} for unit in units]
-    if focus_checks:
-        result["focus_checks"] = focus_checks
-    return result
+    if dimension_means:
+        # 代码算出的均分是唯一来源：模型返回的维度分可能和逐题分对不上。
+        dimensions = dict(dimension_means)
+    else:
+        for name, value in list(dimensions.items()):
+            if isinstance(value, (int, float)):
+                dimensions[name] = max(0.0, min(10.0, float(value)))
+    report["dimension_scores"] = dimensions
+    if overall_value is not None:
+        report["overall"] = overall_value
+    else:
+        weighted = weighted_overall(dimensions, weights)
+        if weighted is not None:
+            report["overall"] = weighted
+    return {**report, **report_base}
 
 
 register_workflow(

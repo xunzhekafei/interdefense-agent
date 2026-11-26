@@ -7,7 +7,8 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Literal
 
-from fastapi import FastAPI, HTTPException, Request, Response, WebSocket, WebSocketDisconnect
+from fastapi import (FastAPI, File, HTTPException, Request, Response, UploadFile,
+                     WebSocket, WebSocketDisconnect)
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -19,10 +20,13 @@ from settings import env_flag
 from .auth import COOKIE, TTL_SECONDS, AuthStore
 from .profile import build_profile
 from .report_export import to_markdown, to_pdf
+from .script_import import MAX_UPLOAD_BYTES as SCRIPT_MAX_BYTES
+from .script_import import ScriptImportError, extract as extract_script
 from .service import InterviewService
 from .speech import CAPABILITIES
 
 ROOT = Path(__file__).resolve().parent.parent
+logger = logging.getLogger(__name__)
 
 # create_app 没显式传 recognizer 时用这个哨兵，表示「按环境试着构建一个」。
 # 显式传 None 则表示「不要语音」，两者含义不同：测试靠它拿到确定行为。
@@ -174,6 +178,23 @@ def create_app(directory=None, adapter=None, recognizer=_AUTO):
                 return JSONResponse({"detail": "不允许的来源"}, status_code=403)
         return await call_next(request)
 
+    def request_token(request):
+        """Cookie 优先，其次 Authorization: Bearer —— 原生 App 用后者。
+
+        浏览器里没有 Bearer 头，行为不变；Android 客户端不必自己管理 cookie
+        存储，登录后把 token 放进 HTTP 头即可。
+        """
+        header = request.headers.get("authorization") or ""
+        if header[:7].lower() == "bearer ":
+            return header[7:].strip()
+        return request.cookies.get(COOKIE)
+
+    def websocket_token(websocket):
+        header = websocket.headers.get("authorization") or ""
+        if header[:7].lower() == "bearer ":
+            return header[7:].strip()
+        return websocket.cookies.get(COOKIE)
+
     @app.middleware("http")
     async def check_auth(request: Request, call_next):
         auth = app.state.auth
@@ -183,7 +204,7 @@ def create_app(directory=None, adapter=None, recognizer=_AUTO):
         # 登录本身和健康检查必须公开；静态页面也要能加载出登录页。
         if not path.startswith("/api/") or path in ("/api/health", "/api/login", "/api/logout"):
             return await call_next(request)
-        user = auth.check(request.cookies.get(COOKIE))
+        user = auth.check(request_token(request))
         if user is None:
             from fastapi.responses import JSONResponse
             return JSONResponse({"detail": "请先登录"}, status_code=401)
@@ -249,14 +270,15 @@ def create_app(directory=None, adapter=None, recognizer=_AUTO):
                   or request.headers.get("x-forwarded-proto") == "https")
         response.set_cookie(COOKIE, token, max_age=TTL_SECONDS, httponly=True,
                             samesite="lax", secure=secure, path="/")
-        return {"user": body.username, "enabled": True}
+        # token 同时返回给原生客户端：它不用管 cookie，放进 Authorization 头即可。
+        return {"user": body.username, "enabled": True, "token": token}
 
     @app.get("/api/me")
     def me(request: Request):
         auth = app.state.auth
         if not auth.enabled():
             return {"user": None, "enabled": False}
-        user = auth.check(request.cookies.get(COOKIE))
+        user = auth.check(request_token(request))
         if user is None:
             raise HTTPException(401, "请先登录")
         return {"user": user, "enabled": True}
@@ -266,7 +288,7 @@ def create_app(directory=None, adapter=None, recognizer=_AUTO):
         auth = app.state.auth
         if auth.enabled():
             # 只删 cookie 只让浏览器不再发送；服务端版本号 +1 才能让旧 token 真正作废。
-            auth.revoke(request.cookies.get(COOKIE))
+            auth.revoke(request_token(request))
         response.delete_cookie(COOKIE, path="/")
         return {"ok": True}
 
@@ -303,6 +325,29 @@ def create_app(directory=None, adapter=None, recognizer=_AUTO):
         except KeyError:
             raise HTTPException(404, "场次不存在")
         return {"deleted": True}
+
+    @app.post("/api/import-script")
+    async def import_script(file: UploadFile = File(...)):
+        """上传讲稿（.docx / .pptx / .txt / .md），返回提取出的纯文本。
+
+        刻意不直接建场次：文本先回到输入框让学生确认和修改，
+        「AI 读错了我的讲稿」要在开始追问之前就发现。
+        """
+        data = await file.read(SCRIPT_MAX_BYTES + 1)
+        # 上传失败时最难判断的是「请求到底有没有到后端」。这条日志让终端能直接回答：
+        # 没有这一行 → 浏览器/宿主的问题；有这一行但报错 → 解析的问题。
+        logger.info("讲稿导入：%s（%d 字节）", (file.filename or "")[-60:], len(data))
+        if len(data) > SCRIPT_MAX_BYTES:
+            raise HTTPException(
+                413, f"文件超过 {SCRIPT_MAX_BYTES // (1024 * 1024)} MB，请只上传讲稿正文")
+        try:
+            result = extract_script(file.filename or "", data)
+        except ScriptImportError as error:
+            logger.warning("讲稿导入失败：%s", error)
+            raise HTTPException(400, str(error)) from error
+        logger.info("讲稿导入成功：%s，%d 字%s", result["filename"], result["chars"],
+                    "（已截断）" if result["truncated"] else "")
+        return result
 
     @app.post("/api/sessions/{session_id}/summary-card")
     def summary_card(session_id: str, body: SummaryRefresh | None = None):
@@ -349,11 +394,12 @@ def create_app(directory=None, adapter=None, recognizer=_AUTO):
 
     @app.get("/api/sessions/{session_id}/report.md")
     def report_markdown(session_id: str):
-        result = get_session(session_id)["report"]
+        session = get_session(session_id)
+        result = session["report"]
         if result is None:
             raise HTTPException(404, "报告尚未生成")
         return Response(
-            content=to_markdown(result),
+            content=to_markdown(result, session.get("scene") or ""),
             media_type="text/markdown; charset=utf-8",
             headers={
                 "Content-Disposition": f'attachment; filename="interview-report-{session_id[:8]}.md"'
@@ -362,11 +408,12 @@ def create_app(directory=None, adapter=None, recognizer=_AUTO):
 
     @app.get("/api/sessions/{session_id}/report.pdf")
     def report_pdf(session_id: str):
-        result = get_session(session_id)["report"]
+        session = get_session(session_id)
+        result = session["report"]
         if result is None:
             raise HTTPException(404, "报告尚未生成")
         return Response(
-            content=to_pdf(result),
+            content=to_pdf(result, session.get("scene") or ""),
             media_type="application/pdf",
             headers={
                 "Content-Disposition": f'attachment; filename="interview-report-{session_id[:8]}.pdf"'
@@ -431,7 +478,7 @@ def create_app(directory=None, adapter=None, recognizer=_AUTO):
     @app.websocket("/api/sessions/{session_id}/ws")
     async def socket(websocket: WebSocket, session_id: str):
         auth = app.state.auth
-        if auth.enabled() and auth.check(websocket.cookies.get(COOKIE)) is None:
+        if auth.enabled() and auth.check(websocket_token(websocket)) is None:
             # reason 让前端能区分「没登录」和「场次不存在」
             await websocket.close(code=1008, reason="unauthorized")
             return
@@ -530,6 +577,26 @@ def create_app(directory=None, adapter=None, recognizer=_AUTO):
     dist = ROOT / "frontend" / "dist"
     if (dist / "assets").is_dir():
         app.mount("/assets", StaticFiles(directory=dist / "assets"), name="assets")
+    # PWA 资源：manifest、Service Worker、图标。它们必须在站点根路径下，
+    # 否则浏览器不认（scope 也会不对）。
+    if (dist / "icons").is_dir():
+        app.mount("/icons", StaticFiles(directory=dist / "icons"), name="icons")
+
+    @app.get("/manifest.webmanifest")
+    def manifest():
+        path = dist / "manifest.webmanifest"
+        if not path.is_file():
+            raise HTTPException(404, "前端尚未构建")
+        return FileResponse(path, media_type="application/manifest+json")
+
+    @app.get("/sw.js")
+    def service_worker():
+        path = dist / "sw.js"
+        if not path.is_file():
+            raise HTTPException(404, "前端尚未构建")
+        # 不能缓存：浏览器一天只检查一次更新，缓存住会让修复迟迟到不了用户
+        return FileResponse(path, media_type="text/javascript",
+                            headers={"Cache-Control": "no-cache"})
 
     @app.get("/")
     def index():

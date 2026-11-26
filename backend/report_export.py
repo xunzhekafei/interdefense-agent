@@ -33,18 +33,34 @@ def _text(value: Any) -> str:
 
 
 def _score(value: Any) -> str:
+    """保留两位小数但去掉末尾的 0：4.65 不会显示成 4.7，5.0 显示成 5。
+
+    报告里的综合评分和 summary 引用的是同一个数，显示精度不一致会让人
+    以为有两套分数。
+    """
     try:
-        return f"{float(value):.1f}"
+        return f"{float(value):.2f}".rstrip("0").rstrip(".")
     except (TypeError, ValueError):
         return _text(value) or "—"
+
+
+TITLES = {
+    "defense": "答辩复盘报告",
+    "presentation": "课程汇报复盘报告",
+    "interview": "面试复盘报告",
+}
+
+
+def _title(scene: str = "") -> str:
+    return TITLES.get(str(scene or "interview"), TITLES["interview"])
 
 
 def _esc(value: Any) -> str:
     return html.escape(_text(value)).replace("\n", "<br/>")
 
 
-def to_markdown(report: dict) -> str:
-    lines: list[str] = ["# 面试复盘报告", ""]
+def to_markdown(report: dict, scene: str = "") -> str:
+    lines: list[str] = [f"# {_title(scene)}", ""]
     overall = report.get("overall")
     if overall is not None:
         lines += [f"**综合评分：{_score(overall)} / 10**", ""]
@@ -59,6 +75,23 @@ def to_markdown(report: dict) -> str:
             lines.append(f"- {name}：{_score(value)} / 10")
         lines.append("")
 
+    # 答辩报告要能自证「问到哪、没问到哪」：导出的 PDF 是给评委看的，
+    # 覆盖率和逐题锚定不能只存在于网页里。
+    coverage = report.get("unit_coverage") or {}
+    if coverage.get("total"):
+        covered = coverage.get("covered") or 0
+        total = coverage["total"]
+        ratio = coverage.get("ratio")
+        percent = f"（{round(ratio * 100)}%）" if isinstance(ratio, (int, float)) else ""
+        lines += ["## 陈述单元覆盖", "",
+                  f"- 讲稿共 {total} 段，本场追问覆盖 {covered} 段{percent}", ""]
+        uncovered = coverage.get("uncovered") or []
+        if uncovered:
+            ids = "、".join(row.get("id", "") for row in uncovered[:8])
+            more = f" 等 {len(uncovered)} 段" if len(uncovered) > 8 else ""
+            note = "（讲稿段数多于练习轮数时，覆盖不全属正常）" if total > (report.get("target_rounds") or 0) else ""
+            lines += [f"- 未追问：{ids}{more}{note}", ""]
+
     for heading, key in (
         ("你的优势", "strengths"),
         ("值得加强", "weaknesses"),
@@ -71,12 +104,25 @@ def to_markdown(report: dict) -> str:
         lines += [f"- {item}" for item in items]
         lines.append("")
 
+    units = {unit.get("id"): unit for unit in (report.get("units") or [])
+             if isinstance(unit, dict) and unit.get("id")}
     per_question = report.get("per_question") or []
     if per_question:
         lines += ["## 逐题复盘", ""]
         for index, item in enumerate(per_question, 1):
             lines.append(f"### {index:02d}. {_text(item.get('question')).strip()}")
             lines.append("")
+            refs = item.get("unit_ref") or []
+            if refs:
+                parts = []
+                for ref in refs:
+                    unit = units.get(ref) or {}
+                    text = _text(unit.get("text")).strip()
+                    if len(text) > 36:
+                        text = text[:36] + "…"
+                    section = _text(unit.get("section"))
+                    parts.append(f"{ref}【{section}】{text}" if text else str(ref))
+                lines += [f"> 锚定讲稿：{'；'.join(parts)}", ""]
             for name in dimensions:
                 if name in item:
                     lines.append(f"- {name}：{_score(item[name])}")
@@ -110,11 +156,19 @@ def to_markdown(report: dict) -> str:
             lines.append(_text(item.get("reason_text") or item.get("reason")))
             lines.append("")
 
+    focus = report.get("focus_checks") or []
+    if focus:
+        lines += ["## 上一场检验点", ""]
+        for item in focus:
+            mark = "已检验" if item.get("checked") else "未检验"
+            lines.append(f"- [{mark}] {_text(item.get('text')).strip()}")
+        lines.append("")
+
     lines += ["---", f"生成时间：{datetime.now().strftime('%Y-%m-%d %H:%M')}"]
     return "\n".join(lines).rstrip() + "\n"
 
 
-def to_pdf(report: dict) -> bytes:
+def to_pdf(report: dict, scene: str = "") -> bytes:
     _ensure_font()
     output = BytesIO()
     document = SimpleDocTemplate(
@@ -124,7 +178,7 @@ def to_pdf(report: dict) -> bytes:
         rightMargin=18 * mm,
         topMargin=18 * mm,
         bottomMargin=18 * mm,
-        title="面试复盘报告",
+        title=_title(scene),
         author="Interview Studio",
     )
 
@@ -165,7 +219,7 @@ def to_pdf(report: dict) -> bytes:
         "small", parent=body, fontSize=8.5, leading=12, textColor=HexColor("#777777")
     )
 
-    story: list[Any] = [Paragraph("面试复盘报告", title)]
+    story: list[Any] = [Paragraph(_title(scene), title)]
     overall = report.get("overall")
     if overall is not None:
         story.append(Paragraph(f"综合评分：<b>{_score(overall)}</b> / 10", body))

@@ -8,7 +8,7 @@ import time
 from backend.agent_adapter import answered_qa
 from backend.service import InterviewService
 from script_units import (coverage, segment, render, resolve_refs, split_markers,
-                          unit_of_quote)
+                          unit_of_question, unit_of_quote)
 
 SCRIPT = """## 研究背景
 毕设做的是面向高校的课程知识问答。现有系统回答不了跨章节的问题。
@@ -42,6 +42,17 @@ def test_segment_offsets_point_back_to_original():
     for unit in units:
         assert SCRIPT[unit["start"]:unit["end"]] == unit["text"]
         assert unit["text"].strip() == unit["text"]
+
+
+def test_segment_strips_headings_from_unit_text():
+    """标题只用来判段落类型，不进正文：报告里不该出现「## 研究背景」。"""
+    units = segment(SCRIPT)
+    assert all("##" not in unit["text"] for unit in units)
+    assert units[0]["section"] == "背景"
+    assert units[0]["text"].startswith("毕设做的是面向高校的课程知识问答")
+    # 去掉标题后偏移仍然逐字对应
+    for unit in units:
+        assert SCRIPT[unit["start"]:unit["end"]] == unit["text"]
 
 
 def test_segment_empty_script():
@@ -123,6 +134,20 @@ def test_unit_of_quote_links_evidence():
     assert unit_of_quote(units, quote) == "U2"
     assert unit_of_quote(units, "这句话不在这份讲稿里") is None
     assert unit_of_quote(units, "") is None
+
+
+def test_unit_of_question_links_paraphrased_question():
+    """模型漏写标记时用问题回链：共享原文片段够长才链，纯语义改写不猜。
+
+    「你说准确率提升了 19 个百分点」与原文只共享「准确率」三字，按设计不链——
+    宁可让报告说这一段没问到，也不要链错一段。
+    """
+    units = segment(SCRIPT)
+    assert unit_of_question(units, "你说准确率从 62% 提升到 81%，测了多少条数据？") == "U3"
+    assert unit_of_question(units, "你说先做向量召回、再用重排模型，召回用的什么？") == "U2"
+    assert unit_of_question(units, "你说准确率提升了 19 个百分点，基线是多少？") is None
+    assert unit_of_question(units, "你觉得这个课题的意义是什么？") is None
+    assert unit_of_question(units, "你刚才提到很多工具，怎么看这个市场？") is None
 
 
 def test_coverage_counts_references_and_uncovered():

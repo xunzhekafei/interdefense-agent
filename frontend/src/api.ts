@@ -52,6 +52,34 @@ export async function api<T>(path: string, body?: unknown): Promise<T> {
   return response.json();
 }
 
+/** 上传文件（multipart）。讲稿解析要读整个文档，给 30 秒。 */
+export async function apiUpload<T>(path: string, file: File): Promise<T> {
+  const form = new FormData();
+  form.append("file", file);
+  const response = await request(
+    `/api${path}`,
+    { method: "POST", body: form },
+    30_000,
+  );
+  if (!response.ok) {
+    throw new Error(await readError(response, "上传失败，请检查文件格式"));
+  }
+  return response.json();
+}
+
+/** PATCH：摘要卡等局部更新。`api()` 固定 POST，不能复用。 */
+export async function apiPatch<T>(path: string, body: unknown): Promise<T> {
+  const response = await request(`/api${path}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    throw new Error(await readError(response, "保存失败，请重试"));
+  }
+  return response.json();
+}
+
 /** 上传一段录音，拿回转写文字。**不写入会话**——文字填进输入框，由用户确认后再走 answer 提交。
  *
  * 不能复用上面的 `api()`：它固定发 JSON 并把 body 序列化。

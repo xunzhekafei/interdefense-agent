@@ -1,5 +1,6 @@
 """Offline web acceptance tests; no API requests or real interview files."""
 import threading
+from pathlib import Path
 import time
 import uuid
 from types import SimpleNamespace
@@ -532,3 +533,18 @@ def test_session_mode_defaults_to_text_and_can_be_voice(tmp_path):
         listed = {item["id"]: item["mode"] for item in client.get("/api/sessions").json()}
         assert listed[default["id"]] == "text"
         assert listed[voice["id"]] == "voice"
+
+
+def test_pwa_assets_are_served_from_root(tmp_path):
+    """manifest / sw.js / 图标必须在根路径，否则浏览器不认为可安装。"""
+    dist = Path(__file__).resolve().parent.parent / "frontend" / "dist"
+    if not (dist / "manifest.webmanifest").is_file():
+        pytest.skip("前端未构建（先 npm run build）")
+    with TestClient(create_app(tmp_path, FakeAgent(), recognizer=None)) as client:
+        manifest = client.get("/manifest.webmanifest")
+        assert manifest.status_code == 200
+        assert manifest.json()["start_url"] == "/"
+        worker = client.get("/sw.js")
+        assert worker.status_code == 200
+        assert worker.headers["cache-control"] == "no-cache"
+        assert client.get("/icons/icon-192.png").status_code == 200

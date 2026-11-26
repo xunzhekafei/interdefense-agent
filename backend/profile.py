@@ -20,7 +20,7 @@ from datetime import date, timedelta
 from difflib import SequenceMatcher
 from statistics import mean
 
-from interview_spec import DIMENSION_NAMES, weighted_overall
+from interview_spec import all_dimension_names, dimensions_for, weighted_overall
 
 RECENT_SESSIONS = 5
 
@@ -64,10 +64,21 @@ def _completed(sessions):
 
 
 def _dimensions(session):
+    """读出该场报告的维度分。
+
+    答辩与求职面试是两套维度，不能只按面试四维过滤——否则答辩场次的
+    维度分全部读到空，总分也跟着算不出来，整场从画像里消失。
+    """
     scores = (session.get("report") or {}).get("dimension_scores") or {}
     result = {}
-    for name in DIMENSION_NAMES:
+    for name in all_dimension_names():
         value = _number(scores.get(name))
+        if value is not None:
+            result[name] = max(0.0, min(10.0, value))
+    for name, value in scores.items():        # 未知维度也保留，不静默丢弃
+        if name in result:
+            continue
+        value = _number(value)
         if value is not None:
             result[name] = max(0.0, min(10.0, value))
     return result
@@ -90,8 +101,9 @@ def _overall(session):
     if scores:
         # v3 起总分是加权和；这里写死 3，不能跟着 SCORING_VERSION 走——
         # 否则升到 v4 时，v3 的历史报告会被误判成旧口径。
+        # 权重要按该场的场景取：答辩四维和面试四维的权重不是一套。
         if _version(session) >= 3:
-            return weighted_overall(scores)
+            return weighted_overall(scores, dimensions_for(session.get("scene")))
         return round(mean(scores.values()), 2)
     value = _number((session.get("report") or {}).get("overall"))
     return value if value is not None and 0 <= value <= 10 else None
@@ -264,7 +276,7 @@ def build_profile(sessions, today: date | None = None) -> dict:
 
     # 每个维度：均分、首场、最近一场、变化
     dimensions = {}
-    for name in DIMENSION_NAMES:
+    for name in all_dimension_names():
         series = [(_dimensions(s).get(name)) for s in completed]
         series = [v for v in series if v is not None]
         if not series:
@@ -294,7 +306,7 @@ def build_profile(sessions, today: date | None = None) -> dict:
             "latest": overalls[-1] if overalls else None,
             "dimensions": {name: _average([_dimensions(s).get(name) for s in items
                                            if _dimensions(s).get(name) is not None])
-                           for name in DIMENSION_NAMES},
+                           for name in all_dimension_names()},
         })
     roles.sort(key=lambda r: r["sessions"], reverse=True)
 

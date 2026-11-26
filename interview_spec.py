@@ -16,8 +16,15 @@ import re
 # v2：加入分档标尺
 # v3：总分由「四维均分」改为「按权重加权和」
 # v4：重复题目、问候、空回答、主动跳过和反问环节不计分，避免误触拉低总分
-SCORING_VERSION = 4
+# v5：维度按场景分开——答辩/汇报不再套用面试四维
+SCORING_VERSION = 5
 
+# 少于这个题数不产出四维评分。
+# 一道题答得好不好，说明不了「答辩水平」；硬打四个维度分，等于把一次回答的
+# 表现当成整体能力，报告越长越像真的，反而误导。此时只保留逐题反馈。
+MIN_SCORED_ROUNDS = 3
+
+# 求职面试：评估的是「这个人能不能干这份工作」
 DIMENSIONS = (
     ("技术正确性", 0.30),
     ("深度与原理", 0.30),
@@ -28,16 +35,101 @@ DIMENSIONS = (
 DIMENSION_NAMES = tuple(name for name, _ in DIMENSIONS)
 DIMENSION_WEIGHTS = dict(DIMENSIONS)
 
+# 答辩 / 课程汇报：评估的是「这份工作本身站不站得住、是不是他做的」。
+# 用面试四维去套，报告会写「技术正确性 4 分」，而答辩现场关心的是
+# 工作量、论证、个人贡献——这正是「面试换皮」最容易被识破的地方。
+DEFENSE_DIMENSIONS = (
+    ("方法与论证严谨性", 0.35),
+    ("工作量与完整性", 0.25),
+    ("创新与个人贡献", 0.25),
+    ("表达与应答", 0.15),
+)
+DEFENSE_DIMENSION_NAMES = tuple(name for name, _ in DEFENSE_DIMENSIONS)
 
-def weighted_overall(scores: dict) -> float | None:
+SCENE_DIMENSIONS = {
+    "interview": DIMENSIONS,
+    "defense": DEFENSE_DIMENSIONS,
+    "presentation": DEFENSE_DIMENSIONS,
+}
+
+
+def dimensions_for(scene: str = "") -> tuple:
+    """场景 → 维度与权重；未知场景按求职面试处理（与改造前行为一致）。"""
+    return SCENE_DIMENSIONS.get(str(scene or "interview"), DIMENSIONS)
+
+
+def dimension_names(scene: str = "") -> tuple:
+    return tuple(name for name, _ in dimensions_for(scene))
+
+
+def all_dimension_names() -> tuple:
+    """所有场景的维度并集，按场景顺序去重。跨场景画像用它遍历。"""
+    names = []
+    for dims in SCENE_DIMENSIONS.values():
+        for name, _ in dims:
+            if name not in names:
+                names.append(name)
+    return tuple(names)
+
+
+# 每个维度「评什么」——写进逐题评分的 prompt。只写维度名而不写判断依据，
+# 模型会把四个维度打成差不多的分（实测四维之间相关系数偏高）。
+RUBRICS = {
+    "interview": {
+        "技术正确性": "事实、结论、术语是否正确，有无明显错误或过时说法",
+        "深度与原理": "是否讲清「为什么」，能否解释机制、取舍与代价，而不是只报结果",
+        "工程与场景思考": "边界、失败路径、可复现性、真实约束下能不能用",
+        "表达与结构": "是否先给结论再展开，条理清楚、重点突出",
+    },
+    "defense": {
+        "方法与论证严谨性": "主张是否有证据支撑；基线、样本量、统计口径是否交代；"
+                          "因果与相关是否分清；对反例和替代解释有没有回应",
+        "工作量与完整性": "背景、方法、结果、创新、局限是否讲全；关键环节是真的做了，"
+                        "还是只有设想；工作量与成果是否匹配",
+        "创新与个人贡献": "创新点是否具体、与已有工作的差异是否说清；"
+                         "本人承担的部分能否与团队工作区分，有没有把别人的工作说成自己的",
+        "表达与应答": "陈述是否结构化；被追问时是否正面回答，有没有答非所问、转移话题或回避",
+    },
+}
+
+# 分档标尺：没有锚点时同一回答的分数会漂（std 0.31），加档位后降到 0.15。
+BANDS = {
+    "interview": (
+        ("9-10", "结论正确，讲清原理与取舍，主动给出量化证据和边界；追问能接住"),
+        ("7-8", "结论正确，原理基本清楚，有一定证据，但细节或边界有缺口"),
+        ("5-6", "方向对，但停留在表面或复述定义，缺少个人实践与证据"),
+        ("3-4", "有明显错误或空洞表述，几乎没有可验证的信息"),
+        ("0-2", "核心概念错误，或基本没有回答"),
+    ),
+    "defense": (
+        ("9-10", "论证有完整证据链（基线、样本、口径齐全），个人贡献清楚，"
+                 "追问能正面接住并主动说明边界"),
+        ("7-8", "主张基本有证据，个别口径或边界没交代，追问基本接得住"),
+        ("5-6", "讲了做法和结果，但证据停在结论层，追问时回避或答非所问"),
+        ("3-4", "只有设想或复述，缺少可验证证据，多处答非所问"),
+        ("0-2", "陈述空洞或事实错误，基本没有实质内容"),
+    ),
+}
+
+
+def rubric_for(scene: str = "") -> dict:
+    return RUBRICS.get(str(scene or "interview"), RUBRICS["interview"])
+
+
+def bands_for(scene: str = "") -> tuple:
+    return BANDS.get(str(scene or "interview"), BANDS["interview"])
+
+
+def weighted_overall(scores: dict, dims=None) -> float | None:
     """按权重算总分；缺维度时用已有维度的权重重新归一化。
 
     未考察的维度不应该按 0 分拉低总分——这和 backend-interview-simulator
-    的阶段性综合分是同一条规则。
+    的阶段性综合分是同一条规则。``dims`` 不传时按求职面试四维算（旧调用方行为不变）。
     """
+    dims = DIMENSIONS if dims is None else dims
     total = 0.0
     weight_sum = 0.0
-    for name, weight in DIMENSIONS:
+    for name, weight in dims:
         value = scores.get(name)
         if isinstance(value, (int, float)) and not isinstance(value, bool):
             total += float(value) * weight

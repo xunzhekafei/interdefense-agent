@@ -186,6 +186,12 @@ def test_service_generates_confirms_and_inherits_focus(tmp_path):
         focus = result["focus"]
         assert focus and all(item["id"] != "C1" for item in focus)
 
+        # 检验点是「下一场」的：本场不能继承自己刚确认的卡片，
+        # 否则第一场的追问和报告都会把它当成「上一场遗留」。
+        saved = service.store.get(session["id"])
+        assert saved["focus"] == []
+        assert saved["next_focus"] == focus
+
         nxt = service.create("甲", "答辩", "", scene="defense", script=SCRIPT,
                              focus_from=session["id"])
         assert nxt["focus"] == focus
@@ -249,3 +255,12 @@ def test_summary_card_routes_and_input_fields(tmp_path):
     assert ("/api/sessions/{session_id}/summary-card", "POST") in routes
     assert ("/api/sessions/{session_id}/summary-card", "PATCH") in routes
     assert ("/api/sessions/{session_id}/summary-card/confirm", "POST") in routes
+
+def test_session_summary_exposes_scene(tmp_path):
+    """列表页要能区分场景；旧场次没有该字段时前端按面试处理。"""
+    service = InterviewService(tmp_path, CardAgent())
+    try:
+        service.create("甲", "答辩", "", scene="defense", script=SCRIPT)
+        assert service.store.summaries()[0]["scene"] == "defense"
+    finally:
+        service.close()

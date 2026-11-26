@@ -20,6 +20,9 @@ from .speech import Transcript
 
 # large-v3-turbo 的中文准确率明显好于 small，fp16 约 1.6GB，8GB 显存够用
 DEFAULT_MODEL = "large-v3-turbo"
+# 没有显卡时退回 small（约 460MB）：large 在 CPU 上转 1 分钟音频要几十秒到几分钟，
+# 手机上录完等这么久会让人以为卡死。显式设 WHISPER_MODEL 时以环境变量为准。
+CPU_DEFAULT_MODEL = "small"
 # initial_prompt 干两件事：
 #  1) 开头一句指定普通话，否则 Whisper 系列常输出**繁体**——候选人看到繁体字会以为是 bug；
 #  2) 列出领域术语做偏置。面试回答里全是术语，而 Whisper 对它们很敏感：
@@ -32,6 +35,27 @@ ZH_PROMPT = (
     "注意力机制、智能体、提示词、上下文、幻觉、准确率、延迟、吞吐、"
     "事件循环、闭包、渲染、打包、组件。"
 )
+
+
+
+def _patch_av_open():
+    """兼容 PyAV 19+：faster-whisper 1.2.1 仍在传 `metadata_errors`，新版不认。
+
+    实测 PyAV 19 会抛 `TypeError: open() got an unexpected keyword argument
+    'metadata_errors'`，转写直接失败。与其锁死 av 版本（Python 3.14 上可选的 wheel
+    很少，而且以后的 av 还可能再变），不如在这里丢掉这个 kwarg——它只是"忽略元数据
+    错误"的开关，语音识别用默认行为没有影响。
+    """
+    import av
+
+    original = getattr(av, "open")
+    if getattr(original, "_interdefense_compat", False):
+        return
+    def open_compat(*args, **kwargs):
+        kwargs.pop("metadata_errors", None)
+        return original(*args, **kwargs)
+    open_compat._interdefense_compat = True
+    av.open = open_compat
 
 
 def _register_cuda_dlls():
@@ -90,15 +114,20 @@ class WhisperRecognizer:
         with self._lock:
             if self._model is not None:
                 return self._model
+            _patch_av_open()
             from faster_whisper import WhisperModel
 
             _register_cuda_dlls()
             failure = None
+            explicit = bool(os.environ.get("WHISPER_MODEL"))
             for device, compute_type in self._candidates():
+                model_name = self.model_name
+                if not explicit and device == "cpu":
+                    model_name = CPU_DEFAULT_MODEL
                 try:
-                    print(f"[语音] 加载 {self.model_name}（device={device}, "
+                    print(f"[语音] 加载 {model_name}（device={device}, "
                           f"compute_type={compute_type}）…首次使用可能需要下载模型", flush=True)
-                    model = WhisperModel(self.model_name, device=device, compute_type=compute_type,
+                    model = WhisperModel(model_name, device=device, compute_type=compute_type,
                                          cpu_threads=self.cpu_threads, download_root=self.download_root)
                 except Exception as error:
                     # 缺 DLL 时抛的是 RuntimeError，不是 ImportError/OSError，必须宽catch
@@ -106,6 +135,7 @@ class WhisperRecognizer:
                     print(f"[语音] {device} 不可用（{type(error).__name__}: {error}），尝试下一个", flush=True)
                     continue
                 self._model = model
+                self.model_name = model_name
                 print("[语音] 模型就绪", flush=True)
                 return self._model
             raise RuntimeError(f"语音模型加载失败：{failure}")

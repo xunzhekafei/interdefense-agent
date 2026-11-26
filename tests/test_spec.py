@@ -23,7 +23,29 @@ def test_agent_uses_the_shared_dimensions():
 
 
 def test_profile_uses_the_shared_dimensions():
-    assert profile.DIMENSION_NAMES == spec.DIMENSION_NAMES
+    """画像按「所有场景维度并集」聚合：答辩场次的维度不能因为只认面试四维而丢失。"""
+    assert profile.all_dimension_names() == spec.all_dimension_names()
+
+
+def test_scene_dimensions_are_distinct():
+    assert spec.dimension_names("defense") != spec.dimension_names("interview")
+    assert spec.dimension_names("presentation") == spec.dimension_names("defense")
+    assert spec.dimension_names("") == spec.dimension_names("interview")
+    assert set(spec.dimension_names("defense")) <= set(spec.all_dimension_names())
+
+
+def test_scene_weights_sum_to_one():
+    for scene in ("interview", "defense", "presentation"):
+        assert abs(sum(weight for _, weight in spec.dimensions_for(scene)) - 1.0) < 1e-9
+
+
+def test_weighted_overall_uses_scene_weights():
+    scores = {"方法与论证严谨性": 6, "工作量与完整性": 8,
+              "创新与个人贡献": 7, "表达与应答": 9}
+    # 6*.35 + 8*.25 + 7*.25 + 9*.15 = 2.1 + 2 + 1.75 + 1.35 = 7.2
+    assert spec.weighted_overall(scores, spec.dimensions_for("defense")) == 7.2
+    # 用面试四维去算这套分会得到 None（一个维度都对不上），不能静默当 0 分
+    assert spec.weighted_overall(scores) is None
 
 
 def test_round_plan_sums_to_target():
@@ -74,4 +96,4 @@ def test_classify_answer_filters_accidents():
 
 
 def test_scoring_version_marks_invalid_answer_change():
-    assert spec.SCORING_VERSION == 4
+    assert spec.SCORING_VERSION == 5

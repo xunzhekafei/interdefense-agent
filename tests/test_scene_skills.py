@@ -143,3 +143,34 @@ def test_unit_plan_marks_complete_when_all_covered():
 
     assert "所有单元已覆盖" in text
     assert "尚未覆盖" not in text
+
+def test_unit_plan_enforces_round_cap():
+    """学生选了轮数就必须生效：问满就收尾，不能继续按单元一路问下去。"""
+    units = segment(SCRIPT)
+    session = {"messages": [
+        {"role": "assistant", "text": "Q1", "status": "completed", "unit_ref": ["U1"]},
+        {"role": "user", "text": "A1", "status": "completed"},
+        {"role": "assistant", "text": "Q2", "status": "completed", "unit_ref": ["U2"]},
+        {"role": "user", "text": "A2", "status": "completed"},
+        {"role": "assistant", "text": "Q3", "status": "completed", "unit_ref": ["U3"]},
+        {"role": "user", "text": "A3", "status": "completed"},
+    ]}
+    text = _unit_plan(session, 3, units)
+
+    assert "目前已经问了 3 题" in text
+    assert "已经达到本场题数上限" in text
+    assert "不要再提问" in text
+    # 达到上限时不再列出未覆盖清单，避免模型继续"补作业"
+    assert "尚未覆盖：" not in text
+
+
+def test_unit_plan_still_lists_units_before_cap():
+    units = segment(SCRIPT)
+    session = {"messages": [
+        {"role": "user", "text": "A1", "status": "completed"},
+        {"role": "user", "text": "A2", "status": "completed"},
+    ]}
+    text = _unit_plan(session, 10, units)
+    assert "目前已经问了 2 题" in text
+    assert "尚未覆盖：" in text
+    assert "题数硬上限" in text

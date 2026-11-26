@@ -9,7 +9,10 @@ export type Message = {
   input_mode: InputMode;
 };
 export type Report = {
-  overall: number;
+  /** 有效回答不足 3 题时为 null：不给分，只保留逐题反馈 */
+  overall: number | null;
+  /** 本次练习未完成（回答太少），报告只含逐题反馈 */
+  incomplete?: boolean;
   summary: string;
   dimension_scores: Record<string, number>;
   strengths: string[];
@@ -21,6 +24,8 @@ export type Report = {
     suggestion: string;
     /** 证据是否通过了「必须是候选人逐字原话」的机器校验 */
     evidence_verified?: boolean;
+    /** 这一问锚定到的陈述单元编号 */
+    unit_ref?: string[];
   } & Record<string, unknown>)[];
   /** 误触/问候/跳过/反问等没有有效作答的轮次，已从均分中剔除 */
   skipped_questions?: {
@@ -31,7 +36,74 @@ export type Report = {
   }[];
   /** 本场目标总题数 */
   target_rounds?: number;
+  /** 答辩/汇报：每个陈述单元被追问了几次 */
+  unit_coverage?: UnitCoverage;
+  /** 答辩/汇报：上一场确认的检验点这一场是否被问到 */
+  focus_checks?: FocusItem[];
 };
+export type Pressure = "温和" | "标准" | "压力";
+export type SessionMode = "text" | "voice";
+export type Scene = "interview" | "defense" | "presentation";
+
+export type ScriptUnit = {
+  id: string;
+  section?: string;
+  text: string;
+  start?: number;
+  end?: number;
+};
+
+export type SummaryStatus =
+  | "pending"
+  | "confirmed"
+  | "rejected"
+  | "resolved"
+  | "dismissed";
+
+export type SummaryEntry = {
+  id: string;
+  unit_ref: string;
+  text: string;
+  status: SummaryStatus;
+  edited_text?: string | null;
+};
+
+/** AI 对讲稿的理解：学生确认/修正后才进入追问。 */
+export type SummaryCard = {
+  version: number;
+  /** model = 模型概括；rules = 模型不可用时的规则兜底 */
+  source: "model" | "rules";
+  claims: SummaryEntry[];
+  open_questions: SummaryEntry[];
+  confirmed: boolean;
+  confirmed_at: string | null;
+};
+
+/** 上一场确认、这一场应定向检验的点。 */
+export type FocusItem = {
+  kind: "claim" | "question";
+  id: string;
+  text: string;
+  /** 该点所在单元的原文开头，用于跨场次找回同一段 */
+  quote: string;
+  unit_ref: string;
+  checked?: boolean;
+};
+
+export type UnitCoverage = {
+  total: number;
+  covered: number;
+  ratio: number | null;
+  units: {
+    id: string;
+    section?: string;
+    text: string;
+    references: number;
+    covered: boolean;
+  }[];
+  uncovered: { id: string; section?: string; text: string }[];
+};
+
 export type SessionSummary = {
   id: string;
   candidate: string;
@@ -42,13 +114,19 @@ export type SessionSummary = {
   mode?: SessionMode;
   /** 目标总题数（含开场和反问）；老场次按 15 处理 */
   rounds?: number;
+  /** 老场次没有场景字段，按求职面试处理 */
+  scene?: Scene;
 };
-export type Pressure = "温和" | "标准" | "压力";
-export type SessionMode = "text" | "voice";
-
 export type Session = SessionSummary & {
   background: string;
   pressure?: Pressure;
+  scene?: Scene;
+  script?: string;
+  units?: ScriptUnit[];
+  summary_card?: SummaryCard | null;
+  /** 上一场确认的检验点，本场会定向追问 */
+  focus?: FocusItem[];
+  focus_from?: string | null;
   messages: Message[];
   report: Report | null;
   active_turn: string | null;

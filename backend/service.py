@@ -434,11 +434,15 @@ class InterviewService:
             updated = confirm(card)
             updated["confirmed_at"] = now()
             session["summary_card"] = updated
-            session["focus"] = focus_items(updated, session.get("units") or [])
+            # 检验点是给**下一场**用的，不能写进本场的 focus：本场的追问和报告
+            # 都读 focus，写进去会让第一场就声称「上一场有点没被问到」。
+            # 下一场通过 focus_from 指向本场，再从这里取出检验点。
+            session["next_focus"] = focus_items(updated, session.get("units") or [])
             self.store.save(session, "summary.confirmed",
-                            {"card": updated, "focus": session["focus"]})
+                            {"card": updated, "focus": session["next_focus"]})
             self._publish_snapshot(session)
-            return {"summary_card": updated, "focus": session["focus"]}
+            # 响应里的 focus 是「下一场该检验的点」，供前端展示，不是本场的。
+            return {"summary_card": updated, "focus": session["next_focus"]}
 
     def _refresh_memory(self, session_id):
         """后台更新结构化笔记；失败或场次已删就静默跳过。"""

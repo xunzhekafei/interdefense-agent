@@ -1,6 +1,17 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react";
+import type { DragEvent } from "react";
 import Markdown from "react-markdown";
-import { api, connectSession, deleteSession, logout, me, transcribe } from "./api";
+import {
+  api,
+  apiPatch,
+  apiUpload,
+  connectSession,
+  deleteSession,
+  logout,
+  me,
+  transcribe,
+} from "./api";
+import { STATUS_LABELS, formatDate } from "./format";
 import { draftKey, mergeDelta, nextRetryDelay } from "./logic";
 import type {
   Action,
@@ -8,16 +19,22 @@ import type {
   InputMode,
   Message,
   Pressure,
+  Scene,
   ScoredQuestion,
   Session,
   SessionMode,
   SessionSummary,
+  SummaryCard,
+  SummaryEntry,
 } from "./types";
 import EndDialog from "./components/EndDialog";
+import HistoryView from "./components/HistoryView";
+import InstallButton from "./components/InstallButton";
 import LiveReport from "./components/LiveReport";
 import LoginView from "./components/LoginView";
 import ProfileView from "./components/ProfileView";
 import ReportView from "./components/ReportView";
+import SummaryCardView from "./components/SummaryCardView";
 
 // 录音上限：opus 大约 24–32 kbps，2 分钟还不到 1MB，远低于后端 5MB 的兜底上限
 const MAX_RECORD_MS = 120_000;
@@ -60,21 +77,10 @@ function chineseVoice(): SpeechSynthesisVoice | null {
   );
 }
 
-const labels: Record<string, string> = {
-  ready: "待继续",
-  running: "面试中",
-  scoring: "评分中",
-  completed: "已完成",
-};
 const toolLabels: Record<string, string> = {
   search_questions: "正在选择适合你的问题",
   load_skill: "正在准备面试",
 };
-const date = (value: string) =>
-  new Date(value).toLocaleDateString("zh-CN", {
-    month: "2-digit",
-    day: "2-digit",
-  });
 
 /** 单条消息。流式时只有最后一条在变，memo 让其余消息跳过重渲染和 Markdown 重解析。 */
 const MessageRow = memo(function MessageRow({
@@ -155,13 +161,24 @@ export default function App() {
   const [pressure, setPressure] = useState<Pressure>("标准");
   const [mode, setMode] = useState<SessionMode>("text");
   const [rounds, setRounds] = useState(15);
+  // 练习场景：面试 / 毕业答辩 / 课程汇报。后两者需要先提交讲稿。
+  const [scene, setScene] = useState<Scene>("interview");
+  const [script, setScript] = useState("");
+  // 上传讲稿：解析结果是初稿，填进输入框让学生先看一遍再开始追问
+  const [importing, setImporting] = useState(false);
+  const [scriptNote, setScriptNote] = useState<{ text: string; error: boolean } | null>(null);
+  // 摘要卡确认阶段：创建答辩/汇报场次后，先确认 AI 的理解再进入对话
+  const [pendingSession, setPendingSession] = useState<Session | null>(null);
+  const [summaryCard, setSummaryCard] = useState<SummaryCard | null>(null);
+  const [summaryBusy, setSummaryBusy] = useState(false);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
   // null = 正在检查；enabled 且 user 为空 = 需要登录
   const [auth, setAuth] = useState<{ user: string | null; enabled: boolean } | null>(null);
   const [creating, setCreating] = useState(false);
   const [pending, setPending] = useState(false);
   const [view, setView] = useState<"chat" | "report">("chat");
   // 顶层页面：会话工作区 / 跨场次能力画像
-  const [page, setPage] = useState<"session" | "profile">("session");
+  const [page, setPage] = useState<"session" | "profile" | "history">("session");
   // 报告生成中的逐题结果：评完一题推一条，先显示出来，不用等整份报告
   const [liveQuestions, setLiveQuestions] = useState<
     { index: number; total: number; item: ScoredQuestion }[]
@@ -224,9 +241,25 @@ export default function App() {
   );
   useEffect(() => {
     void refresh();
-    api<Health>("/health")
-      .then(setHealth)
-      .catch((e) => setError(e.message));
+    // 手机上第一次打开时后端/隧道可能还没就绪。health 只成功请求一次的话，
+    // 「生成摘要卡」会因为 health 为 null 永久变灰，而且不给任何原因。
+    // 这里失败就每 5 秒重试；同时按钮不再把「还没拿到 health」当成未配置。
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
+    const load = () => {
+      api<Health>("/health")
+        .then((value) => {
+          if (!cancelled) setHealth(value);
+        })
+        .catch(() => {
+          if (!cancelled) timer = setTimeout(load, 5000);
+        });
+    };
+    load();
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [refresh]);
   useEffect(() => {
     setSession(null);
@@ -480,6 +513,84 @@ export default function App() {
     if (active && active.state !== "inactive") active.stop();
   }, []);
 
+  // 上传讲稿：服务端解析成纯文本，填进输入框——学生可以先改再开始追问。
+  // 生成摘要卡：创建答辩/汇报场次后调用；失败要能重试，不能一直转圈。
+  const loadSummaryCard = useCallback(async (session: Session) => {
+    setSummaryBusy(true);
+    setSummaryError(null);
+    try {
+      // 必须带请求体：api() 不传 body 时会发 GET，而生成摘要卡是 POST（405）。
+      const result = await api<{ summary_card: SummaryCard }>(
+        `/sessions/${session.id}/summary-card`,
+        {},
+      );
+      setSummaryCard(result.summary_card);
+    } catch (reason) {
+      setSummaryError(reason instanceof Error ? reason.message : "摘要卡生成失败");
+    } finally {
+      setSummaryBusy(false);
+    }
+  }, []);
+
+  // 从摘要卡页面退回：删掉刚建的空场次，避免历史里留下一条没练过的记录。
+  const cancelSummary = useCallback(async () => {
+    if (!pendingSession) return;
+    const session = pendingSession;
+    setPendingSession(null);
+    setSummaryCard(null);
+    setSummaryError(null);
+    try {
+      await deleteSession(session.id);
+      await refresh();
+    } catch {
+      // 删不掉不影响用户改讲稿重新开始
+    }
+  }, [pendingSession, refresh]);
+
+  const importScript = useCallback(async (file: File) => {
+    setImporting(true);
+    setScriptNote(null);
+    try {
+      const result = await apiUpload<{
+        text: string;
+        filename: string;
+        kind: string;
+        chars: number;
+        truncated: boolean;
+      }>("/import-script", file);
+      setScript(result.text);
+      setScriptNote({
+        text:
+          `已从《${result.filename}》导入 ${result.chars} 字` +
+          (result.truncated ? "（超出 2 万字，已截断，请检查结尾）" : "") +
+          "，可以先修改再开始",
+        error: false,
+      });
+    } catch (reason) {
+      setScriptNote({
+        text: reason instanceof Error ? reason.message : "导入失败，请换一个文件",
+        error: true,
+      });
+    } finally {
+      setImporting(false);
+    }
+  }, []);
+
+  // 拖拽上传：浏览器默认会把拖进页面的文件「打开」，表现为标签一直转圈。
+  // 在讲稿区接住 drop，统一走和点按钮一样的导入流程。
+  const dropScript = useCallback(
+    (event: DragEvent) => {
+      const file = event.dataTransfer.files?.[0];
+      if (!file) return;
+      event.preventDefault();
+      void importScript(file);
+    },
+    [importScript],
+  );
+  const allowScriptDrop = useCallback((event: DragEvent) => {
+    if (event.dataTransfer.types.includes("Files")) event.preventDefault();
+  }, []);
+
   const runTranscribe = useCallback(async (blob: Blob, mimeType: string) => {
     if (!selected) return;
     if (blob.size < 1024) {
@@ -592,13 +703,46 @@ export default function App() {
         pressure,
         mode,
         rounds,
+        scene,
+        script,
       });
       await refresh();
+      if (scene !== "interview" && (s.units?.length ?? 0) > 0) {
+        // 先让学生确认 AI 的理解，再进入追问；确认结果会成为下一场的检验点。
+        setPendingSession(s);
+        setSummaryCard(null);
+        await loadSummaryCard(s);
+        return;
+      }
       setSelected(s.id);
     } catch (e) {
       setError((e as Error).message);
     } finally {
       setCreating(false);
+    }
+  };
+
+  const confirmSummary = async (
+    claims: SummaryEntry[],
+    questions: SummaryEntry[],
+  ) => {
+    if (!pendingSession) return;
+    setSummaryBusy(true);
+    setError("");
+    try {
+      await apiPatch(`/sessions/${pendingSession.id}/summary-card`, {
+        claims,
+        open_questions: questions,
+      });
+      await api(`/sessions/${pendingSession.id}/summary-card/confirm`, {});
+      const id = pendingSession.id;
+      setPendingSession(null);
+      setSummaryCard(null);
+      setSelected(id);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "保存失败，请重试");
+    } finally {
+      setSummaryBusy(false);
     }
   };
   const busy = !!session?.active_turn;
@@ -640,69 +784,32 @@ export default function App() {
         >
           <span className="brand-mark">i.</span>
           <div>
-            面试练习室<small>INTERVIEW STUDIO</small>
+            答辩复盘<small>INTERDEFENSE STUDIO</small>
           </div>
         </a>
-        <button
-          className="new-session"
-          onClick={() => {
-            setPage("session");
-            setSelected(null);
-          }}
-        >
-          <span>＋</span> 新建面试
-        </button>
-        <button
-          className={`profile-link ${page === "profile" ? "active" : ""}`}
-          onClick={() => setPage("profile")}
-        >
-          成长画像 <span>↗</span>
-        </button>
-        <div className="sidebar-label">
-          练习记录 <span>{sessions.length}</span>
+        <div className="sidebar-actions">
+          <button
+            className="new-session"
+            onClick={() => {
+              setPage("session");
+              setSelected(null);
+            }}
+          >
+            <span>＋</span> 新建练习
+          </button>
+          <button
+            className={`profile-link ${page === "history" ? "active" : ""}`}
+            onClick={() => setPage("history")}
+          >
+            练习记录 <span>{sessions.length}</span>
+          </button>
+          <button
+            className={`profile-link ${page === "profile" ? "active" : ""}`}
+            onClick={() => setPage("profile")}
+          >
+            成长画像 <span>↗</span>
+          </button>
         </div>
-        <nav aria-label="面试历史">
-          {sessions.length === 0 ? (
-            <p className="no-history">
-              你的第一场练习，
-              <br />
-              从这里开始。
-            </p>
-          ) : (
-            sessions.map((s) => (
-              <div
-                className={`history-row ${selected === s.id ? "selected" : ""}`}
-                key={s.id}
-              >
-                <button
-                  className={`history-item ${selected === s.id ? "selected" : ""}`}
-                  onClick={() => {
-                    setPage("session");
-                    setSelected(s.id);
-                  }}
-                >
-                  <strong>{s.role}</strong>
-                  <span>
-                    {s.candidate} · {date(s.created_at)}
-                    <i className={s.status === "completed" ? "done" : ""}>
-                      {labels[s.status]}
-                    </i>
-                  </span>
-                </button>
-                <button
-                  className="history-delete"
-                  type="button"
-                  title="删除这场记录"
-                  aria-label={`删除 ${s.role} 的练习记录`}
-                  disabled={deletingId === s.id}
-                  onClick={() => void deleteFromList(s.id, s.role)}
-                >
-                  {deletingId === s.id ? "…" : "×"}
-                </button>
-              </div>
-            ))
-          )}
-        </nav>
         <div className="sidebar-foot">
           <span className="small-dot" /> 本地练习空间<p>认真练习，从容表达。</p>
           {auth?.user && (
@@ -725,17 +832,30 @@ export default function App() {
             <b>
               {page === "profile"
                 ? "成长画像"
-                : selected
-                  ? "模拟面试"
+                : page === "history"
+                  ? "练习记录"
+                  : selected
+                  ? session?.scene === "defense"
+                    ? "毕业答辩"
+                    : session?.scene === "presentation"
+                      ? "课程汇报"
+                      : "模拟面试"
                   : "新的开始"}
             </b>
           </span>
-          <span className="tag">
-            {selected
-              ? connected
-                ? "● 已连接"
-                : "○ 正在连接"
-              : "技术岗位 · 中文面试"}
+          <span className="topbar-right">
+            <InstallButton />
+            <span className="tag">
+              {selected
+                ? connected
+                  ? "● 已连接"
+                  : "○ 正在连接"
+                : scene === "interview"
+                  ? "技术岗位 · 中文面试"
+                  : scene === "defense"
+                    ? "毕业答辩 · 陈述单元追问"
+                    : "课程汇报 · 陈述单元追问"}
+            </span>
           </span>
         </header>
         {error && (
@@ -751,8 +871,37 @@ export default function App() {
             尚未配置模型密钥。请在后端环境设置 ANTHROPIC_API_KEY 后重启服务。
           </div>
         )}
-        {page === "profile" ? (
+        {page === "history" ? (
+          <HistoryView
+            sessions={sessions}
+            selected={selected}
+            deletingId={deletingId}
+            onOpen={(id) => {
+              setPage("session");
+              setSelected(id);
+            }}
+            onDelete={(id) => {
+              const target = sessions.find((item) => item.id === id);
+              if (target) void deleteFromList(id, target.role);
+            }}
+            onNew={() => {
+              setPage("session");
+              setSelected(null);
+            }}
+          />
+        ) : page === "profile" ? (
           <ProfileView />
+        ) : pendingSession ? (
+          <SummaryCardView
+            card={summaryCard}
+            busy={summaryBusy}
+            error={summaryError}
+            onRetry={() => {
+              if (pendingSession) void loadSummaryCard(pendingSession);
+            }}
+            onBack={() => void cancelSummary()}
+            onConfirm={confirmSummary}
+          />
         ) : !selected ? (
           <div className="setup">
             <div className="intro">
@@ -796,8 +945,25 @@ export default function App() {
               <div className="card-heading">
                 <span className="eyebrow">SET UP YOUR SESSION</span>
                 <h2>准备好，开始一场练习</h2>
-                <p>告诉面试官一点关于你的信息。</p>
+                <p>选一个场景，告诉我要练什么。</p>
               </div>
+              <label>
+                练习场景
+                <select
+                  value={scene}
+                  onChange={(e) => {
+                    const next = e.target.value as Scene;
+                    setScene(next);
+                    if (next !== "interview") {
+                      setRole(next === "defense" ? "毕业设计答辩" : "课程汇报");
+                    }
+                  }}
+                >
+                  <option value="interview">求职面试</option>
+                  <option value="defense">毕业答辩</option>
+                  <option value="presentation">课程汇报</option>
+                </select>
+              </label>
               <label>
                 怎么称呼你
                 <input
@@ -810,7 +976,12 @@ export default function App() {
                 />
               </label>
               <label>
-                目标岗位
+                {scene === "interview"
+                  ? "目标岗位"
+                  : scene === "defense"
+                    ? "答辩题目"
+                    : "课程 / 项目"}
+                {scene === "interview" ? (
                 <select value={role} onChange={(e) => setRole(e.target.value)}>
                   <option>AI / ML 工程师</option>
                   <option>数据科学家</option>
@@ -828,7 +999,63 @@ export default function App() {
                   <option>算法工程师</option>
                   <option>产品经理</option>
                 </select>
+                ) : (
+                  <input
+                    required
+                    maxLength={120}
+                    value={role}
+                    onChange={(e) => setRole(e.target.value)}
+                    placeholder={
+                      scene === "defense"
+                        ? "例如：基于 RAG 的课程问答系统"
+                        : "例如：数据库课程设计"
+                    }
+                  />
+                )}
               </label>
+              {scene !== "interview" && (
+                <div
+                  className="script-drop"
+                  onDragOver={allowScriptDrop}
+                  onDrop={dropScript}
+                >
+                  <div className="script-actions">
+                    <label className={importing ? "file-button busy" : "file-button"}>
+                      {importing ? "正在解析…" : "上传讲稿文件"}
+                      <input
+                        type="file"
+                        accept=".docx,.pptx,.txt,.md"
+                        disabled={importing}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) void importScript(file);
+                          e.target.value = ""; // 允许重复选同一个文件
+                        }}
+                      />
+                    </label>
+                    <span className="optional">
+                      支持 .docx / .pptx / .txt / .md（不超过 10 MB），也可以把文件拖到这里或直接粘贴
+                    </span>
+                  </div>
+                  {scriptNote && (
+                    <p className={scriptNote.error ? "script-note error" : "script-note"}>
+                      {scriptNote.text}
+                    </p>
+                  )}
+                  <label>
+                    陈述讲稿 <span className="optional">建议 800 字以上</span>
+                    <textarea
+                      required
+                      maxLength={20000}
+                      value={script}
+                      onChange={(e) => setScript(e.target.value)}
+                      placeholder="粘贴答辩讲稿或课程汇报稿，或点上方上传 Word / PPT / 文本文件（也可以直接把文件拖进这个框）。系统会切成背景 / 方法 / 结果 / 创新 / 局限，追问会锚定到具体段落。"
+                      rows={9}
+                    />
+                  </label>
+                </div>
+              )}
+              {scene === "interview" && (
               <label>
                 面试压力
                 <select value={pressure} onChange={(e) => setPressure(e.target.value as Pressure)}>
@@ -837,8 +1064,9 @@ export default function App() {
                   <option value="压力">压力面 — 连珠追问、质疑前提、不让喘</option>
                 </select>
               </label>
+              )}
               <label>
-                面试轮数
+                {scene === "interview" ? "面试轮数" : "练习轮数"}
                 <select
                   value={rounds}
                   onChange={(e) => setRounds(Number(e.target.value))}
@@ -895,13 +1123,24 @@ export default function App() {
                 className="primary start-button"
                 disabled={
                   creating ||
-                  !health?.configured ||
-                  (mode === "voice" && !health?.speech.asr)
+                  // 只有明确知道「后端没配密钥」时才禁用；health 还没回来时允许尝试
+                  health?.configured === false ||
+                  (mode === "voice" && health?.speech.asr === false) ||
+                  (scene !== "interview" && script.trim().length < 20)
                 }
               >
-                {creating ? "正在创建…" : "进入面试室"} <span>↗</span>
+                {creating
+                  ? "正在创建…"
+                  : scene === "interview"
+                    ? "进入面试室"
+                    : "生成摘要卡"}{" "}
+                <span>↗</span>
               </button>
-              <p className="form-note">结束后生成报告 · 问答自动保存到本机</p>
+              <p className="form-note">
+                {scene === "interview"
+                  ? "结束后生成报告 · 问答自动保存到本机"
+                  : "先确认 AI 的理解，再进入追问 · 问答自动保存到本机"}
+              </p>
             </form>
           </div>
         ) : !session ? (
@@ -913,8 +1152,14 @@ export default function App() {
                 <span className="eyebrow">YOUR PRACTICE SESSION</span>
                 <h1>{session.role}</h1>
                 <p>
-                  {session.candidate} <span>·</span> {date(session.created_at)}{" "}
-                  <span>·</span> {labels[session.status]}
+                  {session.candidate} <span>·</span> {formatDate(session.created_at)}{" "}
+                  <span>·</span> {STATUS_LABELS[session.status]}
+                  {session.scene && session.scene !== "interview" && (
+                    <>
+                      <span>·</span>
+                      {session.scene === "defense" ? "毕业答辩" : "课程汇报"}
+                    </>
+                  )}
                   {session.rounds && (
                     <>
                       <span>·</span> 目标 {session.rounds} 题
@@ -962,7 +1207,12 @@ export default function App() {
               <div className="conversation">
                 <div className="conversation-top">
                   <span>
-                    <span className="small-dot" /> 模拟面试官
+                    <span className="small-dot" />{" "}
+                    {session.scene === "defense"
+                      ? "答辩评委"
+                      : session.scene === "presentation"
+                        ? "课程助教"
+                        : "模拟面试官"}
                   </span>
                   <small>
                     第 {Math.min(askedCount, session.rounds ?? 15)} /{" "}
@@ -979,16 +1229,29 @@ export default function App() {
                       <div className="welcome-symbol">i.</div>
                       <h2>这里是你的练习时间。</h2>
                       <p>
-                        先从自我介绍开始。准备好后，
-                        <br />
-                        面试官会根据你的经历逐步提问。
+                        {session.scene && session.scene !== "interview" ? (
+                          <>
+                            讲稿已经提交。准备好后，
+                            <br />
+                            {session.scene === "defense" ? "评委" : "助教"}
+                            会直接针对陈述单元提问。
+                          </>
+                        ) : (
+                          <>
+                            先从自我介绍开始。准备好后，
+                            <br />
+                            面试官会根据你的经历逐步提问。
+                          </>
+                        )}
                       </p>
                       <button
                         className="primary"
                         disabled={!available}
                         onClick={() => send("start")}
                       >
-                        开始面试 →
+                        {session.scene && session.scene !== "interview"
+                          ? "开始复盘 →"
+                          : "开始面试 →"}
                       </button>
                     </div>
                   )}

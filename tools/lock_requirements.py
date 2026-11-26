@@ -27,12 +27,20 @@ ROOTS = [
     ("pytest", ()),
     ("httpx", ()),
     ("pyyaml", ()),
+    ("python-multipart", ()),
+    ("python-docx", ()),
+    ("python-pptx", ()),
+    ("reportlab", ()),
 ]
 
 WEB_ROOTS = [
     ("anthropic", ()),
     ("fastapi", ()),
     ("uvicorn", ("standard",)),
+    ("python-multipart", ()),
+    ("python-docx", ()),
+    ("python-pptx", ()),
+    ("reportlab", ()),
 ]
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent

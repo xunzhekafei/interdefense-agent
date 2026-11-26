@@ -70,3 +70,46 @@ def test_auth_store_rejects_expired_token(tmp_path, monkeypatch):
     token = store.issue("alice")
     monkeypatch.setattr(auth.time, "time", lambda: 10**12)
     assert store.check(token) is None
+
+
+def test_bearer_token_works_without_cookie(tmp_path):
+    """原生 App 用 Authorization: Bearer；登录响应里要带 token。"""
+    add_user(tmp_path, "reviewer", "secret123")
+    with client_for(tmp_path) as client:
+        login = client.post("/api/login", json={"username": "reviewer",
+                                                "password": "secret123"}).json()
+        token = login["token"]
+        # 换一个不带 cookie 的客户端，模拟手机 App
+        with client_for(tmp_path) as mobile:
+            assert mobile.get("/api/sessions").status_code == 401
+            headers = {"Authorization": f"Bearer {token}"}
+            assert mobile.get("/api/me", headers=headers).json()["user"] == "reviewer"
+            assert mobile.get("/api/sessions", headers=headers).status_code == 200
+            assert mobile.get("/api/me", headers={"Authorization": "Bearer bad.token"}
+                              ).status_code == 401
+
+
+def test_bearer_token_is_revoked_by_logout(tmp_path):
+    add_user(tmp_path, "reviewer", "secret123")
+    with client_for(tmp_path) as client:
+        token = client.post("/api/login", json={"username": "reviewer",
+                                                "password": "secret123"}).json()["token"]
+        headers = {"Authorization": f"Bearer {token}"}
+        assert client.get("/api/me", headers=headers).status_code == 200
+        # 登出时带上 Bearer，token 必须和服务端版本号一起作废
+        assert client.post("/api/logout", headers=headers).status_code == 200
+        assert client.get("/api/me", headers=headers).status_code == 401
+
+
+def test_websocket_accepts_bearer_token(tmp_path):
+    """手机端的 WebSocket 也要能只靠 token 连上，不依赖 cookie。"""
+    add_user(tmp_path, "reviewer", "secret123")
+    with client_for(tmp_path) as client:
+        token = client.post("/api/login", json={"username": "reviewer",
+                                                "password": "secret123"}).json()["token"]
+        session = client.post("/api/sessions", json={"candidate": "甲", "role": "答辩"},
+                              headers={"Authorization": f"Bearer {token}"}).json()
+        with client.websocket_connect(
+                f"/api/sessions/{session['id']}/ws",
+                headers={"Authorization": f"Bearer {token}"}) as ws:
+            assert ws.receive_json()["type"] == "session.snapshot"

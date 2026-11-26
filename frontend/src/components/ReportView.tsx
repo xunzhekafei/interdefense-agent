@@ -34,9 +34,9 @@ export default function ReportView({
           <h2>每一次练习，都有收获。</h2>
           <p>{report.summary}</p>
         </div>
-        <div className="score">
-          <strong>{report.overall}</strong>
-          <span>综合评分</span>
+        <div className={report.overall == null ? "score empty" : "score"}>
+          <strong>{report.overall == null ? "—" : report.overall}</strong>
+          <span>{report.overall == null ? "样本不足，未评分" : "综合评分"}</span>
         </div>
       </div>
       <div className="dimensions">
@@ -66,6 +66,52 @@ export default function ReportView({
           </section>
         ))}
       </div>
+      {report.unit_coverage ? (
+        <section className="unit-coverage">
+          <h3>陈述单元覆盖</h3>
+          <p className="report-note">
+            本场追问覆盖了 {report.unit_coverage.covered} /{" "}
+            {report.unit_coverage.total} 个陈述单元
+            {report.unit_coverage.ratio !== null &&
+              `（${Math.round((report.unit_coverage.ratio ?? 0) * 100)}%）`}
+            。没被问到的单元，下一次可以重点补。
+          </p>
+          {report.unit_coverage.uncovered.length > 0 ? (
+            <ul>
+              {report.unit_coverage.uncovered.map((unit) => (
+                <li key={unit.id}>
+                  <span className="unit-badge">{unit.id}</span>
+                  {unit.section ? `${unit.section}：` : ""}
+                  {unit.text.length > 80
+                    ? `${unit.text.slice(0, 80)}…`
+                    : unit.text}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <small>所有单元都被追问到了。</small>
+          )}
+        </section>
+      ) : null}
+      {report.focus_checks?.length ? (
+        <section className="focus-checks">
+          <h3>上一场检验点</h3>
+          <p className="report-note">
+            这些是你上一场亲自确认或修正过的理解，本场做了定向检验。
+          </p>
+          <ul>
+            {report.focus_checks.map((item) => (
+              <li
+                key={`${item.kind}-${item.id}`}
+                className={item.checked ? "checked" : "missing"}
+              >
+                <span>{item.checked ? "已检验" : "未问到"}</span>
+                {item.text}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
       <h3>逐题复盘</h3>
       {report.per_question?.map((item, i) => (
         <details key={i}>
@@ -80,6 +126,11 @@ export default function ReportView({
               </span>
             ))}
           </div>
+          {item.unit_ref?.length ? (
+            <small className="unit-tag">
+              锚定陈述单元 {item.unit_ref.join("、")}
+            </small>
+          ) : null}
           <blockquote>{item.evidence}</blockquote>
           {item.evidence_verified === false && (
             <small className="evidence-warning">

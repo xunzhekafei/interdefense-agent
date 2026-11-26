@@ -9,7 +9,7 @@ SCHEMA_VERSION = 1
 
 # 列表页只需要这些字段；完整问答和报告留在 payload 里，按需读取。
 SUMMARY_FIELDS = ("id", "candidate", "role", "created_at", "status",
-                  "mode", "rounds", "pressure")
+                  "mode", "rounds", "pressure", "scene")
 
 
 def _summary(session):

@@ -50,3 +50,10 @@ evals/calibration-data/
 # 评审账号与登录签名密钥（部署时生成）
 auth.json
 auth_secret
+
+# 本地推送日志（排查网络/浅克隆用，不入库）
+push.log
+
+# 试用数据导出（含参与者信息，不要入库）
+trials/
+trials-named/

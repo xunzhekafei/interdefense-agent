@@ -106,21 +106,32 @@ def answered_qa(messages):
 
 
 def _unit_plan(session, rounds, units):
-    """答辩/课程汇报的推进计划：按单元覆盖，不按技术题配额。"""
+    """答辩/课程汇报的推进计划：在题数上限内按单元覆盖。
+
+    之前只写了「按单元覆盖、每个单元至少问到一次」，24 段的讲稿会一路问下去，
+    学生选的 10 轮根本不生效。现在把轮数写成硬上限，并告诉模型当前已经问了几题。
+    """
+    messages = session.get("messages") or []
     covered = []
-    for message in session.get("messages") or []:
+    for message in messages:
         for ref in message.get("unit_ref") or []:
             if ref not in covered:
                 covered.append(ref)
+    asked = sum(1 for message in messages
+                if message.get("role") == "user" and message.get("status") == "completed")
     remaining = [unit for unit in units if unit["id"] not in covered]
     lines = [
         "\n\n【本场复盘计划（必须遵守）】",
-        f"目标总题数：{rounds} 题；本场不设反问环节。",
+        f"目标总题数：{rounds} 题（含最后一轮收尾）；目前已经问了 {asked} 题；本场不设反问环节。",
         f"陈述单元共 {len(units)} 个，已覆盖 {len(covered)} 个。",
-        "推进规则：按单元顺序覆盖；同一单元最多追问 2 层；"
-        "单元问完再进下一个；每个单元至少问到一次，已覆盖的不要重复问。",
+        f"**题数硬上限**：问满 {rounds} 题必须停止提问，提示学生点击「结束并生成报告」；"
+        "没覆盖到的单元留给报告，不要超问。",
+        "推进规则：在题数上限内按单元覆盖；同一单元最多追问 2 层；"
+        "单元问完再进下一个；已覆盖的不要重复问。",
     ]
-    if remaining:
+    if asked >= rounds:
+        lines.append("已经达到本场题数上限：这一轮只做收尾，提示学生结束并生成报告，不要再提问。")
+    elif remaining:
         lines.append("尚未覆盖：" + "、".join(unit["id"] for unit in remaining)
                      + "。优先从「结果」「创新」段里还没问到的单元开始。")
     else:
@@ -226,8 +237,9 @@ class InterviewAgent:
                           "追问对象是下面这份讲稿里的具体陈述，不要让候选人重新自我介绍，"
                           "也不要把技术题当成独立的知识测验。\n"
                           + render_units(units) +
-                          "\n每轮先在心里选定一个单元再提问；如果这一问确实锚定某个单元，"
-                          "就把编号写在句末（如「这里的基线是多少？[[U2]]」）。")
+                          "\n每轮先在心里选定一个单元再提问；只要这一问针对该单元的具体内容，"
+                          "就把编号写在句末（如「这里的基线是多少？[[U2]]」）。"
+                          "即使改写了措辞也要标——漏标会让报告误以为这一段没被问到。")
         focus_block = ""
         focus = session.get("focus") or []
         if focus:

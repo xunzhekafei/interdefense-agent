@@ -4,7 +4,8 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist", "node_modules"] },
+  // public/ 里的 sw.js 是 Service Worker：有自己的一套全局变量，按浏览器脚本规则检查没有意义
+  { ignores: ["dist", "node_modules", "public"] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
