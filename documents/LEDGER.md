@@ -24,7 +24,8 @@
   - 移动端原生骨架 + Bearer 鉴权（§14）
   - 手机端修复（按钮/布局/轮数/语音）与语音可用（§15–§16）
   - 试用工具链（§17）
-- 正在做：无（等 §6–§17 提交；等部署新版本后开始真实用户试用）。
+  - 线上部署（双站点，§18）
+- 正在做：真实用户试用准备（手机端 PWA 复验 + 招募）。
 - 待验证：
   - PWA 在 Android Chrome / iOS Safari 上的安装与竖屏布局；手机端录音依赖服务端 ASR。
   - `android/` 未编译：需 Android Studio + SDK 跑一次 `:app:assembleDebug`。
@@ -533,6 +534,46 @@
 **下一步**
 - 部署新版本到有 HTTPS 的服务器（旧部署仍是改造前代码），建 `trial` 账号。
 - 第 1 轮试用；结束后用 `trial_export.py` 检查指标是否齐全。
+
+## 2026-11-26 线上部署：双站点并存（已完成）
+
+**目标**：把答辩复盘版上线给试用者，同时**不影响**旧 myagent 服务的评委演示账号。
+
+**线上拓扑**
+
+| 用途 | 域名 | 端口 | 服务 / 数据目录 |
+| --- | --- | --- | --- |
+| 旧版面试（评委） | `47-95-146-46.sslip.io` | 8010 | `myagent.service` / `/opt/myagent/.web-data` |
+| 答辩复盘（试用） | `defense.47-95-146-46.sslip.io` | 8011 | `interdefense.service` / `/opt/interdefense-agent/.web-data` |
+
+两个 `.web-data` 完全独立，账号不互通；nginx 按 `server_name` 分流，证书各自独立。
+
+**配置要点**
+- nginx 新站点：`client_max_body_size 20m`（讲稿上传）、WebSocket 的 `Upgrade/Connection` 头、
+  `proxy_read_timeout 600s`（报告生成是分钟级）。
+- 服务文件：`User=admin`、`EnvironmentFile=/etc/interdefense.env`、`--port 8011 --workers 1`。
+- `/etc/interdefense.env` 从 `/etc/myagent.env` 复制后改 `WEB_ALLOWED_HOSTS`，
+  权限 `root:admin 640`。语音：`WHISPER_DEVICE=cpu`、`WHISPER_MODEL=small`、`HF_ENDPOINT` 镜像。
+- 证书：`certbot --nginx -d defense.47-95-146-46.sslip.io`。
+- 前端产物在本机构建后上传（服务器 Node 18 不满足 Vite 7）。
+
+**踩坑**
+- 服务器 Node 18.19，Vite 7 要求 20.19+/22.12+ → 本机构建 + 传输 dist。
+- `sudo npm ci` 让 `node_modules` 变成 root 所有，后续 `npm run build` 报 EACCES。
+- Windows `scp -r` 传目录失败（SFTP 协商）→ 用 `tar | ssh` 管道。
+- `tar -czf - frontend/dist` 会保留 `frontend/` 前缀，解压后变成 `frontend/frontend/dist`；
+  正确写法是 `tar -czf - -C frontend dist`。
+- 旧服务实际监听 **8010**、密钥在 `/etc/myagent.env`（不是写在 unit 里），差点按 8000 误停。
+- sslip.io 支持任意子域名解析到同一 IP，所以不用买新域名。
+
+**验证**
+- `http://127.0.0.1:8011/api/health`、两个公网域名均 200。
+- 旧域名用原评审账号「退出 → 重新登录」通过；新域名用 `trial` 登录通过。
+- 两站点可同时访问，互不影响。
+
+**遗留**
+- 手机端在新域名上重新「添加到主屏幕」、上传 .docx、语音作答的完整复验。
+- 2G 内存：两个服务 + `small` 模型常驻，观察报告生成时是否 OOM；必要时换 `base`。
 
 ## 用户/产品决定（代码里看不到的）
 
